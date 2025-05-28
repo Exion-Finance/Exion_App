@@ -119,7 +119,7 @@ export interface TotalFeeResponse {
 
 export interface MobileTransaction {
   id: string
-  recipientName: string       // e.g. "RONEX MOGAKA ONDIMU"
+  recipientName: string
   destinationChannel: string  // e.g. "M-PESA"
   transactionDate: string     // "YYYYMMDDHHmmss"
   transactionAmount: number
@@ -127,6 +127,6 @@ export interface MobileTransaction {
 }
 
 export interface Section {
-  title: string               // "Today" or "DD/MM/YYYY"
+  title: string
   data: MobileTransaction[]
 }
