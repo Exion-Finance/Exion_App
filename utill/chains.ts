@@ -1,0 +1,1 @@
+export const Chains =[{"name":"celo", "ChainId":1}]
