@@ -24,7 +24,7 @@ import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY } from './context/AuthContext';
 import { getBalances } from './Apiconfig/api';
 import { BalanceData, ResponseBalance } from './(tabs)';
-import { SendMoney, calculateFee } from './Apiconfig/api';
+import { SendMoney, calculateFee, CheckTransactionStatus } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
 //import {normalizePhoneNumber } from "../app/hooks/"
@@ -62,6 +62,11 @@ const CustomKeyboard = () => {
   const [transactionCode, setTransactionCode] = useState<string>("Qwerty")
   const [transactionState, setTransactionState] = useState<string>("Initiating transaction...")
   const [transactionLoading, setTransactionLoading] = useState<boolean>()
+  const [firstName, setFirstName] = useState<string>("")
+  const [secondName, setSecondName] = useState<string>("")
+  const [txCode, setTxCode] = useState<string>("")
+  const [txChannel, setTxChannel] = useState<string>("")
+  const [amount, setAmount] = useState<number>(0)
 
   // const handleSheetChanges = useCallback((index: number) => {
   //   setIsSheetVisible(index !== -1);
@@ -171,25 +176,42 @@ const CustomKeyboard = () => {
       setSend(true)
       try {
         bottomSheetRef2.current?.snapToIndex(0);
-        setTimeout(() => {
+
+        const chainId = 1
+        const tokenName = activeToken.token
+        const channel = "Mpesa"
+        const phonenumber = normalizePhoneNumber(phoneNumber as string)
+        console.log(" token", jwtTokens)
+        const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
+        console.log('send money response is', res)
+        if (res.error) {
+          setError(true)
+          setErrorDescription(res.msg)
+          console.log(res.msg)
+          return;
+        }
+        if (res.message === "Processing") {
           setTransactionState("Processing...")
-        }, 4000)
-        setTimeout(() => {
-          setTransactionState("Transaction sent🎉")
-        }, 8000)
-        // const chainId = 1
-        // const tokenName = activeToken.token
-        // // const tokenName = "cKES"
-        // const channel = "Mpesa"
-        // const phonenumber = normalizePhoneNumber(phoneNumber as string)
-        // console.log(" token", jwtTokens)
-        // const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-        // console.log('send money response is', res)
-        // if (res.error) {
-        //   setError(true)
-        //   setErrorDescription(res.msg)
-        //   console.log(res.msg)
-        // }
+          const merchantRequestID: string = res.response.OriginatorConversationID;
+          setTimeout(async() => {
+            const checkTx = await CheckTransactionStatus(merchantRequestID)
+            // console.log("checkTx--->", checkTx)
+            if (checkTx.data.txHash) {
+              // console.log("Check response data", checkTx.data)
+              const [first, second] = checkTx.data.recipientName.split(' ')
+              setFirstName(first)
+              setSecondName(second)
+              setTxCode(checkTx.data.thirdPartyTransactionCode)
+              setTxChannel(checkTx.data.destinationChannel)
+              setAmount(checkTx.data.transactionAmount)
+              setTransactionState("Transaction sent🎉")
+            }
+            else if (!checkTx.data.success){
+              bottomSheetRef2.current?.close();
+              Alert.alert("Oops😕", `${checkTx.data.message}`)
+            }
+          }, 3000)
+        }
 
       } catch (err) {
         console.log('error is', err)
@@ -261,17 +283,6 @@ const CustomKeyboard = () => {
 
         if (response && response.balance) {
           setTokens(response);
-
-          // Set active token to the first token in the response
-          // const firstTokenKey = Object.entries(response.balance)[0][0];
-          // const firstToken = response.balance[firstTokenKey];
-          // if (selectedTokenId === 0) { // Only set if no token is selected
-          //   setActiveToken({
-          //     token: firstTokenKey.toUpperCase(),
-          //     balance: firstToken.token,
-          //     ksh: firstToken.kes
-          //   });
-          // }
 
           // Set active token to the first token with a valid balance
           const tokenEntries = Object.entries(response.balance) as [string, { token: string; kes: string }][];
@@ -430,7 +441,7 @@ const CustomKeyboard = () => {
         >
           <BottomSheetView style={styles.contentContainer}>
             <LottieAnimation
-              loop = { transactionLoading ? true : false }
+              loop={transactionLoading ? true : false}
               animationSource={transactionLoading ? require('@/assets/animations/loading.json') : require('@/assets/animations/done.json')}
               animationStyle={{ width: transactionLoading ? "60%" : "94%", height: transactionLoading ? "50%" : "50%", marginTop: transactionLoading ? -10 : -20 }}
             />
@@ -446,10 +457,11 @@ const CustomKeyboard = () => {
               <View style={[reusableStyle.rowJustifyBetween, styles.txRow]}>
                 <View style={styles.flexRow}>
                   <View style={{ marginLeft: 10 }}>
-                    <PrimaryFontText style={styles.name}>GEORGE AGAI</PrimaryFontText>
+
+                    <PrimaryFontText style={styles.name}>{firstName.toUpperCase()} {secondName.toUpperCase()}</PrimaryFontText>
 
                     <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-                      <PrimaryFontMedium style={styles.confirmationCode}>SWEJ40Z8JDAKY2N </PrimaryFontMedium>
+                      <PrimaryFontMedium style={styles.confirmationCode}>{txCode} </PrimaryFontMedium>
                       <MaterialIcons name="content-copy" size={16} color="#00C48F" />
                     </TouchableOpacity>
 
@@ -457,8 +469,8 @@ const CustomKeyboard = () => {
                 </View>
 
                 <View style={styles.amountBlock}>
-                  <PrimaryFontMedium style={styles.amount}>Ksh 100.00</PrimaryFontMedium>
-                  <PrimaryFontMedium style={styles.time}>M-pesa</PrimaryFontMedium>
+                  <PrimaryFontMedium style={styles.amount}>Ksh {amount.toFixed(2)}</PrimaryFontMedium>
+                  <PrimaryFontMedium style={styles.time}>{txChannel}</PrimaryFontMedium>
                 </View>
               </View>}
 

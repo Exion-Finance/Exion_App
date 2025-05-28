@@ -51,12 +51,20 @@ export const AddFund = async (token: string, tokenId: number, amount: number) =>
 //send Money
 export const SendMoney = async (token: string, amount: number, tokenName: string, chainId: number, phoneNumber: string, channel: string) => {
     try {
-        console.log(tokenName)
         const response = await axios.post(`${PESACHAIN_URL}/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel }, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
+        return response.data;
+    } catch (e: any) {
+        return { error: true, msg: e.response.data.message }
+    }
+};
+
+export const CheckTransactionStatus = async (merchantRequestID: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/payments/transaction-details`, { merchantRequestID });
         return response.data;
     } catch (e: any) {
         return { error: true, msg: e.response.data.message }

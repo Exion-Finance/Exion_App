@@ -245,6 +245,7 @@ export default function TabOneScreen() {
     try {
       const tx = await fetchMobileTransactions(authToken)
       setMobileTransactions(tx.data)
+      await refetchBalance()
 
     } catch (e: any) {
       setError(e.message || 'Failed to load transactions')

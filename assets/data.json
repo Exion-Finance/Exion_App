@@ -284,6 +284,13 @@
                     "value": "2000000000000000000"
                 }
             ]
+        },
+        {
+            "data": {
+                "message": "Payment not found",
+                "success": false
+            },
+            "success": true
         }
     ]
 }

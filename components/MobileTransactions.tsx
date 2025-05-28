@@ -32,17 +32,6 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
-    // if (sections && sections.length === 0) {
-    //     return (
-    //         <View style={[styles.empty, reusableStyles.paddingContainer]}>
-    //             <Image source={Empty} style={{ height: 150, width: 130, marginTop: -90 }} />
-    //             <PrimaryFontMedium style={styles.emptyText}>
-    //                 No transactions found
-    //             </PrimaryFontMedium>
-    //         </View>
-    //     )
-    // }
-
     if (sections && sections.length === 0) {
         return (
             <ScrollView
@@ -65,7 +54,11 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
     return (
         <SectionList
             sections={sections}
-            keyExtractor={item => item.id}
+            keyExtractor={(item, index) =>
+                item.id
+                  ? item.id
+                  : `missing-id-${index}`
+              }
             renderSectionHeader={({ section: { title } }) => (
                 <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
             )}

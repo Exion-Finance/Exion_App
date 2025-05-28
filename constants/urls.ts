@@ -1,1 +1,1 @@
-export const PESACHAIN_URL = "https://exion.vercel.app/api/v1"  // "https://pesachain.onrender.com/api/v1"
+export const PESACHAIN_URL = "https://exion-backend.onrender.com/api/v1"
