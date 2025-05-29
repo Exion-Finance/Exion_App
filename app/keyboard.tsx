@@ -112,10 +112,8 @@ const CustomKeyboard = () => {
   }
 
   const handleDone = () => {
-    setTransactionLoading(true)
-    setTransactionState("Initiating transaction...")
     bottomSheetRef2.current?.close();
-    // route.push("/(tabs)")
+    route.push("/(tabs)")
   }
 
   const handleButtonClick = async () => {
@@ -129,7 +127,8 @@ const CustomKeyboard = () => {
       setErrorDescription('Enter a valid amount')
       return;
     }
-    if (activeToken.balance - parseFloat(inputValue) < 0) {
+
+    if (activeToken.ksh - parseFloat(inputValue) < 0) {
       setError(true)
       setErrorDescription('Insufficient funds')
       return;
@@ -181,10 +180,10 @@ const CustomKeyboard = () => {
         const tokenName = activeToken.token
         const channel = "Mpesa"
         const phonenumber = normalizePhoneNumber(phoneNumber as string)
-        console.log(" token", jwtTokens)
         const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
         console.log('send money response is', res)
         if (res.error) {
+          bottomSheetRef2.current?.close();
           setError(true)
           setErrorDescription(res.msg)
           console.log(res.msg)
@@ -193,7 +192,7 @@ const CustomKeyboard = () => {
         if (res.message === "Processing") {
           setTransactionState("Processing...")
           const merchantRequestID: string = res.response.OriginatorConversationID;
-          setTimeout(async() => {
+          setTimeout(async () => {
             const checkTx = await CheckTransactionStatus(merchantRequestID)
             // console.log("checkTx--->", checkTx)
             if (checkTx.data.txHash) {
@@ -206,11 +205,11 @@ const CustomKeyboard = () => {
               setAmount(checkTx.data.transactionAmount)
               setTransactionState("Transaction sent🎉")
             }
-            else if (!checkTx.data.success){
+            else if (!checkTx.data.success) {
               bottomSheetRef2.current?.close();
               Alert.alert("Oops😕", `${checkTx.data.message}`)
             }
-          }, 3000)
+          }, 2500)
         }
 
       } catch (err) {

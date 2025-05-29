@@ -134,14 +134,14 @@ export default function TabOneScreen() {
 
   }, [data, dispatch])
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true)
-    await Promise.all([
-      refetchBalance(),
-      refetchTransactions(),
-    ]);
-    setRefreshing(false)
-  }, [])
+  // const handleRefresh = useCallback(async () => {
+  //   setRefreshing(true)
+  //   await Promise.all([
+  //     refetchBalance(),
+  //     refetchTransactions(),
+  //   ]);
+  //   setRefreshing(false)
+  // }, [])
 
 
   useEffect(() => {
@@ -181,6 +181,7 @@ export default function TabOneScreen() {
     const loadTx = async () => {
       if (!authToken) return
       try {
+        console.log("Useeffect called-->")
         const tx = await fetchMobileTransactions(authToken)
         if (isMounted) {
           setMobileTransactions(tx.data)
