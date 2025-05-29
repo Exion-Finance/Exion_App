@@ -69,7 +69,7 @@ export default function SendMoney() {
                 <View>
                     <InputField
                         label="Please enter the phone number"
-                        placeholder="+254701234567"
+                        placeholder="0701234567"
                         onInputChange={handlePhoneNumberChange}
                         error={error}
                         errorDescription={errorDescription}
