@@ -24,7 +24,7 @@ import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY } from './context/AuthContext';
 import { getBalances } from './Apiconfig/api';
 import { BalanceData, ResponseBalance } from './(tabs)';
-import { SendMoney, calculateFee, CheckTransactionStatus } from './Apiconfig/api';
+import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
 //import {normalizePhoneNumber } from "../app/hooks/"
@@ -62,8 +62,7 @@ const CustomKeyboard = () => {
   const [transactionCode, setTransactionCode] = useState<string>("Qwerty")
   const [transactionState, setTransactionState] = useState<string>("Initiating transaction...")
   const [transactionLoading, setTransactionLoading] = useState<boolean>()
-  const [firstName, setFirstName] = useState<string>("")
-  const [secondName, setSecondName] = useState<string>("")
+  const [userName, seUserName] = useState<string>("")
   const [txCode, setTxCode] = useState<string>("")
   const [txChannel, setTxChannel] = useState<string>("")
   const [amount, setAmount] = useState<number>(0)
@@ -181,7 +180,7 @@ const CustomKeyboard = () => {
         const channel = "Mpesa"
         const phonenumber = normalizePhoneNumber(phoneNumber as string)
         const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-        console.log('send money response is', res)
+        // console.log('send money response is', res)
         if (res.error) {
           bottomSheetRef2.current?.close();
           setError(true)
@@ -192,43 +191,204 @@ const CustomKeyboard = () => {
         if (res.message === "Processing") {
           setTransactionState("Processing...")
           const merchantRequestID: string = res.response.OriginatorConversationID;
-          setTimeout(async () => {
-            const checkTx = await CheckTransactionStatus(merchantRequestID)
-            // console.log("checkTx--->", checkTx)
+          // setTimeout(async () => {
+          //   const checkTx = await CheckTransactionStatus(merchantRequestID)
+          //   // console.log("checkTx--->", checkTx)
+          //   if (checkTx.data.txHash) {
+          //     // console.log("Check response data", checkTx.data)
+          //     const [first, second] = checkTx.data.recipientName.split(' ')
+          //     const fullName = first as string + second as string
+          //     seUserName(fullName)
+          //     setTxCode(checkTx.data.thirdPartyTransactionCode)
+          //     setTxChannel(checkTx.data.destinationChannel)
+          //     setAmount(checkTx.data.transactionAmount)
+          //     setTransactionState("Transaction sent🎉")
+          //   }
+          //   else if (!checkTx.data.success) {
+          //     bottomSheetRef2.current?.close();
+          //     Alert.alert("Oops😕", `${checkTx.data.message}`)
+          //   }
+          // }, 2500)
+
+
+          const checkStatus = async (retryCount = 0) => {
+            const checkTx = await CheckTransactionStatus(merchantRequestID);
+            // console.log("checkTx--->", checkTx);
+
             if (checkTx.data.txHash) {
               // console.log("Check response data", checkTx.data)
               const [first, second] = checkTx.data.recipientName.split(' ')
-              setFirstName(first)
-              setSecondName(second)
+              const fullName = first as string + second as string
+              seUserName(fullName)
               setTxCode(checkTx.data.thirdPartyTransactionCode)
               setTxChannel(checkTx.data.destinationChannel)
               setAmount(checkTx.data.transactionAmount)
               setTransactionState("Transaction sent🎉")
-            }
-            else if (!checkTx.data.success) {
+            } else if (!checkTx.data.success && retryCount < 2) {
+              console.log("Not found, going for second retry")
+              setTimeout(() => checkStatus(retryCount + 1), 2000);
+            } else if (!checkTx.data.success) {
               bottomSheetRef2.current?.close();
               Alert.alert("Oops😕", `${checkTx.data.message}`)
             }
-          }, 2500)
+          };
+
+          setTimeout(() => checkStatus(), 2500);
         }
 
       } catch (err) {
         console.log('error is', err)
         setSend(false)
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", `Something went wrong, please try again`)
       }
       finally {
         setSend(false)
       }
-
-
     }
+
+
     else if (source === 'tillnumber') {
-      Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-      console.log('tillnumber')
+      // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
+      // console.log('tillnumber')
+
+      if (Number(inputValue) < 10) {
+        setError(true)
+        setErrorDescription("Minimum amount is Ksh 10")
+        return;
+      }
+      setSend(true)
+      try {
+        bottomSheetRef2.current?.snapToIndex(0);
+
+        const chainId = 1
+        const tokenName = activeToken.token.toUpperCase()
+        const networkCode = "Mpesa"
+        const res = await BuyGoods(jwtTokens, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
+        // console.log('<---Buy goods response is--->', res)
+        if (res.error) {
+          bottomSheetRef2.current?.close();
+          setError(true)
+          setErrorDescription(res.msg)
+          // console.log(res.msg)
+          return;
+        }
+        if (!res.response.status) {
+          bottomSheetRef2.current?.close();
+          setError(true)
+          setErrorDescription(res.response.detail)
+          return;
+        }
+
+        if (res.message === "Processing" && res.response.status) {
+          setTransactionState("Processing...");
+          const merchantRequestID: string = res.response.OriginatorConversationID;
+
+          const checkStatus = async (retryCount = 0) => {
+            const checkTx = await CheckTransactionStatus(merchantRequestID);
+            // console.log("checkTx--->", checkTx);
+
+            if (checkTx.data.txHash) {
+              // console.log("Check payment success status data-->", checkTx.data);
+              seUserName(checkTx.data.recipientAccountNumber)
+              setTxCode(checkTx.data.thirdPartyTransactionCode);
+              setTxChannel("Buy Goods");
+              setAmount(checkTx.data.transactionAmount);
+              setTransactionState("Transaction sent🎉");
+            } else if (!checkTx.data.success && retryCount < 2) {
+              console.log("Not found, going for second retry")
+              setTimeout(() => checkStatus(retryCount + 1), 2000);
+            } else if (!checkTx.data.success) {
+              bottomSheetRef2.current?.close();
+              Alert.alert("Oops😕", `${checkTx.data.message}`);
+            }
+          };
+
+          setTimeout(() => checkStatus(), 3000);
+        }
+
+      }
+      catch (err) {
+        console.log('error is', err)
+        setSend(false)
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", `Something went wrong, please try again`)
+      }
+      finally {
+        setSend(false)
+      }
     }
+
+
     else if (source === 'paybillaccountnumber') {
-      Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-      console.log('paybill')
+      // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
+      // console.log('paybill')
+
+      if (Number(inputValue) < 10) {
+        setError(true)
+        setErrorDescription("Minimum amount is Ksh 10")
+        return;
+      }
+      setSend(true)
+      try {
+        bottomSheetRef2.current?.snapToIndex(0);
+
+        const chainId = 1
+        const tokenName = activeToken.token.toUpperCase()
+        const networkCode = "Mpesa"
+        const res = await PayBill(jwtTokens, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
+  
+        if (res.error) {
+          bottomSheetRef2.current?.close();
+          setError(true)
+          setErrorDescription(res.msg)
+          // console.log(res.msg)
+          return;
+        }
+        if (!res.response.status) {
+          bottomSheetRef2.current?.close();
+          setError(true)
+          setErrorDescription(res.response.detail)
+          return;
+        }
+
+        if (res.message === "Processing" && res.response.status) {
+          setTransactionState("Processing...");
+          const merchantRequestID: string = res.response.OriginatorConversationID;
+
+          const checkStatus = async (retryCount = 0) => {
+            const checkTx = await CheckTransactionStatus(merchantRequestID);
+            // console.log("checkTx--->", checkTx);
+
+            if (checkTx.data.txHash) {
+              // console.log("Check payment success status data-->", checkTx.data);
+              seUserName(checkTx.data.recipientAccountNumber)
+              setTxCode(checkTx.data.thirdPartyTransactionCode);
+              setTxChannel("Paybill");
+              setAmount(checkTx.data.transactionAmount);
+              setTransactionState("Transaction sent🎉");
+            } else if (!checkTx.data.success && retryCount < 2) {
+              console.log("Not found, going for second retry")
+              setTimeout(() => checkStatus(retryCount + 1), 2000);
+            } else if (!checkTx.data.success) {
+              bottomSheetRef2.current?.close();
+              Alert.alert("Oops😕", `${checkTx.data.message}`);
+            }
+          };
+
+          setTimeout(() => checkStatus(), 3000);
+        }
+
+      }
+      catch (err) {
+        console.log('error is', err)
+        setSend(false)
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", `Something went wrong, please try again`)
+      }
+      finally {
+        setSend(false)
+      }
     }
 
   }
@@ -238,8 +398,6 @@ const CustomKeyboard = () => {
     setInputValue(prev => prev.slice(0, -1));
     setError(false)
   };
-
-
 
 
 
@@ -457,7 +615,7 @@ const CustomKeyboard = () => {
                 <View style={styles.flexRow}>
                   <View style={{ marginLeft: 10 }}>
 
-                    <PrimaryFontText style={styles.name}>{firstName.toUpperCase()} {secondName.toUpperCase()}</PrimaryFontText>
+                    <PrimaryFontText style={styles.name}>{ txChannel == "Buy Goods" ? "TILL:" : txChannel == "Paybill" ? "PAYBILL:" : null } {userName.toUpperCase()}</PrimaryFontText>
 
                     <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
                       <PrimaryFontMedium style={styles.confirmationCode}>{txCode} </PrimaryFontMedium>

@@ -291,6 +291,175 @@
                 "success": false
             },
             "success": true
-        }
+        },
+        {
+            "message": "Processing",
+            "response": {
+                "ResponseCode": "400",
+                "detail": "Mininum amount is KES 10.00",
+                "status": false
+            }
+        },
+        {
+            "message": "Processing",
+            "response": {
+                "B2BRequestID": "4419-d9962bc7-d6b4-476a-a6fb-e87efce3b944",
+                "ConversationID": "d9962bc7-d6b4-476a-a6fb-e87efce3b944",
+                "OriginatorConversationID": "20250529154410563",
+                "ResponseCode": "0",
+                "ResponseDescription": "Transaction is being processed",
+                "TransactionCharges": "0.00",
+                "detail": "Transaction is being processed",
+                "status": true
+            }
+        },
+
+
+
+
+
+
+
+
+
+        [
+            {
+                "title": "Today",
+                "data": [
+                    {
+                        "type": "TILL",
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250530071510",
+                        "txHash": "0xc81a12bfcad8c981a151a2a2001d3fefbb8907fa1a48f9d8767cba7ad104f620",
+                        "thirdPartyTransactionCode": "TEU7ROGOCJ",
+                        "recipientAccountNumber": "4154310",
+                        "sasaPayTransactionCode": "SWEJ4033H0297VQ"
+                    },
+                    {
+                        "type": "MPESA",
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "RONEX MOGAKA ONDIMU",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250530071215",
+                        "txHash": "0xa25cc72489a99e076d17a6b62488b9abadd9490812a8b2fa682c94943d15d831",
+                        "thirdPartyTransactionCode": "TEU1RO1DWJ",
+                        "recipientAccountNumber": "254701707772",
+                        "sasaPayTransactionCode": "SWEJ4033HV7TG52"
+                    },
+                    {
+                        "type": "PAYBILL",
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250530071215",
+                        "txHash": "0xa25cc72489a99e076d17a6b62488b9abadd9490812a8b2fa682c94943d15d831",
+                        "thirdPartyTransactionCode": "TEU1RO1DWJ",
+                        "accountNumber": "01707772",
+                        "businessNumber": "AOWOL",
+                        "sasaPayTransactionCode": "SWEJ4033HV7TG52"
+                    }
+                ]
+            },
+            {
+                "title": "29/5/2025",
+                "data": [
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250529154418",
+                        "txHash": "0xe04886eb7f2f03e21c4e8f7a5e56fc9fe70a949295e06d25de26fb79aeacded6",
+                        "thirdPartyTransactionCode": "TET3PAKSWD",
+                        "recipientAccountNumber": "4154310",
+                        "sasaPayTransactionCode": "SWEJ403RSP2U514"
+                    }
+                ]
+            },
+            {
+                "title": "28/5/2025",
+                "data": [
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528160029",
+                        "txHash": "0xc595f1c974e2e158cd76f41c9712aaf1f719e61230acbfd1dd3977a51292fb7a",
+                        "thirdPartyTransactionCode": "TES2KPNISI",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403E3WO87GE"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528155656",
+                        "txHash": "0xda47fbdcfa1c4ebeab6074049ac2dbe620c4be41a0ecaed95dbdedb5ab6cd9aa",
+                        "thirdPartyTransactionCode": "TES9KOP6G3",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403E1WDBMJN"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528154541",
+                        "txHash": "0xe5381549ad43d63f9e078b7cf04944c9ff961d7594958a861f1fa9feb7181a7a",
+                        "thirdPartyTransactionCode": "TES7KLRX65",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403E1DXEZ7X"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528143548",
+                        "txHash": "0x2c82588a7770ac77080671f0bcf5caa7a5e873ff8f34c076f65fda5e5f5f029c",
+                        "thirdPartyTransactionCode": "TES5K64DLV",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403EWB4SIKZ"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528143222",
+                        "txHash": "0x0f1437a70f754275b40e4a1d6b8af37d77c25f52f68c8f3d6f33102dceb4e219",
+                        "thirdPartyTransactionCode": "TES9K5FSBF",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403EV6QB6E8"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528141926",
+                        "txHash": "0x7a71cca45cf288010d1f5aeaadfcd30f39fc4a2b5d96755fb83f0ac2f0708cd3",
+                        "thirdPartyTransactionCode": "TES1K2XQOL",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403EVLAW00U"
+                    },
+                    {
+                        "type": null,
+                        "destinationChannel": "M-PESA",
+                        "recipientName": "GEORGE OTIENO AGAI",
+                        "transactionAmount": 10,
+                        "transactionDate": "20250528135903",
+                        "txHash": "0xf8851d7c57767df8b5409fc49ff536b9861c1612b786d7b59675d23eb415488e",
+                        "thirdPartyTransactionCode": "TES8JZ7P8E",
+                        "recipientAccountNumber": "254792271915",
+                        "sasaPayTransactionCode": "SWEJ403ESTO9MJU"
+                    }
+                ]
+            }
+        ]
     ]
 }

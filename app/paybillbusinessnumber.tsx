@@ -27,7 +27,7 @@ export default function PaybillBusinessNumber() {
             setError(true)
             return;
         }
-        console.log('Cleaned Account Number:', cleanedBusinessNumber);
+        // console.log('Cleaned Account Number:', cleanedBusinessNumber);
 
         route.push({
             pathname: '/paybillaccountnumber',

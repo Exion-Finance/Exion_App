@@ -13,8 +13,9 @@ import { Transactions as Trans, TransactionData, MobileTransaction, Section } fr
 import { TOKEN_KEY } from '../context/AuthContext';
 import { getBalances, Transactionss, transactionHistory, fetchMobileTransactions } from '../Apiconfig/api';
 import { userTransactions } from '../hooks/query/userTransactions';
-import { selectTransactions } from '../state/slices';
-import { useSelector } from 'react-redux';
+import { selectTransactions, addTransaction } from '../state/slices';
+import { useSelector, useDispatch } from 'react-redux';
+// import { useQuery } from '@tanstack/react-query';
 
 
 const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 25 : 0;
@@ -27,13 +28,14 @@ export default function Transactions() {
     // const { data, isLoading, isError, error } = userTransactions(authToken);
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
     const [isLoading, setIsLoading] = useState(false)
-    // const [refreshing, setRefreshing] = useState<boolean>(false)
+    // const [userTx, setUserTx] = useState(useSelector(selectTransactions))
     const [mobileTransactions, setMobileTransactions] = useState<MobileTransaction[]>([])
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
 
     const [transactionsReceived, setTransactionsReceived] = useState(false)
-    const user_transactions = useSelector(selectTransactions)
+    const dispatch = useDispatch();
+    let userTx = useSelector(selectTransactions)
 
     useEffect(() => {
         const token = async () => {
@@ -47,9 +49,34 @@ export default function Transactions() {
         token()
     }, [authToken])
 
+
+
+
+    const {
+        data,
+        isLoading: isTxLding,
+    } = userTransactions(authToken);
+    // console.log("isTxLding-->", isTxLding)
+    useEffect(() => {
+        // console.log("Cache transactions useeffect")
+        if (data) {
+            dispatch(addTransaction(data))
+        }
+    }, [data])
+
+    // useEffect(() => {
+    //     console.log("Dispatch changed useeffect")
+    //     const setNewTx = () => {
+    //         setTimeout(() => {
+    //             userTx = useSelector(selectTransactions)
+    //         }, 3000)
+    //     }
+    //     setNewTx()
+    // }, [dispatch])
+
     const handleRefresh = useCallback(async () => {
         setRefreshing(true)
-        setTransactions(user_transactions)
+        setTransactions(userTx)
         setRefreshing(false)
     }, [])
 
@@ -164,7 +191,7 @@ export default function Transactions() {
 
             <View style={styles.tabContainer}>
 
-            <TouchableOpacity
+                <TouchableOpacity
                     style={[
                         styles.tabButton,
                         activeTab === 'mobile' && styles.tabButtonActive,
@@ -180,7 +207,7 @@ export default function Transactions() {
                         Mobile Payments
                     </PrimaryFontMedium>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                     style={[
                         styles.tabButton,
@@ -217,10 +244,10 @@ export default function Transactions() {
                             onRefresh={handleMobileTransactionsRefresh}
                         />
                     </View>
-                :
-            <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
-                <ActivityIndicator size="small" color='#00C48F' />
-            </View>}
+                    :
+                    <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
+                        <ActivityIndicator size="small" color='#00C48F' />
+                    </View>}
 
         </View>
     );
