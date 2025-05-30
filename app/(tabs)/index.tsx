@@ -183,7 +183,8 @@ export default function TabOneScreen() {
       if (!authToken) return
       try {
         // console.log("Useeffect called-->")
-        const tx = await fetchMobileTransactions(authToken)
+        const pageSize: number = 5;
+        const tx = await fetchMobileTransactions(authToken, pageSize)
         if (isMounted) {
           setMobileTransactions(tx.data)
         }
@@ -250,7 +251,8 @@ export default function TabOneScreen() {
 
   const refetchMobileTx = async () => {
     try {
-      const tx = await fetchMobileTransactions(authToken)
+      const pageSize: number = 5;
+      const tx = await fetchMobileTransactions(authToken, pageSize)
       setMobileTransactions(tx.data)
       await refetchBalance()
 

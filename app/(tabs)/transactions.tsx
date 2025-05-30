@@ -89,7 +89,8 @@ export default function Transactions() {
         const loadTx = async () => {
             if (!authToken) return
             try {
-                const tx = await fetchMobileTransactions(authToken)
+                const pageSize: number = 500;
+                const tx = await fetchMobileTransactions(authToken, pageSize)
                 if (isMounted) {
                     setMobileTransactions(tx.data)
                 }

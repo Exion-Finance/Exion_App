@@ -214,10 +214,10 @@ export const calculateFee = async ({
     );
 };
 
-export const fetchMobileTransactions = async(token: string) => {
+export const fetchMobileTransactions = async(token: string, pageSize: number) => {
     try {
         const response = await axios.get(`${PESACHAIN_URL}/payments/history`, {
-            // params: { pagination }, 
+            params: { pageSize: pageSize }, 
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

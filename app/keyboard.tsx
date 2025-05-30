@@ -27,7 +27,7 @@ import { BalanceData, ResponseBalance } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
-//import {normalizePhoneNumber } from "../app/hooks/"
+import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import Loading from "@/components/Loading";
 
@@ -81,6 +81,8 @@ const CustomKeyboard = () => {
     setInputValue(prev => prev + value);
     setError(false)
   };
+
+  const { handleFingerprintScan } = useFingerprintAuthentication();
 
   const calculateTransactionFee = async (amount: string) => {
     setSend(true)
@@ -171,6 +173,12 @@ const CustomKeyboard = () => {
         setErrorDescription("Minimum amount is Ksh 10")
         return;
       }
+      const success = await handleFingerprintScan()
+      if(!success){
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+        return;
+      }
       setSend(true)
       try {
         bottomSheetRef2.current?.snapToIndex(0);
@@ -257,6 +265,12 @@ const CustomKeyboard = () => {
         setErrorDescription("Minimum amount is Ksh 10")
         return;
       }
+      const success = await handleFingerprintScan()
+      if(!success){
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+        return;
+      }
       setSend(true)
       try {
         bottomSheetRef2.current?.snapToIndex(0);
@@ -327,6 +341,12 @@ const CustomKeyboard = () => {
       if (Number(inputValue) < 10) {
         setError(true)
         setErrorDescription("Minimum amount is Ksh 10")
+        return;
+      }
+      const success = await handleFingerprintScan()
+      if(!success){
+        bottomSheetRef2.current?.close();
+        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
         return;
       }
       setSend(true)
