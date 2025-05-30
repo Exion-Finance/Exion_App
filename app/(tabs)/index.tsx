@@ -305,7 +305,7 @@ export default function TabOneScreen() {
             <View style={[reusableStyle.rowJustifyBetween, { height: '32%', alignItems: 'flex-start' }]}>
               <View>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15.5 }}>Available Balance</PrimaryFontMedium>
+                  <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15.5 }}>Balance (Ksh)</PrimaryFontMedium>
                   <TouchableOpacity onPress={toggleVisibility} style={{ marginLeft: 7 }}>
                     <MaterialIcons
                       name={isHidden ? "visibility" : "visibility-off"}
@@ -315,9 +315,12 @@ export default function TabOneScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginTop: 5 }}>
-                  Ksh{isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
+                <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'flex-start', flexDirection: 'row' }}>
+                {/* <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15, marginBottom: 5 }}>Ksh</PrimaryFontMedium> */}
+                <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginBottom: 15 }}>
+                  {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
                 </PrimaryFontMedium>
+                </View>
 
               </View>
               <SecondaryButton

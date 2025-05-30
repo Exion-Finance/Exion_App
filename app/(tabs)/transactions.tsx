@@ -152,7 +152,8 @@ export default function Transactions() {
 
     const refetchMobileTx = async () => {
         try {
-            const tx = await fetchMobileTransactions(authToken)
+            const pageSize: number = 500;
+            const tx = await fetchMobileTransactions(authToken, pageSize)
             setMobileTransactions(tx.data)
 
         } catch (e: any) {
