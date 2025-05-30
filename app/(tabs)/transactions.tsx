@@ -89,7 +89,8 @@ export default function Transactions() {
         const loadTx = async () => {
             if (!authToken) return
             try {
-                const tx = await fetchMobileTransactions(authToken)
+                const pageSize: number = 500;
+                const tx = await fetchMobileTransactions(authToken, pageSize)
                 if (isMounted) {
                     setMobileTransactions(tx.data)
                 }
@@ -145,13 +146,20 @@ export default function Transactions() {
         return Object.entries(groups).map(([title, data]) => ({ title, data }))
     }
 
+
+    const sections = useMemo(() => {
+        if (!mobileTransactions) return [];
+        return makeSections(mobileTransactions);
+    }, [mobileTransactions]);
+
     //Memoize sections so they only recompute when mobileTransactions changes
-    const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
+    // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
     // console.log("sections-->", sections.length)
 
     const refetchMobileTx = async () => {
         try {
-            const tx = await fetchMobileTransactions(authToken)
+            const pageSize: number = 500;
+            const tx = await fetchMobileTransactions(authToken, pageSize)
             setMobileTransactions(tx.data)
 
         } catch (e: any) {
