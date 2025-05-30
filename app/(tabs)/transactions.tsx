@@ -146,8 +146,14 @@ export default function Transactions() {
         return Object.entries(groups).map(([title, data]) => ({ title, data }))
     }
 
+
+    const sections = useMemo(() => {
+        if (!mobileTransactions) return [];
+        return makeSections(mobileTransactions);
+    }, [mobileTransactions]);
+
     //Memoize sections so they only recompute when mobileTransactions changes
-    const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
+    // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
     // console.log("sections-->", sections.length)
 
     const refetchMobileTx = async () => {
