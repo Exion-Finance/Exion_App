@@ -45,7 +45,10 @@ export default function RootLayout() {
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      console.log("Erorrrrrrrrrrrrrrrrxxxxxxx")
+      throw error
+    };
   }, [error]);
 
   useEffect(() => {
@@ -77,12 +80,19 @@ function RootLayoutNav() {
   const { authState, onLogout } = useAuth()
   useEffect(() => {
     // onLogout!()
-    if (!authState?.authenticated) {
-      route.push("/landing")
-    } else {
-      route.push("/(tabs)")
+    try {
+      if (!authState?.authenticated) {
+        route.push("/landing")
+      } else {
+        route.push("/(tabs)")
 
+      }
     }
+    catch (error) {
+      onLogout!()
+      console.log("/layout error-->", error)
+    }
+
   }, [authState])
 
 

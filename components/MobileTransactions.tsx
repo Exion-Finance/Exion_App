@@ -16,23 +16,27 @@ interface Props {
 }
 
 export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRefresh }) => {
+
     const formatTime = (s: string) => {
-        const d = new Date(
-            +s.slice(0, 4),
-            +s.slice(4, 6) - 1,
-            +s.slice(6, 8),
-            +s.slice(8, 10),
-            +s.slice(10, 12)
-        )
-        const hour = d.getHours() % 12 || 12
-        const ampm = d.getHours() < 12 ? 'am' : 'pm'
-        const min = d.getMinutes().toString().padStart(2, '0')
-        return `${hour}:${min}${ampm}`
-    }
+        const year = +s.slice(0, 4);
+        const month = +s.slice(4, 6) - 1;
+        const day = +s.slice(6, 8);
+        const hour = +s.slice(8, 10);
+        const min = +s.slice(10, 12);
 
-    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+        // Create the date in UTC
+        const d = new Date(Date.UTC(year, month, day, hour, min));
 
+        const localHour = d.getHours() % 12 || 12;
+        const ampm = d.getHours() < 12 ? 'am' : 'pm';
+        const minute = d.getMinutes().toString().padStart(2, '0');
+
+        return `${localHour}:${minute}${ampm}`;
+    };
+
+    // console.log(JSON.stringify(sections, null, 2));
     if (sections && sections.length === 0) {
+
         return (
             <ScrollView
                 contentContainerStyle={[styles.empty, reusableStyles.paddingContainer]}
@@ -51,14 +55,57 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
         )
     }
 
+    const formatTransaction = (item: any) => {
+        let username = "";
+        let transactionType = "";
+
+        switch (item.type) {
+            case "TILL":
+                username = item.recipientAccountNumber;
+                transactionType = "Buy Goods";
+                break;
+
+            case "MPESA":
+                const nameParts = item.recipientName.trim().split(" ");
+                const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
+                const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
+                username = `${first} ${last}`;
+                transactionType = "Send Money";
+                break;
+
+            case "PAYBILL":
+                username = item.recipientAccountNumber;
+                transactionType = "Paybill";
+                break;
+
+            default:
+                if (item.type === null) {
+                    if (item.recipientName && item.recipientName.trim() !== "") {
+                        const nameParts = item.recipientName.trim().split(" ");
+                        const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
+                        const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
+                        username = `${first} ${last}`;
+                        transactionType = "Send Money";
+                    } else {
+                        username = item.recipientAccountNumber;
+                        transactionType = "Mpesa";
+                    }
+                }
+                break;
+        }
+
+        return { username, transactionType };
+    };
+
+
     return (
         <SectionList
             sections={sections}
             keyExtractor={(item, index) =>
                 item.id
-                  ? item.id
-                  : `missing-id-${index}`
-              }
+                    ? item.id
+                    : `missing-id-${index}`
+            }
             renderSectionHeader={({ section: { title } }) => (
                 <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
             )}
@@ -67,14 +114,14 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
             }
             style={styles.section}
             renderItem={({ item }) => {
-                const [first, second] = item.recipientName.split(' ')
+                const { username, transactionType } = formatTransaction(item);
                 return (
                     <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]}>
                         <View style={styles.flexRow}>
                             <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
                             <View style={{ marginLeft: 10 }}>
-                                <PrimaryFontText style={styles.name}>{capitalize(first)} {capitalize(second)}</PrimaryFontText>
-                                <PrimaryFontText style={styles.channel}>{item.destinationChannel}</PrimaryFontText>
+                                <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
+                                <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
                             </View>
                         </View>
 
@@ -112,23 +159,23 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     channel: {
-        fontSize: 11,
+        fontSize: 11.5,
         color: '#79828E',
-        marginTop: 7,
+        marginTop: 7.5,
     },
     amountBlock: {
         flexDirection: 'column',
         alignItems: 'flex-end'
     },
     amount: {
-        fontSize: 16.5,
+        fontSize: 17.5,
         color: '#5EAF5E',
         marginTop: 0
     },
     time: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#6B6B6B',
-        marginTop: 4,
+        marginTop: 5,
     },
     flexRow: {
         flexDirection: 'row',

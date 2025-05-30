@@ -30,7 +30,6 @@ import { useQuery } from '@tanstack/react-query';
 import { userTransactions, userBalance, userTokensWithAmount } from '../hooks/query/userTransactions';
 import { updateBalance, selectUserBalance, balanceSlice, addTransaction, selectTransactions } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
-import { txexample } from '@/assets/countrycodes';
 
 
 type CurrencyData = {
@@ -85,17 +84,18 @@ export default function TabOneScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['60%'], []);
 
-  const {
-    data,
-    // isLoading,
-    refetch: refetchTransactions,
-  } = userTransactions(authToken);
+  // const {
+  //   data,
+  //   // isLoading,
+  //   refetch: refetchTransactions,
+  // } = userTransactions(authToken);
   //const { data:tokensbalance, isLoading:balLoading, isError:balError, error:balerror } = userBalance(authToken);
 
 
 
   //fetch user balance
   const fetchBalance = async (jwttoken: string): Promise<BalanceData> => {
+    // console.log("Fetch balance fn called")
     const response = await getBalances(jwttoken)
     setTokens(response)
 
@@ -116,6 +116,7 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     if (tokensbalance) {
+      // console.log("Update balance cache called")
       const totalBalance = Object.values(tokensbalance).reduce<TotalAmounts>((acc, currency) => {
         acc.usd += parseFloat(currency.usd);
         acc.kes += parseFloat(currency.kes);
@@ -127,12 +128,12 @@ export default function TabOneScreen() {
     }
   }, [tokensbalance]);
 
-  useEffect(() => {
-    if (data) {
-      dispatch(addTransaction(data))
-    }
+  // useEffect(() => {
+  //   if (data) {
+  //     dispatch(addTransaction(data))
+  //   }
 
-  }, [data, dispatch])
+  // }, [data, dispatch])
 
   // const handleRefresh = useCallback(async () => {
   //   setRefreshing(true)
@@ -181,7 +182,7 @@ export default function TabOneScreen() {
     const loadTx = async () => {
       if (!authToken) return
       try {
-        console.log("Useeffect called-->")
+        // console.log("Useeffect called-->")
         const tx = await fetchMobileTransactions(authToken)
         if (isMounted) {
           setMobileTransactions(tx.data)
@@ -239,8 +240,13 @@ export default function TabOneScreen() {
   }
 
   //Memoize sections so they only recompute when mobileTransactions changes
-  const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
+  // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
   // console.log("sections-->", sections.length)
+
+  const sections = useMemo(() => {
+    if (!mobileTransactions) return [];
+    return makeSections(mobileTransactions);
+  }, [mobileTransactions]);
 
   const refetchMobileTx = async () => {
     try {
@@ -265,6 +271,7 @@ export default function TabOneScreen() {
   }, [])
 
   // console.log(data)
+  // console.log(JSON.stringify(sections, null, 2));
 
 
   return (

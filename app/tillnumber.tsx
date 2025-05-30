@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
-import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
+import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import { useRouter } from 'expo-router';
@@ -47,9 +47,10 @@ export default function TillNumber() {
                     onInputChange={handleTillNumberChange}
                     error={error}
                     errorDescription={errorDescription}
+                    keyboardType='numeric'
                 />
                 <Pressable style={styles.button} onPress={handleSubmit}>
-                    <PrimaryFontMedium style={styles.text}>Continue</PrimaryFontMedium>
+                    <PrimaryFontBold style={styles.text}>Continue</PrimaryFontBold>
                 </Pressable>
             </View>
 

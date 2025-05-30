@@ -62,6 +62,34 @@ export const SendMoney = async (token: string, amount: number, tokenName: string
     }
 };
 
+//Buy goods
+export const BuyGoods = async (token: string, amount: number, tokenName: string, chainId: number, tillNumber: string, networkCode: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/payments/till`, { amount, tokenName, chainId, tillNumber, networkCode }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (e: any) {
+        return { error: true, msg: e.response.data.message }
+    }
+};
+
+//Pay Bill
+export const PayBill = async (token: string, amount: number, tokenName: string, chainId: number, businessNumber: string, accountNo: string, networkCode: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/payments/paybill`, { amount, tokenName, chainId, businessNumber, accountNo, networkCode }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (e: any) {
+        return { error: true, msg: e.response.data.message }
+    }
+};
+
 export const CheckTransactionStatus = async (merchantRequestID: string) => {
     try {
         const response = await axios.post(`${PESACHAIN_URL}/payments/transaction-details`, { merchantRequestID });
