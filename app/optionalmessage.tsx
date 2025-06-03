@@ -28,7 +28,7 @@ export default function OptionalMessage() {
     const [transactionDescription, setTransactionDescription] = useState<string>("Please wait...");
     const [totalAmountSent, seTotalAmountSent] = useState<number>()
 
-    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees } = useLocalSearchParams();
+    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd } = useLocalSearchParams();
     const { isAuthenticated, handleFingerprintScan } = useFingerprintAuthentication();
 
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -51,7 +51,7 @@ export default function OptionalMessage() {
         }
         return null;
     }
-
+    console.log("tokenId", id as number)
 
     const handleSend = async () => {
         const success = await handleFingerprintScan()
@@ -61,7 +61,11 @@ export default function OptionalMessage() {
                 const token = await getParsedToken(TOKEN_KEY);
 
                 if (token) {
-                    const amountFloat = parseFloat(amount?.toString() || "0").toFixed(2);
+                    const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
+                    // console.log(amountFloat)
+                    // console.log("typeof amountFloat", typeof amountFloat)
+                    // console.log(token)
+                    // console.log("tokenId", id as number)
                     const response = await SendMoneyV1({
                         token: token,
                         chainId: 1,
@@ -69,6 +73,7 @@ export default function OptionalMessage() {
                         recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
                         amount: Number(amountFloat)
                     });
+                    // console.log("<---response--->", response)
 
                     if (response && !response.error) {
                         setResponseReceived(true);
@@ -85,6 +90,9 @@ export default function OptionalMessage() {
             } catch (error) {
                 bottomSheetRef.current?.close();
                 Alert.alert("Oops😕", "An error occurred while sending money, please try again");
+            }
+            finally{
+                bottomSheetRef.current?.close();
             }
         }
         else {
@@ -113,7 +121,7 @@ export default function OptionalMessage() {
         <GestureHandlerRootView>
             <View style={styles.container}>
                 <StatusBar style={'dark'} />
-                <NavBar title={`Sending ${amount} ${token}`} onBackPress={() => route.push('/keyboard')} />
+                <NavBar title={`Sending ${amount} Ksh`} onBackPress={() => route.push('/keyboard')} />
 
                 <View style={reusableStyles.paddingContainer}>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 10 }]}>

@@ -229,3 +229,13 @@ export const fetchMobileTransactions = async(token: string, pageSize: number) =>
         return { error: true, msg: error.response?.data?.message || "An error occurred" };
     }
 }
+
+export const getConversionRates = async() => {
+    try {
+        const response = await axios.get(`${PESACHAIN_URL}/kes-usd`);
+        return response.data;
+    } catch (error: any) {
+        console.log(error)
+        return { error: true, msg: error.response?.data?.message || "An error occurred" };
+    }
+}
