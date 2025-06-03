@@ -24,7 +24,7 @@ import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY } from './context/AuthContext';
 import { getBalances } from './Apiconfig/api';
 import { BalanceData, ResponseBalance } from './(tabs)';
-import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill } from './Apiconfig/api';
+import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
@@ -89,6 +89,7 @@ const CustomKeyboard = () => {
     if (jwtTokens) {
       try {
         const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
+        // const tokenAmount = activeToken.token
         const response = await calculateFee({
           auth: jwtTokens,
           recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
@@ -118,297 +119,317 @@ const CustomKeyboard = () => {
   }
 
   const handleButtonClick = async () => {
-    if (inputValue === "") {
-      setError(true)
-      setErrorDescription('Enter a valid amount')
-      return;
-    }
-    if (Number(inputValue) <= 0) {
-      setError(true)
-      setErrorDescription('Enter a valid amount')
-      return;
-    }
-
-    if (activeToken.ksh - parseFloat(inputValue) < 0) {
-      setError(true)
-      setErrorDescription('Insufficient funds')
-      return;
-    }
-
-
-    if (source === 'contacts' || source === "sendcrypto") {
-
-      const txFees = await calculateTransactionFee(inputValue)
-      if (!txFees) {
-        setError(true)
-        setErrorDescription('Something went wrong, try again')
-        return;
-      }
-      const inputValueFloat = parseFloat(inputValue)
-      const totalDeductables = txFees.totalFee.gasFeeinKes + txFees.totalFee.serviceFeeinKes
-      const remainingAmount = Number(activeToken.ksh) - (inputValueFloat + totalDeductables);
-
-      if (remainingAmount < 0) {
-        setError(true)
-        setErrorDescription(`Not enough balance left for Ksh ${totalDeductables.toFixed(2)} fee`)
-        return;
-      }
-
-      route.push({
-        pathname: '/optionalmessage',
-        params: {
-          name: name || recipient_address,
-          phoneNumber,
-          amount: inputValueFloat,
-          token: activeToken.token,
-          recipient_address,
-          gasFees: txFees.totalFee.gasFeeinKes,
-          serviceFees: txFees.totalFee.serviceFeeinKes
-        }
-      });
-    }
-    else if (source === 'sendmoney') {
-      if (Number(inputValue) < 10) {
-        setError(true)
-        setErrorDescription("Minimum amount is Ksh 10")
-        return;
-      }
-      const success = await handleFingerprintScan()
-      if(!success){
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
-        return;
-      }
+    try {
       setSend(true)
-      try {
-        bottomSheetRef2.current?.snapToIndex(0);
-
-        const chainId = 1
-        const tokenName = activeToken.token
-        const channel = "Mpesa"
-        const phonenumber = normalizePhoneNumber(phoneNumber as string)
-        const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-        // console.log('send money response is', res)
-        if (res.error) {
-          bottomSheetRef2.current?.close();
-          setError(true)
-          setErrorDescription(res.msg)
-          console.log(res.msg)
-          return;
-        }
-        if (res.message === "Processing") {
-          setTransactionState("Processing...")
-          const merchantRequestID: string = res.response.OriginatorConversationID;
-          // setTimeout(async () => {
-          //   const checkTx = await CheckTransactionStatus(merchantRequestID)
-          //   // console.log("checkTx--->", checkTx)
-          //   if (checkTx.data.txHash) {
-          //     // console.log("Check response data", checkTx.data)
-          //     const [first, second] = checkTx.data.recipientName.split(' ')
-          //     const fullName = first as string + second as string
-          //     seUserName(fullName)
-          //     setTxCode(checkTx.data.thirdPartyTransactionCode)
-          //     setTxChannel(checkTx.data.destinationChannel)
-          //     setAmount(checkTx.data.transactionAmount)
-          //     setTransactionState("Transaction sent🎉")
-          //   }
-          //   else if (!checkTx.data.success) {
-          //     bottomSheetRef2.current?.close();
-          //     Alert.alert("Oops😕", `${checkTx.data.message}`)
-          //   }
-          // }, 2500)
-
-
-          const checkStatus = async (retryCount = 0) => {
-            const checkTx = await CheckTransactionStatus(merchantRequestID);
-            // console.log("checkTx--->", checkTx);
-
-            if (checkTx.data.txHash) {
-              // console.log("Check response data", checkTx.data)
-              const [first, second] = checkTx.data.recipientName.split(' ')
-              const fullName = first as string + second as string
-              seUserName(fullName)
-              setTxCode(checkTx.data.thirdPartyTransactionCode)
-              setTxChannel(checkTx.data.destinationChannel)
-              setAmount(checkTx.data.transactionAmount)
-              setTransactionState("Transaction sent🎉")
-            } else if (!checkTx.data.success && retryCount < 2) {
-              console.log("Not found, going for second retry")
-              setTimeout(() => checkStatus(retryCount + 1), 2000);
-            } else if (!checkTx.data.success) {
-              bottomSheetRef2.current?.close();
-              Alert.alert("Oops😕", `${checkTx.data.message}`)
-            }
-          };
-
-          setTimeout(() => checkStatus(), 2500);
-        }
-
-      } catch (err) {
-        console.log('error is', err)
-        setSend(false)
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", `Something went wrong, please try again`)
-      }
-      finally {
-        setSend(false)
-      }
-    }
-
-
-    else if (source === 'tillnumber') {
-      // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-      // console.log('tillnumber')
-
-      if (Number(inputValue) < 10) {
+      if (inputValue === "") {
         setError(true)
-        setErrorDescription("Minimum amount is Ksh 10")
+        setErrorDescription('Enter a valid amount')
         return;
       }
-      const success = await handleFingerprintScan()
-      if(!success){
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
-        return;
-      }
-      setSend(true)
-      try {
-        bottomSheetRef2.current?.snapToIndex(0);
-
-        const chainId = 1
-        const tokenName = activeToken.token.toUpperCase()
-        const networkCode = "Mpesa"
-        const res = await BuyGoods(jwtTokens, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
-        // console.log('<---Buy goods response is--->', res)
-        if (res.error) {
-          bottomSheetRef2.current?.close();
-          setError(true)
-          setErrorDescription(res.msg)
-          // console.log(res.msg)
-          return;
-        }
-        if (!res.response.status) {
-          bottomSheetRef2.current?.close();
-          setError(true)
-          setErrorDescription(res.response.detail)
-          return;
-        }
-
-        if (res.message === "Processing" && res.response.status) {
-          setTransactionState("Processing...");
-          const merchantRequestID: string = res.response.OriginatorConversationID;
-
-          const checkStatus = async (retryCount = 0) => {
-            const checkTx = await CheckTransactionStatus(merchantRequestID);
-            // console.log("checkTx--->", checkTx);
-
-            if (checkTx.data.txHash) {
-              // console.log("Check payment success status data-->", checkTx.data);
-              seUserName(checkTx.data.recipientAccountNumber)
-              setTxCode(checkTx.data.thirdPartyTransactionCode);
-              setTxChannel("Buy Goods");
-              setAmount(checkTx.data.transactionAmount);
-              setTransactionState("Transaction sent🎉");
-            } else if (!checkTx.data.success && retryCount < 2) {
-              console.log("Not found, going for second retry")
-              setTimeout(() => checkStatus(retryCount + 1), 2000);
-            } else if (!checkTx.data.success) {
-              bottomSheetRef2.current?.close();
-              Alert.alert("Oops😕", `${checkTx.data.message}`);
-            }
-          };
-
-          setTimeout(() => checkStatus(), 3000);
-        }
-
-      }
-      catch (err) {
-        console.log('error is', err)
-        setSend(false)
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", `Something went wrong, please try again`)
-      }
-      finally {
-        setSend(false)
-      }
-    }
-
-
-    else if (source === 'paybillaccountnumber') {
-      // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-      // console.log('paybill')
-
-      if (Number(inputValue) < 10) {
+      if (Number(inputValue) <= 0) {
         setError(true)
-        setErrorDescription("Minimum amount is Ksh 10")
+        setErrorDescription('Enter a valid amount')
         return;
       }
-      const success = await handleFingerprintScan()
-      if(!success){
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+
+      if (activeToken.ksh - parseFloat(inputValue) < 0) {
+        setError(true)
+        setErrorDescription('Insufficient funds')
         return;
       }
-      setSend(true)
-      try {
-        bottomSheetRef2.current?.snapToIndex(0);
 
-        const chainId = 1
-        const tokenName = activeToken.token.toUpperCase()
-        const networkCode = "Mpesa"
-        const res = await PayBill(jwtTokens, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
-  
-        if (res.error) {
-          bottomSheetRef2.current?.close();
+
+      if (source === 'contacts' || source === "sendcrypto") {
+        const conversionRate = await getConversionRates()
+        const inputValueFloat = parseFloat(inputValue)
+        let conversionToUsd: number
+        if (activeToken.token === "CKES") {
+          conversionToUsd = inputValueFloat
+        }
+        else {
+          conversionToUsd = inputValueFloat * conversionRate.data.usd
+        }
+        // console.log("inputValueFloat --->", typeof inputValueFloat)
+        // console.log("conversionToUsd --->", typeof conversionToUsd)
+        // console.log("active token --->", activeToken.token)
+        const txFees = await calculateTransactionFee(inputValue)
+        if (!txFees || !conversionRate.data.usd) {
           setError(true)
-          setErrorDescription(res.msg)
-          // console.log(res.msg)
+          setErrorDescription('Something went wrong, try again')
           return;
         }
-        if (!res.response.status) {
-          bottomSheetRef2.current?.close();
+        // const inputValueFloat = parseFloat(inputValue)
+        const totalDeductables = txFees.totalFee.gasFeeinKes + txFees.totalFee.serviceFeeinKes
+        const remainingAmount = Number(activeToken.ksh) - (inputValueFloat + totalDeductables);
+
+        if (remainingAmount < 0) {
           setError(true)
-          setErrorDescription(res.response.detail)
+          setErrorDescription(`Not enough balance left for Ksh ${totalDeductables.toFixed(2)} fee`)
           return;
         }
 
-        if (res.message === "Processing" && res.response.status) {
-          setTransactionState("Processing...");
-          const merchantRequestID: string = res.response.OriginatorConversationID;
-
-          const checkStatus = async (retryCount = 0) => {
-            const checkTx = await CheckTransactionStatus(merchantRequestID);
-            // console.log("checkTx--->", checkTx);
-
-            if (checkTx.data.txHash) {
-              // console.log("Check payment success status data-->", checkTx.data);
-              seUserName(checkTx.data.recipientAccountNumber)
-              setTxCode(checkTx.data.thirdPartyTransactionCode);
-              setTxChannel("Paybill");
-              setAmount(checkTx.data.transactionAmount);
-              setTransactionState("Transaction sent🎉");
-            } else if (!checkTx.data.success && retryCount < 2) {
-              console.log("Not found, going for second retry")
-              setTimeout(() => checkStatus(retryCount + 1), 2000);
-            } else if (!checkTx.data.success) {
-              bottomSheetRef2.current?.close();
-              Alert.alert("Oops😕", `${checkTx.data.message}`);
-            }
-          };
-
-          setTimeout(() => checkStatus(), 3000);
+        route.push({
+          pathname: '/optionalmessage',
+          params: {
+            name: name || recipient_address,
+            phoneNumber,
+            amount: inputValueFloat,
+            conversionToUsd,
+            token: activeToken.token,
+            recipient_address,
+            gasFees: txFees.totalFee.gasFeeinKes,
+            serviceFees: txFees.totalFee.serviceFeeinKes
+          }
+        });
+      }
+      else if (source === 'sendmoney') {
+        if (Number(inputValue) < 10) {
+          setError(true)
+          setErrorDescription("Minimum amount is Ksh 10")
+          return;
         }
+        const success = await handleFingerprintScan()
+        if (!success) {
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          return;
+        }
+        setSend(true)
+        try {
+          bottomSheetRef2.current?.snapToIndex(0);
 
+          const chainId = 1
+          const tokenName = activeToken.token
+          const channel = "Mpesa"
+          const phonenumber = normalizePhoneNumber(phoneNumber as string)
+          const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
+          // console.log('send money response is', res)
+          if (res.error) {
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.msg)
+            console.log(res.msg)
+            return;
+          }
+          if (res.message === "Processing") {
+            setTransactionState("Processing...")
+            const merchantRequestID: string = res.response.OriginatorConversationID;
+            // setTimeout(async () => {
+            //   const checkTx = await CheckTransactionStatus(merchantRequestID)
+            //   // console.log("checkTx--->", checkTx)
+            //   if (checkTx.data.txHash) {
+            //     // console.log("Check response data", checkTx.data)
+            //     const [first, second] = checkTx.data.recipientName.split(' ')
+            //     const fullName = first as string + second as string
+            //     seUserName(fullName)
+            //     setTxCode(checkTx.data.thirdPartyTransactionCode)
+            //     setTxChannel(checkTx.data.destinationChannel)
+            //     setAmount(checkTx.data.transactionAmount)
+            //     setTransactionState("Transaction sent🎉")
+            //   }
+            //   else if (!checkTx.data.success) {
+            //     bottomSheetRef2.current?.close();
+            //     Alert.alert("Oops😕", `${checkTx.data.message}`)
+            //   }
+            // }, 2500)
+
+
+            const checkStatus = async (retryCount = 0) => {
+              const checkTx = await CheckTransactionStatus(merchantRequestID);
+              // console.log("checkTx--->", checkTx);
+
+              if (checkTx.data.txHash) {
+                // console.log("Check response data", checkTx.data)
+                const [first, second] = checkTx.data.recipientName.split(' ')
+                const fullName = first as string + second as string
+                seUserName(fullName)
+                setTxCode(checkTx.data.thirdPartyTransactionCode)
+                setTxChannel(checkTx.data.destinationChannel)
+                setAmount(checkTx.data.transactionAmount)
+                setTransactionState("Transaction sent🎉")
+              } else if (!checkTx.data.success && retryCount < 2) {
+                console.log("Not found, going for second retry")
+                setTimeout(() => checkStatus(retryCount + 1), 2000);
+              } else if (!checkTx.data.success) {
+                bottomSheetRef2.current?.close();
+                Alert.alert("Oops😕", `${checkTx.data.message}`)
+              }
+            };
+
+            setTimeout(() => checkStatus(), 2500);
+          }
+
+        } catch (err) {
+          console.log('error is', err)
+          setSend(false)
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", `Something went wrong, please try again`)
+        }
+        finally {
+          setSend(false)
+        }
       }
-      catch (err) {
-        console.log('error is', err)
-        setSend(false)
-        bottomSheetRef2.current?.close();
-        Alert.alert("Oops😕", `Something went wrong, please try again`)
+
+
+      else if (source === 'tillnumber') {
+        // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
+        // console.log('tillnumber')
+
+        if (Number(inputValue) < 10) {
+          setError(true)
+          setErrorDescription("Minimum amount is Ksh 10")
+          return;
+        }
+        const success = await handleFingerprintScan()
+        if (!success) {
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          return;
+        }
+        setSend(true)
+        try {
+          bottomSheetRef2.current?.snapToIndex(0);
+
+          const chainId = 1
+          const tokenName = activeToken.token.toUpperCase()
+          const networkCode = "Mpesa"
+          const res = await BuyGoods(jwtTokens, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
+          // console.log('<---Buy goods response is--->', res)
+          if (res.error) {
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.msg)
+            // console.log(res.msg)
+            return;
+          }
+          if (!res.response.status) {
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.response.detail)
+            return;
+          }
+
+          if (res.message === "Processing" && res.response.status) {
+            setTransactionState("Processing...");
+            const merchantRequestID: string = res.response.OriginatorConversationID;
+
+            const checkStatus = async (retryCount = 0) => {
+              const checkTx = await CheckTransactionStatus(merchantRequestID);
+              // console.log("checkTx--->", checkTx);
+
+              if (checkTx.data.txHash) {
+                // console.log("Check payment success status data-->", checkTx.data);
+                seUserName(checkTx.data.recipientAccountNumber)
+                setTxCode(checkTx.data.thirdPartyTransactionCode);
+                setTxChannel("Buy Goods");
+                setAmount(checkTx.data.transactionAmount);
+                setTransactionState("Transaction sent🎉");
+              } else if (!checkTx.data.success && retryCount < 2) {
+                console.log("Not found, going for second retry")
+                setTimeout(() => checkStatus(retryCount + 1), 2000);
+              } else if (!checkTx.data.success) {
+                bottomSheetRef2.current?.close();
+                Alert.alert("Oops😕", `${checkTx.data.message}`);
+              }
+            };
+
+            setTimeout(() => checkStatus(), 3000);
+          }
+
+        }
+        catch (err) {
+          console.log('error is', err)
+          setSend(false)
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", `Something went wrong, please try again`)
+        }
+        finally {
+          setSend(false)
+        }
       }
-      finally {
-        setSend(false)
+
+
+      else if (source === 'paybillaccountnumber') {
+        // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
+        // console.log('paybill')
+
+        if (Number(inputValue) < 10) {
+          setError(true)
+          setErrorDescription("Minimum amount is Ksh 10")
+          return;
+        }
+        const success = await handleFingerprintScan()
+        if (!success) {
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          return;
+        }
+        setSend(true)
+        try {
+          bottomSheetRef2.current?.snapToIndex(0);
+
+          const chainId = 1
+          const tokenName = activeToken.token.toUpperCase()
+          const networkCode = "Mpesa"
+          const res = await PayBill(jwtTokens, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
+
+          if (res.error) {
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.msg)
+            // console.log(res.msg)
+            return;
+          }
+          if (!res.response.status) {
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.response.detail)
+            return;
+          }
+
+          if (res.message === "Processing" && res.response.status) {
+            setTransactionState("Processing...");
+            const merchantRequestID: string = res.response.OriginatorConversationID;
+
+            const checkStatus = async (retryCount = 0) => {
+              const checkTx = await CheckTransactionStatus(merchantRequestID);
+              // console.log("checkTx--->", checkTx);
+
+              if (checkTx.data.txHash) {
+                // console.log("Check payment success status data-->", checkTx.data);
+                seUserName(checkTx.data.recipientAccountNumber)
+                setTxCode(checkTx.data.thirdPartyTransactionCode);
+                setTxChannel("Paybill");
+                setAmount(checkTx.data.transactionAmount);
+                setTransactionState("Transaction sent🎉");
+              } else if (!checkTx.data.success && retryCount < 2) {
+                console.log("Not found, going for second retry")
+                setTimeout(() => checkStatus(retryCount + 1), 2000);
+              } else if (!checkTx.data.success) {
+                bottomSheetRef2.current?.close();
+                Alert.alert("Oops😕", `${checkTx.data.message}`);
+              }
+            };
+
+            setTimeout(() => checkStatus(), 3000);
+          }
+
+        }
+        catch (err) {
+          console.log('error is', err)
+          setSend(false)
+          bottomSheetRef2.current?.close();
+          Alert.alert("Oops😕", `Something went wrong, please try again`)
+        }
+        finally {
+          setSend(false)
+        }
       }
+    } catch (error) {
+      console.log(error)
+    }
+    finally {
+      setSend(false)
     }
 
   }
@@ -505,7 +526,7 @@ const CustomKeyboard = () => {
     updateTransactionState()
   }, [transactionState])
 
-  // console.log("transactionState-->", transactionState)
+  // console.log("active token-->", activeToken)
   // console.log("transactionLoading-->", transactionLoading)
 
 
@@ -635,7 +656,7 @@ const CustomKeyboard = () => {
                 <View style={styles.flexRow}>
                   <View style={{ marginLeft: 10 }}>
 
-                    <PrimaryFontText style={styles.name}>{ txChannel == "Buy Goods" ? "TILL:" : txChannel == "Paybill" ? "PAYBILL:" : null } {userName.toUpperCase()}</PrimaryFontText>
+                    <PrimaryFontText style={styles.name}>{txChannel == "Buy Goods" ? "TILL:" : txChannel == "Paybill" ? "PAYBILL:" : null} {userName.toUpperCase()}</PrimaryFontText>
 
                     <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
                       <PrimaryFontMedium style={styles.confirmationCode}>{txCode} </PrimaryFontMedium>
