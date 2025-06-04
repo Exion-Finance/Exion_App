@@ -62,10 +62,6 @@ export default function OptionalMessage() {
 
                 if (token) {
                     const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
-                    // console.log(amountFloat)
-                    // console.log("typeof amountFloat", typeof amountFloat)
-                    // console.log(token)
-                    // console.log("tokenId", id as number)
                     const response = await SendMoneyV1({
                         token: token,
                         chainId: 1,
@@ -73,7 +69,7 @@ export default function OptionalMessage() {
                         recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
                         amount: Number(amountFloat)
                     });
-                    console.log("<---response--->", response)
+                    // console.log("<---response--->", response)
 
                     if (response && !response.error) {
                         setResponseReceived(true);
@@ -90,9 +86,6 @@ export default function OptionalMessage() {
             } catch (error) {
                 bottomSheetRef.current?.close();
                 Alert.alert("Oops😕", "An error occurred while sending money, please try again");
-            }
-            finally{
-                bottomSheetRef.current?.close();
             }
         }
         else {
