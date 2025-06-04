@@ -313,15 +313,6 @@
                 "status": true
             }
         },
-
-
-
-
-
-
-
-
-
         [
             {
                 "title": "Today",
@@ -460,6 +451,27 @@
                     }
                 ]
             }
-        ]
+        ],
+        {
+            "0": {
+                "data": [
+                    [Object],
+                    [Object],
+                    [Object],
+                    [Object]
+                ],
+                "title": "30/5/2025"
+            },
+            "1": {
+                "data": [
+                    [Object]
+                ],
+                "title": "29/5/2025"
+            },
+            "_persist": {
+                "rehydrated": true,
+                "version": -1
+            }
+        }
     ]
 }

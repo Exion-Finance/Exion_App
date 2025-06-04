@@ -130,3 +130,7 @@ export interface Section {
   title: string
   data: MobileTransaction[]
 }
+
+export type MobileTransactionData = {
+  [date: string]: MobileTransaction[];
+};
