@@ -28,7 +28,17 @@ import * as SecureStore from "expo-secure-store"
 import { getBalances, fetchMobileTransactions, transactionHistory } from '../Apiconfig/api';
 import { useQuery } from '@tanstack/react-query';
 import { userTransactions, userBalance, userTokensWithAmount } from '../hooks/query/userTransactions';
-import { updateBalance, selectUserBalance, balanceSlice, addTransaction, selectTransactions } from '../state/slices';
+import {
+  updateBalance,
+  selectUserBalance,
+  balanceSlice,
+  addTransaction,
+  selectTransactions,
+  selectMobileTransactions,
+  addMobileTransactions,
+  clearMobileTransactions,
+  mergeMobileTransactions
+} from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
 
@@ -69,7 +79,7 @@ export default function TabOneScreen() {
   const [savedUserName, setSavedUserName] = useState<string>("")
   const [isHidden, setIsHidden] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false)
-  const [mobileTransactions, setMobileTransactions] = useState<MobileTransaction[]>([])
+  const [mobileTransactions, setMobileTransactions] = useState<Section[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -80,10 +90,12 @@ export default function TabOneScreen() {
   const { userName } = useLocalSearchParams();
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
-  //const user_transactions = useSelector(selectTransactions)
+  // const user_transactions = useSelector(selectTransactions)
+  const mobile_transactions = useSelector(selectMobileTransactions)
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['60%'], []);
-
+  // console.log("<--mobile_transactions from redux--->", mobile_transactions)
+  // console.log("<--mobile_transactions from redux--->", user_transactions)
   // const {
   //   data,
   //   // isLoading,
@@ -128,12 +140,38 @@ export default function TabOneScreen() {
     }
   }, [tokensbalance]);
 
-  // useEffect(() => {
-  //   if (data) {
-  //     dispatch(addTransaction(data))
-  //   }
-
-  // }, [data, dispatch])
+  function sliceSectionsToFirstNTransactions(sections: Section[], limit: number = 5): Section[] {
+    const result: Section[] = [];
+    let count = 0;
+  
+    for (const section of sections) {
+      if (count >= limit) break;
+  
+      const remaining = limit - count;
+      const slicedData = section.data.slice(0, remaining);
+  
+      if (slicedData.length > 0) {
+        result.push({
+          title: section.title,
+          data: slicedData,
+        });
+        count += slicedData.length;
+      }
+    }
+  
+    return result;
+  }
+  
+  useEffect(() => {
+    setTimeout(() => {
+      if (mobile_transactions.length > 0) {
+        const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 5);
+        // console.log("Found in redux")
+        setMobileTransactions(firstFive)
+        setIsLoading(false)
+      }
+    }, 1500)
+  }, [])
 
   // const handleRefresh = useCallback(async () => {
   //   setRefreshing(true)
@@ -183,10 +221,16 @@ export default function TabOneScreen() {
       if (!authToken) return
       try {
         // console.log("Useeffect called-->")
-        const pageSize: number = 5;
+        const pageSize: number = 500;
         const tx = await fetchMobileTransactions(authToken, pageSize)
-        if (isMounted) {
-          setMobileTransactions(tx.data)
+        if (isMounted && tx.data) {
+          // setMobileTransactions(tx.data)
+          const fullSections = makeSections(tx.data)
+          const firstFive = sliceSectionsToFirstNTransactions(fullSections, 5);
+          setMobileTransactions(firstFive)
+          // console.log("fullSections.length in load", fullSections.length)
+          dispatch(addMobileTransactions(fullSections))
+
         }
       } catch (e: any) {
         if (isMounted) {
@@ -244,16 +288,29 @@ export default function TabOneScreen() {
   // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
   // console.log("sections-->", sections.length)
 
-  const sections = useMemo(() => {
-    if (!mobileTransactions) return [];
-    return makeSections(mobileTransactions);
-  }, [mobileTransactions]);
+  // const sections = useMemo(() => {
+  //   if (!mobileTransactions) return [];
+  //   return makeSections(mobileTransactions);
+  // }, [mobileTransactions]);
+
+  // useEffect(() => {
+  //   if (sections.length > 0) {
+  //     dispatch(mergeMobileTransactions(sections))
+  //     // dispatch(clearMobileTransactions(sections))
+  //     console.log("dispatched")
+  //     // console.log(JSON.stringify(sections, null, 2));
+  //   }
+  // }, [sections])
 
   const refetchMobileTx = async () => {
     try {
-      const pageSize: number = 5;
+      const pageSize: number = 500;
       const tx = await fetchMobileTransactions(authToken, pageSize)
-      setMobileTransactions(tx.data)
+      // setMobileTransactions(tx.data)
+      const fullSections = makeSections(tx.data)
+      console.log("fullSections.length in refetch", fullSections.length)
+      dispatch(addMobileTransactions(fullSections))
+      // console.log(tx.data)
       await refetchBalance()
 
     } catch (e: any) {
@@ -263,7 +320,6 @@ export default function TabOneScreen() {
       setIsLoading(false)
     }
   }
-
   const handleMobileTransactionsRefresh = useCallback(async () => {
     setRefreshing(true)
     await Promise.all([
@@ -316,10 +372,10 @@ export default function TabOneScreen() {
                 </View>
 
                 <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'flex-start', flexDirection: 'row' }}>
-                {/* <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15, marginBottom: 5 }}>Ksh</PrimaryFontMedium> */}
-                <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginBottom: 15 }}>
-                  {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
-                </PrimaryFontMedium>
+                  {/* <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15, marginBottom: 5 }}>Ksh</PrimaryFontMedium> */}
+                  <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginBottom: 15 }}>
+                    {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
+                  </PrimaryFontMedium>
                 </View>
 
               </View>
@@ -364,7 +420,7 @@ export default function TabOneScreen() {
       {!isLoading ?
         <View style={{ width: '100%', flex: 1 }}>
           <MobileTransactions
-            sections={sections}
+            sections={mobileTransactions}
             refreshing={refreshing}
             onRefresh={handleMobileTransactionsRefresh}
           />

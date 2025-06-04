@@ -13,7 +13,7 @@ import { Transactions as Trans, TransactionData, MobileTransaction, Section } fr
 import { TOKEN_KEY } from '../context/AuthContext';
 import { getBalances, Transactionss, transactionHistory, fetchMobileTransactions } from '../Apiconfig/api';
 import { userTransactions } from '../hooks/query/userTransactions';
-import { selectTransactions, addTransaction } from '../state/slices';
+import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
 // import { useQuery } from '@tanstack/react-query';
 
@@ -36,6 +36,7 @@ export default function Transactions() {
     const [transactionsReceived, setTransactionsReceived] = useState(false)
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
+    let mobileTx = useSelector(selectMobileTransactions)
 
     useEffect(() => {
         const token = async () => {
@@ -64,15 +65,11 @@ export default function Transactions() {
         }
     }, [data])
 
-    // useEffect(() => {
-    //     console.log("Dispatch changed useeffect")
-    //     const setNewTx = () => {
-    //         setTimeout(() => {
-    //             userTx = useSelector(selectTransactions)
-    //         }, 3000)
-    //     }
-    //     setNewTx()
-    // }, [dispatch])
+    useEffect(() => {
+        if (mobileTx.length > 0) {
+            setIsMobileTxLoading(false)
+        }
+    }, [])
 
     const handleRefresh = useCallback(async () => {
         setRefreshing(true)
@@ -83,34 +80,34 @@ export default function Transactions() {
 
 
     //Fetch Mobile Transactions
-    useEffect(() => {
-        let isMounted = true
+    // useEffect(() => {
+    //     let isMounted = true
 
-        const loadTx = async () => {
-            if (!authToken) return
-            try {
-                const pageSize: number = 500;
-                const tx = await fetchMobileTransactions(authToken, pageSize)
-                if (isMounted) {
-                    setMobileTransactions(tx.data)
-                }
-            } catch (e: any) {
-                if (isMounted) {
-                    setError(e.message || 'Failed to load transactions')
-                }
-            } finally {
-                if (isMounted) {
-                    setIsMobileTxLoading(false)
-                }
-            }
-        }
+    //     const loadTx = async () => {
+    //         if (!authToken) return
+    //         try {
+    //             const pageSize: number = 500;
+    //             const tx = await fetchMobileTransactions(authToken, pageSize)
+    //             if (isMounted) {
+    //                 setMobileTransactions(tx.data)
+    //             }
+    //         } catch (e: any) {
+    //             if (isMounted) {
+    //                 setError(e.message || 'Failed to load transactions')
+    //             }
+    //         } finally {
+    //             if (isMounted) {
+    //                 setIsMobileTxLoading(false)
+    //             }
+    //         }
+    //     }
 
-        loadTx()
+    //     loadTx()
 
-        return () => {
-            isMounted = false
-        }
-    }, [authToken])
+    //     return () => {
+    //         isMounted = false
+    //     }
+    // }, [authToken])
 
     //Helpers to parse & group mobile transactions by date
     const parseTxDate = (s: string): Date => {
@@ -147,10 +144,10 @@ export default function Transactions() {
     }
 
 
-    const sections = useMemo(() => {
-        if (!mobileTransactions) return [];
-        return makeSections(mobileTransactions);
-    }, [mobileTransactions]);
+    // const sections = useMemo(() => {
+    //     if (!mobileTransactions) return [];
+    //     return makeSections(mobileTransactions);
+    // }, [mobileTransactions]);
 
     //Memoize sections so they only recompute when mobileTransactions changes
     // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
@@ -160,7 +157,12 @@ export default function Transactions() {
         try {
             const pageSize: number = 500;
             const tx = await fetchMobileTransactions(authToken, pageSize)
-            setMobileTransactions(tx.data)
+            if (tx.data) {
+                // setMobileTransactions(tx.data)
+                const fullSections = makeSections(tx.data)
+                dispatch(addMobileTransactions(fullSections))
+            }
+
 
         } catch (e: any) {
             setError(e.message || 'Failed to load transactions')
@@ -247,7 +249,7 @@ export default function Transactions() {
                 activeTab == 'mobile' && !isMobileTxLoading ?
                     <View style={{ width: '100%', flex: 1 }}>
                         <MobileTransactions
-                            sections={sections}
+                            sections={mobileTx}
                             refreshing={refreshing}
                             onRefresh={handleMobileTransactionsRefresh}
                         />

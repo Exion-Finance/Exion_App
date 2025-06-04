@@ -51,7 +51,7 @@ export default function OptionalMessage() {
         }
         return null;
     }
-    console.log("tokenId", id as number)
+    // console.log("tokenId", id as number)
 
     const handleSend = async () => {
         const success = await handleFingerprintScan()
@@ -73,7 +73,7 @@ export default function OptionalMessage() {
                         recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
                         amount: Number(amountFloat)
                     });
-                    // console.log("<---response--->", response)
+                    console.log("<---response--->", response)
 
                     if (response && !response.error) {
                         setResponseReceived(true);
