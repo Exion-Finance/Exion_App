@@ -67,10 +67,6 @@ const CustomKeyboard = () => {
   const [txChannel, setTxChannel] = useState<string>("")
   const [amount, setAmount] = useState<number>(0)
 
-  // const handleSheetChanges = useCallback((index: number) => {
-  //   setIsSheetVisible(index !== -1);
-  // }, []);
-
   let textOnButton
   if (source === 'contacts' || source === "sendcrypto") {
     textOnButton = "NEXT"
@@ -149,9 +145,6 @@ const CustomKeyboard = () => {
         else {
           conversionToUsd = inputValueFloat * conversionRate.data.usd
         }
-        // console.log("inputValueFloat --->", typeof inputValueFloat)
-        // console.log("conversionToUsd --->", typeof conversionToUsd)
-        // console.log("active token --->", activeToken.token)
         const txFees = await calculateTransactionFee(inputValue)
         if (!txFees || !conversionRate.data.usd) {
           setError(true)
@@ -214,25 +207,6 @@ const CustomKeyboard = () => {
           if (res.message === "Processing") {
             setTransactionState("Processing...")
             const merchantRequestID: string = res.response.OriginatorConversationID;
-            // setTimeout(async () => {
-            //   const checkTx = await CheckTransactionStatus(merchantRequestID)
-            //   // console.log("checkTx--->", checkTx)
-            //   if (checkTx.data.txHash) {
-            //     // console.log("Check response data", checkTx.data)
-            //     const [first, second] = checkTx.data.recipientName.split(' ')
-            //     const fullName = first as string + second as string
-            //     seUserName(fullName)
-            //     setTxCode(checkTx.data.thirdPartyTransactionCode)
-            //     setTxChannel(checkTx.data.destinationChannel)
-            //     setAmount(checkTx.data.transactionAmount)
-            //     setTransactionState("Transaction sent🎉")
-            //   }
-            //   else if (!checkTx.data.success) {
-            //     bottomSheetRef2.current?.close();
-            //     Alert.alert("Oops😕", `${checkTx.data.message}`)
-            //   }
-            // }, 2500)
-
 
             const checkStatus = async (retryCount = 0) => {
               const checkTx = await CheckTransactionStatus(merchantRequestID);
@@ -241,7 +215,7 @@ const CustomKeyboard = () => {
               if (checkTx.data.txHash) {
                 // console.log("Check response data", checkTx.data)
                 const [first, second] = checkTx.data.recipientName.split(' ')
-                const fullName = first as string + second as string
+                const fullName = first as string + " " + second as string
                 seUserName(fullName)
                 setTxCode(checkTx.data.thirdPartyTransactionCode)
                 setTxChannel(checkTx.data.destinationChannel)
@@ -350,8 +324,6 @@ const CustomKeyboard = () => {
 
 
       else if (source === 'paybillaccountnumber') {
-        // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-        // console.log('paybill')
 
         if (Number(inputValue) < 10) {
           setError(true)
