@@ -308,7 +308,7 @@ export default function TabOneScreen() {
       const tx = await fetchMobileTransactions(authToken, pageSize)
       // setMobileTransactions(tx.data)
       const fullSections = makeSections(tx.data)
-      console.log("fullSections.length in refetch", fullSections.length)
+      // console.log("fullSections.length in refetch", fullSections.length)
       dispatch(addMobileTransactions(fullSections))
       // console.log(tx.data)
       await refetchBalance()

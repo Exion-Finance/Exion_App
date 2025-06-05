@@ -19,7 +19,11 @@ type ContactSection = {
     data: { name: string; phoneNumber: string }[];
 };
 
-export default function ContactsList() {
+type Props = {
+    from: string
+}
+
+export default function ContactsList({ from }: Props) {
     const [sections, setSections] = useState<ContactSection[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [filteredSections, setFilteredSections] = useState<ContactSection[]>([]);
@@ -119,6 +123,22 @@ export default function ContactsList() {
         }
         return phoneNumber;
     };
+
+    const handleSendMoneyPhoneNumberPrefix = (phoneNumber: string) => {
+        if (phoneNumber.startsWith('07')) {
+            return phoneNumber.replace(/^0/, '254');
+        }
+        if (phoneNumber.startsWith('01')) {
+            return phoneNumber.replace(/^0/, '254');
+        }
+        if (phoneNumber.startsWith('+254')) {
+            return phoneNumber.slice(1);
+        }
+        if (phoneNumber.startsWith('254')) {
+            return phoneNumber;
+        }
+        return phoneNumber;
+    };
     //to be removed the function "removeCountryCode when phone number get updated to country code format"
     const removeCountryCode = (phoneNumber: string): string => {
         return phoneNumber.replace(/^\+254/, '0'); // Removes the +254 and replaces with 0
@@ -128,7 +148,20 @@ export default function ContactsList() {
         setContactClicked(phoneNumber);
         const formattedNumber = handlePhoneNumberCleanup(phoneNumber);
         const cleanNumber = handlePhoneNumberPrefix(formattedNumber);
+        const sendMoneyNumber = handleSendMoneyPhoneNumberPrefix(formattedNumber)
         try {
+            if(from === 'sendmoney'){
+                console.log(sendMoneyNumber)
+                route.push({
+                    pathname: '/keyboard',
+                    params: {
+                        phoneNumber: sendMoneyNumber,
+                        source: 'sendmoney'
+                    }
+                });
+                return;
+            }
+
             const res = await checkPhoneNumber(cleanNumber);
             if (res.status === 200) {
                 route.push({
@@ -163,9 +196,9 @@ export default function ContactsList() {
     };
 
     return (
-        <View style={[styles.container, reusableStyle.paddingContainer]}>
+        <View style={[styles.container, from === "contacts" ? reusableStyle.paddingContainer : reusableStyle.width100]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={styles.searchContainer}>
+                <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%"}]}>
                     <Ionicons name="search" size={20} color="#DADADA" style={styles.searchIcon} />
                     <TextInput
                         style={[styles.input, { fontFamily: 'DMSansRegular' }]}
@@ -175,7 +208,7 @@ export default function ContactsList() {
                         onChangeText={handleSearch}
                     />
                 </View>
-                <TouchableOpacity style={styles.qrButton} onPress={() => route.push('/sendcrypto')}>
+                <TouchableOpacity style={[styles.qrButton, { display: from === "contacts" ? "flex" : "none"}]} onPress={() => route.push('/sendcrypto')}>
                     <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
                 </TouchableOpacity>
             </View>
@@ -222,7 +255,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 6,
         position: 'relative',
-        width: '83%'
     },
     searchIcon: {
         marginRight: 10,

@@ -31,13 +31,8 @@ const CryptoScreen: React.FC = () => {
     const [userName, setUserName] = useState<string>("")
 
     const route = useRouter()
-
-    // const walletAddress = "0x1234567890abcdef1234567890abcdef12345678";
-    // const username = "George";
-
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-    // Define the snap points (height) for the Bottom Sheet
     const snapPoints = useMemo(() => ['72%'], []);
 
     //bottomSheetRef.current?.close();  // Close the BottomSheet after selection
@@ -45,6 +40,7 @@ const CryptoScreen: React.FC = () => {
     const handleEnterWalletAddress = () => {
         bottomSheetRef.current?.expand()
     }
+
 
     useEffect(() => {
         const getCameraPermissions = async () => {
@@ -59,28 +55,40 @@ const CryptoScreen: React.FC = () => {
                 setUserName(parsedToken.data.userName)
             }
         };
-
         getCameraPermissions();
     }, []);
 
     const handleBarcodeScanned = ({ type, data }: any) => {
-        setScanned(true);
-        alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+        try {
+            setScanned(true);
+            if (data.length === 42) {
+                route.push({
+                    pathname: '/keyboard',
+                    params: {
+                        recipient_address: data,
+                        source: 'sendcrypto',
+                    },
+                });
+            }
+            else Alert.alert("Oops😕", 'Could not scan this Qr Code');
+        } catch (error) {
+            Alert.alert("Oops😕", 'Could not scan Qr Code');
+        }
     };
 
     if (hasPermission === null) {
         return <Text>Requesting for camera permission</Text>;
     }
     if (hasPermission === false) {
-        return <Text>No access to camera</Text>;
+        // getCameraPermissions();
+        // return Alert.alert("Oops😕", 'Permission required to access camera, please change it in settings');
     }
 
     const copyToClipboard = () => {
         Clipboard.setStringAsync(walletAddress as string);
 
         if (Platform.OS === 'android') {
-            ToastAndroid.show('Text copied to clipboard!',
-                ToastAndroid.SHORT);
+            ToastAndroid.show('Text copied to clipboard!', ToastAndroid.SHORT);
         } else if (Platform.OS === 'ios') {
             alert('Text copied to clipboard!');
         }

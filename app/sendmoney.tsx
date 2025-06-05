@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
+import ContactsList from '@/components/Contacts';
 import reusableStyles from '@/constants/ReusableStyles';
 import Feather from '@expo/vector-icons/Feather';
 import NavBar from '@/components/NavBar';
@@ -10,9 +11,12 @@ import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { useRouter } from 'expo-router';
 
 export default function SendMoney() {
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [error, setError] = useState(false);
-    const [errorDescription, setErrorDescription] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState<string>('');
+    const [error, setError] = useState<boolean>(false);
+    const [errorDescription, setErrorDescription] = useState<string>('');
+    const [showContacts, setShowContacts] = useState<boolean>(false);
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(0)).current;
 
     const route = useRouter()
 
@@ -62,6 +66,31 @@ export default function SendMoney() {
         });
     };
 
+    const toggleContacts = () => {
+        const toValue = showContacts ? 0 : 1;
+
+        Animated.timing(rotateAnim, {
+            toValue,
+            duration: 200,
+            useNativeDriver: true,
+        }).start();
+
+        Animated.timing(slideAnim, {
+            toValue,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+
+        setShowContacts(!showContacts);
+    };
+
+    const rotate = rotateAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '180deg'],
+    });
+
+
+
     return (
         <View style={styles.container}>
             <NavBar title='Send money' onBackPress={() => route.push('/makepayment')} />
@@ -75,16 +104,36 @@ export default function SendMoney() {
                         errorDescription={errorDescription}
                         keyboardType='numeric'
                     />
-                    {/* <TouchableOpacity>
+
+                    <TouchableOpacity style={styles.chooseContainer} onPress={toggleContacts}>
                         <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
-                    </TouchableOpacity> */}
-                    <TouchableOpacity style={styles.chooseContainer}>
-                        <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
-                        <Feather name="chevron-down" size={18} color="grey" style={{marginTop: 3}}/>
+                        <Animated.View style={{ transform: [{ rotate }] }}>
+                            <Feather name="chevron-down" size={18} color="grey" style={{  marginTop: showContacts ? -2 : 3 }} />
+                        </Animated.View>
                     </TouchableOpacity>
+
+                    <Animated.View
+                        style={{
+                            transform: [
+                                {
+                                    translateY: slideAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [300, 0], // slide in from bottom
+                                    }),
+                                },
+                            ],
+                            opacity: slideAnim,
+                            height: showContacts ? '100%' : 0,
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <View style={{ backgroundColor: '#f0f0f0', marginTop: 10, flex: 1 }}>
+                            <ContactsList from='sendmoney'/>
+                        </View>
+                    </Animated.View>
                 </View>
 
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+               <TouchableOpacity style={[styles.button, { opacity: showContacts ? 0 : 1 }]} onPress={handleSubmit}>
                     <PrimaryFontBold style={styles.text}>Continue</PrimaryFontBold>
                 </TouchableOpacity>
             </View>
@@ -111,12 +160,11 @@ const styles = StyleSheet.create({
     text: {
         color: '#fff',
         fontSize: 19,
-        // fontFamily: 'DMSansMedium'
     },
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 40
+        paddingBottom: 40,
     },
     chooseText: {
         color: 'gray',

@@ -11,7 +11,7 @@ const router = useRouter()
     <View style={{backgroundColor: 'white', flex: 1}}>
         <StatusBar style={'dark'}/>
         <NavBar title='Who are you sending to?' onBackPress={() => router.push("/(tabs)")} />
-        <ContactsList/>
+        <ContactsList from='contacts'/>
     </View>
   );
 }
