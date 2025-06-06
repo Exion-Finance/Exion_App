@@ -53,7 +53,7 @@ const CustomKeyboard = () => {
     ksh: 0
   });
   const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address } = useLocalSearchParams();
-  const [tokens, setTokens] = useState<ResponseBalance>({ balance: {} })
+  const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [selectedTokenId, setSelectedTokenId] = useState<number>(0);
   const [jwtTokens, setJwtToken] = useState<string>("")
   const [send, setSend] = useState<boolean>(false)
