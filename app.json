@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Exion",
-    "slug": "Exion",
+    "slug": "exion",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -46,7 +46,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "4ff8525d-a138-42f0-ab60-c82b2f6d730e"
+        "projectId": "1eeb1b75-8586-4b6a-9908-34d99ab2d618"
       }
     }
   }
