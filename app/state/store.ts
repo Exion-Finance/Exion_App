@@ -23,15 +23,23 @@ const mobileTransactions = {
   whitelist: ["value"]
 }
 
+const tokenBalances = {
+  key: "tokenBalances",
+  storage: AsyncStorage,
+  whitelist: ["value"]
+}
+
 const persistedBalanceReducer = persistReducer(balancePersitConfig, rootReducer.balance)
 const persistedUserTransactionsReducer = persistReducer(userTransactions, rootReducer.transactions)
 const persistedMobileTransactionsReducer = persistReducer(mobileTransactions, rootReducer.mobileTransactions)
+const persistedTokenBalancesReducer = persistReducer(tokenBalances, rootReducer.tokenBalances)
 
 const store = configureStore({
   reducer: {
     balance: persistedBalanceReducer,
     transactions: persistedUserTransactionsReducer,
-    mobileTransactions: persistedMobileTransactionsReducer
+    mobileTransactions: persistedMobileTransactionsReducer,
+    tokenBalances: persistedTokenBalancesReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

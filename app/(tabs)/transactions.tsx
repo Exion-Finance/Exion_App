@@ -13,7 +13,7 @@ import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import * as SecureStore from "expo-secure-store"
-import { Transactions as Trans, TransactionData, MobileTransaction, Section } from '@/types/datatypes';
+import { Transactions as Trans, MobileTransaction, Section } from '@/types/datatypes';
 import { TOKEN_KEY } from '../context/AuthContext';
 import { getBalances, Transactionss, transactionHistory, fetchMobileTransactions } from '../Apiconfig/api';
 import { userTransactions } from '../hooks/query/userTransactions';
@@ -26,19 +26,12 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 export default function Transactions() {
     const [transactions, setTransactions] = useState(useSelector(selectTransactions))
-    const [newTransaction, setNewTransaction] = useState<TransactionData>({})
     const [authToken, setAuthToken] = useState<string>("");
     const [refreshing, setRefreshing] = useState<boolean>(false)
-    // const { data, isLoading, isError, error } = userTransactions(authToken);
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
-    const [isLoading, setIsLoading] = useState(false)
-    // const [userTx, setUserTx] = useState(useSelector(selectTransactions))
-    const [mobileTransactions, setMobileTransactions] = useState<MobileTransaction[]>([])
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
-
-    const [transactionsReceived, setTransactionsReceived] = useState(false)
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
     let mobileTx = useSelector(selectMobileTransactions)
@@ -243,7 +236,7 @@ export default function Transactions() {
                         <ActivityIndicator size="small" color='#00C48F' />
                     </View>}
 
-                    
+
             <BottomSheetBackdrop animatedIndex={animatedTxIndex} />
             <MobileTxReceipt
                 sheetRef={bottomSheetTxRef}
