@@ -14,7 +14,7 @@ import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import SecondaryButton from '@/components/SecondaryButton';
-import GroupedTransactions from '@/components/Transactions';
+import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { MobileTransactions } from '@/components/MobileTransactions';
 import { Href } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import BottomSheet from '@gorhom/bottom-sheet';
 import TokenList from '@/components/TokenList';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSharedValue } from 'react-native-reanimated';
+import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { MobileTransaction, Section, Transactions, TransactionData, Transaction } from '@/types/datatypes';
 import { TOKEN_KEY } from '../context/AuthContext';
 import * as SecureStore from "expo-secure-store"
@@ -32,12 +34,9 @@ import {
   updateBalance,
   selectUserBalance,
   balanceSlice,
-  addTransaction,
-  selectTransactions,
   selectMobileTransactions,
   addMobileTransactions,
-  clearMobileTransactions,
-  mergeMobileTransactions
+  clearMobileTransactions
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -75,13 +74,13 @@ export default function TabOneScreen() {
   const [newTransaction, setNewTransaction] = useState<TransactionData>({})
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {} })
   const [authToken, setAuthToken] = useState<string>("");
-  const [transactionsReceived, setTransactionsReceived] = useState(false)
   const [savedUserName, setSavedUserName] = useState<string>("")
   const [isHidden, setIsHidden] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [mobileTransactions, setMobileTransactions] = useState<Section[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
 
   const toggleVisibility = () => {
     setIsHidden((prev) => !prev);
@@ -90,12 +89,13 @@ export default function TabOneScreen() {
   const { userName } = useLocalSearchParams();
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
-  // const user_transactions = useSelector(selectTransactions)
   const mobile_transactions = useSelector(selectMobileTransactions)
+
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetTxRef = useRef<BottomSheet>(null);
+  const animatedTxIndex = useSharedValue(-1);
+
   const snapPoints = useMemo(() => ['60%'], []);
-  // console.log("<--mobile_transactions from redux--->", mobile_transactions)
-  // console.log("<--mobile_transactions from redux--->", user_transactions)
   // const {
   //   data,
   //   // isLoading,
@@ -103,7 +103,10 @@ export default function TabOneScreen() {
   // } = userTransactions(authToken);
   //const { data:tokensbalance, isLoading:balLoading, isError:balError, error:balerror } = userBalance(authToken);
 
-
+  const handleSelectTransaction = (tx: MobileTransaction) => {
+    setSelectedTx(tx);
+    bottomSheetTxRef.current?.expand();
+  };
 
   //fetch user balance
   const fetchBalance = async (jwttoken: string): Promise<BalanceData> => {
@@ -143,13 +146,13 @@ export default function TabOneScreen() {
   function sliceSectionsToFirstNTransactions(sections: Section[], limit: number = 5): Section[] {
     const result: Section[] = [];
     let count = 0;
-  
+
     for (const section of sections) {
       if (count >= limit) break;
-  
+
       const remaining = limit - count;
       const slicedData = section.data.slice(0, remaining);
-  
+
       if (slicedData.length > 0) {
         result.push({
           title: section.title,
@@ -158,10 +161,10 @@ export default function TabOneScreen() {
         count += slicedData.length;
       }
     }
-  
+
     return result;
   }
-  
+
   useEffect(() => {
     setTimeout(() => {
       if (mobile_transactions.length > 0) {
@@ -170,7 +173,7 @@ export default function TabOneScreen() {
         setMobileTransactions(firstFive)
         setIsLoading(false)
       }
-    }, 1500)
+    }, 1000)
   }, [])
 
   // const handleRefresh = useCallback(async () => {
@@ -224,7 +227,6 @@ export default function TabOneScreen() {
         const pageSize: number = 500;
         const tx = await fetchMobileTransactions(authToken, pageSize)
         if (isMounted && tx.data) {
-          // setMobileTransactions(tx.data)
           const fullSections = makeSections(tx.data)
           const firstFive = sliceSectionsToFirstNTransactions(fullSections, 5);
           setMobileTransactions(firstFive)
@@ -293,24 +295,12 @@ export default function TabOneScreen() {
   //   return makeSections(mobileTransactions);
   // }, [mobileTransactions]);
 
-  // useEffect(() => {
-  //   if (sections.length > 0) {
-  //     dispatch(mergeMobileTransactions(sections))
-  //     // dispatch(clearMobileTransactions(sections))
-  //     console.log("dispatched")
-  //     // console.log(JSON.stringify(sections, null, 2));
-  //   }
-  // }, [sections])
-
   const refetchMobileTx = async () => {
     try {
       const pageSize: number = 500;
       const tx = await fetchMobileTransactions(authToken, pageSize)
-      // setMobileTransactions(tx.data)
       const fullSections = makeSections(tx.data)
-      // console.log("fullSections.length in refetch", fullSections.length)
       dispatch(addMobileTransactions(fullSections))
-      // console.log(tx.data)
       await refetchBalance()
 
     } catch (e: any) {
@@ -423,6 +413,7 @@ export default function TabOneScreen() {
             sections={mobileTransactions}
             refreshing={refreshing}
             onRefresh={handleMobileTransactionsRefresh}
+            onSelectTransaction={handleSelectTransaction}
           />
         </View>
 
@@ -430,6 +421,13 @@ export default function TabOneScreen() {
         <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
           <ActivityIndicator size="small" color='#00C48F' />
         </View>}
+
+      <BottomSheetBackdrop animatedIndex={animatedTxIndex} />
+      <MobileTxReceipt
+        sheetRef={bottomSheetTxRef}
+        transaction={selectedTx}
+        animatedIndex={animatedTxIndex}
+      />
 
       <BottomSheet
         ref={bottomSheetRef}

@@ -141,7 +141,7 @@ const CustomKeyboard = () => {
         let conversionToUsd: number
         if (activeToken.token === "CKES") {
           conversionToUsd = inputValueFloat
-        }
+        }        
         else {
           conversionToUsd = inputValueFloat * conversionRate.data.usd
         }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, StatusBar as RNStatusBar, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import GroupedTransactions from '@/components/Transactions';
@@ -8,6 +8,10 @@ import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import SecondaryButton from '@/components/SecondaryButton';
 import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import BottomSheet from '@gorhom/bottom-sheet';
+import MobileTxReceipt from '@/components/MobileTxReceipt';
+import { useSharedValue } from 'react-native-reanimated';
+import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import * as SecureStore from "expo-secure-store"
 import { Transactions as Trans, TransactionData, MobileTransaction, Section } from '@/types/datatypes';
 import { TOKEN_KEY } from '../context/AuthContext';
@@ -32,11 +36,15 @@ export default function Transactions() {
     const [mobileTransactions, setMobileTransactions] = useState<MobileTransaction[]>([])
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
+    const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
 
     const [transactionsReceived, setTransactionsReceived] = useState(false)
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
     let mobileTx = useSelector(selectMobileTransactions)
+
+    const bottomSheetTxRef = useRef<BottomSheet>(null);
+    const animatedTxIndex = useSharedValue(-1);
 
     useEffect(() => {
         const token = async () => {
@@ -76,38 +84,6 @@ export default function Transactions() {
         setTransactions(userTx)
         setRefreshing(false)
     }, [])
-
-
-
-    //Fetch Mobile Transactions
-    // useEffect(() => {
-    //     let isMounted = true
-
-    //     const loadTx = async () => {
-    //         if (!authToken) return
-    //         try {
-    //             const pageSize: number = 500;
-    //             const tx = await fetchMobileTransactions(authToken, pageSize)
-    //             if (isMounted) {
-    //                 setMobileTransactions(tx.data)
-    //             }
-    //         } catch (e: any) {
-    //             if (isMounted) {
-    //                 setError(e.message || 'Failed to load transactions')
-    //             }
-    //         } finally {
-    //             if (isMounted) {
-    //                 setIsMobileTxLoading(false)
-    //             }
-    //         }
-    //     }
-
-    //     loadTx()
-
-    //     return () => {
-    //         isMounted = false
-    //     }
-    // }, [authToken])
 
     //Helpers to parse & group mobile transactions by date
     const parseTxDate = (s: string): Date => {
@@ -182,6 +158,11 @@ export default function Transactions() {
 
     // console.log("crypto ransactions-->", transactions)
 
+    const handleSelectTransaction = (tx: MobileTransaction) => {
+        setSelectedTx(tx);
+        bottomSheetTxRef.current?.expand();
+    };
+
 
     return (
         <View style={styles.container}>
@@ -252,12 +233,23 @@ export default function Transactions() {
                             sections={mobileTx}
                             refreshing={refreshing}
                             onRefresh={handleMobileTransactionsRefresh}
+                            onSelectTransaction={handleSelectTransaction}
                         />
+
+
                     </View>
                     :
                     <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
                         <ActivityIndicator size="small" color='#00C48F' />
                     </View>}
+
+                    
+            <BottomSheetBackdrop animatedIndex={animatedTxIndex} />
+            <MobileTxReceipt
+                sheetRef={bottomSheetTxRef}
+                transaction={selectedTx}
+                animatedIndex={animatedTxIndex}
+            />
 
         </View>
     );
