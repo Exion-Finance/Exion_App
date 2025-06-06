@@ -36,7 +36,8 @@ import {
   balanceSlice,
   selectMobileTransactions,
   addMobileTransactions,
-  clearMobileTransactions
+  setTokenBalance,
+  selectTokenBalances
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -53,7 +54,7 @@ export type BalanceData = {
 
 export interface ResponseBalance {
   balance: BalanceData
-
+  message: string
 }
 type TotalAmounts = {
   usd: number;
@@ -69,10 +70,7 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 export default function TabOneScreen() {
   const route = useRouter()
   const [userdata, setUserData] = useState<any>()
-  const [balance, setBalance] = useState<TotalAmounts>({ usd: 0, kes: 0 })
-  const [transaction, setTransactions] = useState<Transactions[]>([])
-  const [newTransaction, setNewTransaction] = useState<TransactionData>({})
-  const [tokens, setTokens] = useState<ResponseBalance>({ balance: {} })
+  const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [savedUserName, setSavedUserName] = useState<string>("")
   const [isHidden, setIsHidden] = useState<boolean>(false);
@@ -90,18 +88,12 @@ export default function TabOneScreen() {
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
   const mobile_transactions = useSelector(selectMobileTransactions)
+  const token_balance = useSelector(selectTokenBalances)
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetTxRef = useRef<BottomSheet>(null);
   const animatedTxIndex = useSharedValue(-1);
-
-  const snapPoints = useMemo(() => ['60%'], []);
-  // const {
-  //   data,
-  //   // isLoading,
-  //   refetch: refetchTransactions,
-  // } = userTransactions(authToken);
-  //const { data:tokensbalance, isLoading:balLoading, isError:balError, error:balerror } = userBalance(authToken);
+  const animatedTokenIndex = useSharedValue(-1);
 
   const handleSelectTransaction = (tx: MobileTransaction) => {
     setSelectedTx(tx);
@@ -110,12 +102,13 @@ export default function TabOneScreen() {
 
   //fetch user balance
   const fetchBalance = async (jwttoken: string): Promise<BalanceData> => {
-    // console.log("Fetch balance fn called")
     const response = await getBalances(jwttoken)
     setTokens(response)
+    dispatch(setTokenBalance(response))
 
     return response.balance
   }
+
 
   const {
     data: tokensbalance,
@@ -131,15 +124,12 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     if (tokensbalance) {
-      // console.log("Update balance cache called")
       const totalBalance = Object.values(tokensbalance).reduce<TotalAmounts>((acc, currency) => {
         acc.usd += parseFloat(currency.usd);
         acc.kes += parseFloat(currency.kes);
         return acc;
       }, { usd: 0, kes: 0 });
       dispatch(updateBalance(totalBalance))
-
-      setBalance(totalBalance);  // Update the balance only once after data has changed
     }
   }, [tokensbalance]);
 
@@ -166,24 +156,25 @@ export default function TabOneScreen() {
   }
 
   useEffect(() => {
-    setTimeout(() => {
       if (mobile_transactions.length > 0) {
+        // console.log("mobile_transactions from cache--->", mobile_transactions)
         const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 5);
-        // console.log("Found in redux")
         setMobileTransactions(firstFive)
         setIsLoading(false)
       }
-    }, 1000)
   }, [])
 
-  // const handleRefresh = useCallback(async () => {
-  //   setRefreshing(true)
-  //   await Promise.all([
-  //     refetchBalance(),
-  //     refetchTransactions(),
-  //   ]);
-  //   setRefreshing(false)
-  // }, [])
+  useEffect(() => {
+    if (token_balance) {
+      // console.log("token_balance from cache--->", token_balance)
+      const cachedTokens: ResponseBalance = {
+        balance: token_balance,
+        message: "success"
+      };
+      setTokens(cachedTokens);
+    }
+  }, []);
+
 
 
   useEffect(() => {
@@ -429,11 +420,13 @@ export default function TabOneScreen() {
         animatedIndex={animatedTxIndex}
       />
 
+      <BottomSheetBackdrop animatedIndex={animatedTokenIndex} />
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={snapPoints}
+        snapPoints={['46%']}
         enablePanDownToClose={true}
+        animatedIndex={animatedTokenIndex}
       >
         {/* <PrimaryFontBold
             style={[reusableStyle.paddingContainer,

@@ -1,11 +1,15 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
-import { TransactionData, Section, MobileTransaction, MobileTransactionData } from "@/types/datatypes";
+import { TransactionData, Section, MobileTransaction, MobileTransactionData, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
 
 
 type TotalAmounts = {
   usd: number;
   kes: number;
 };
+
+interface BalanceState {
+  data: ResponseBalance | null;
+}
 
 const initialState = {
   value: {
@@ -15,6 +19,9 @@ const initialState = {
 };
 const initialTransactionState: TransactionData = {};
 const initialMobileTransactionState: Section[] = [];
+const initialTokenState: BalanceState = {
+  data: null,
+};
 
 export const balanceSlice = createSlice({
   name: "userBalance",
@@ -62,14 +69,32 @@ const mobileTransactionSlice = createSlice({
   },
 });
 
+//Available tokens balances slice
+const tokenBalanceSlice = createSlice({
+  name: 'tokenBalances',
+  initialState: initialTokenState,
+  reducers: {
+    setTokenBalance(state, action: PayloadAction<ResponseBalance>) {
+      state.data = action.payload;
+    }
+  },
+});
 
 
 export const { updateBalance } = balanceSlice.actions;
 export const { addTransaction } = transactionSlice.actions;
 export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransactions } = mobileTransactionSlice.actions;
+export const { setTokenBalance } = tokenBalanceSlice.actions;
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
 export const selectTransactions = (state: { transactions: { value: TransactionData } }) => state.transactions.value
+// export const selectTokenBalances = (state: { balance: { value: TokenBalanceData | null } }) =>
+//   state.balance.value ? state.balance.value.balance : null;
+export const selectTokenBalances = (state: {
+  tokenBalances: BalanceState;
+}): TokenBalanceData | null => {
+  return state.tokenBalances.data ? state.tokenBalances.data.balance : null;
+};
 
 const rawMobileTx = (state: { mobileTransactions: Section[] }) => state.mobileTransactions
 
@@ -89,5 +114,6 @@ const rootReducer = {
   balance: balanceSlice.reducer,
   transactions: transactionSlice.reducer,
   mobileTransactions: mobileTransactionSlice.reducer,
+  tokenBalances: tokenBalanceSlice.reducer,
 }
 export default rootReducer;

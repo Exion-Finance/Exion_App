@@ -30,6 +30,20 @@ export interface BalanceData {
   balance: Balance;
 }
 
+export interface ResponseBalance {
+  balance: TokenBalanceData;
+  message: string;
+}
+
+export type CurrencyData = {
+  usd: string;
+  kes: string;
+  token: number;
+};
+
+export type TokenBalanceData = {
+  [key: string]: CurrencyData;
+};
 
 
 export interface Transactions {
