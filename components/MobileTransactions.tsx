@@ -1,5 +1,5 @@
 // GroupedTransactions.tsx
-import React from 'react'
+import React, { useRef } from 'react'
 import { PrimaryFontText } from './PrimaryFontText';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
 import { SectionList, View, TouchableOpacity, StyleSheet, Image, RefreshControl, ScrollView } from 'react-native'
@@ -13,9 +13,10 @@ interface Props {
     sections: Section[];
     refreshing: boolean;
     onRefresh: () => void;
+    onSelectTransaction: (tx: MobileTransaction) => void;
 }
 
-export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRefresh }) => {
+export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRefresh, onSelectTransaction }) => {
 
     const formatTime = (s: string) => {
         const year = +s.slice(0, 4);
@@ -33,6 +34,12 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
         return `${localHour}:${minute}${ampm}`;
     };
+
+    // const bottomSheetRef = useRef<BottomSheet>(null);
+
+    // const openBottomSheet = () => {
+    //     bottomSheetRef.current?.expand(); // or .snapToIndex(1)
+    // };
 
     // console.log(JSON.stringify(sections, null, 2));
     if (sections && sections.length === 0) {
@@ -99,42 +106,42 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
 
     return (
-        <SectionList
-            sections={sections}
-            keyExtractor={(item, index) =>
-                item.id
-                    ? item.id
-                    : `missing-id-${index}`
-            }
-            renderSectionHeader={({ section: { title } }) => (
-                <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
-            )}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            style={styles.section}
-            renderItem={({ item }) => {
-                const { username, transactionType } = formatTransaction(item);
-                return (
-                    <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]}>
-                        <View style={styles.flexRow}>
-                            <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
-                            <View style={{ marginLeft: 10 }}>
-                                <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
-                                <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
+            <SectionList
+                sections={sections}
+                keyExtractor={(item, index) =>
+                    item.id
+                        ? item.id
+                        : `missing-id-${index}`
+                }
+                renderSectionHeader={({ section: { title } }) => (
+                    <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
+                )}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                style={styles.section}
+                renderItem={({ item }) => {
+                    const { username, transactionType } = formatTransaction(item);
+                    return (
+                        <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]} onPress={() => onSelectTransaction(item)}>
+                            <View style={styles.flexRow}>
+                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
+                                <View style={{ marginLeft: 10 }}>
+                                    <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
+                                    <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
+                                </View>
                             </View>
-                        </View>
 
-                        <View style={styles.amountBlock}>
-                            <PrimaryFontMedium style={styles.amount}>Ksh {item.transactionAmount.toFixed(2)}</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
-                        </View>
-                    </TouchableOpacity>
-                )
-            }}
-            // contentContainerStyle={{ padding: 16 }}
-            showsVerticalScrollIndicator={false}
-        />
+                            <View style={styles.amountBlock}>
+                                <PrimaryFontMedium style={styles.amount}>Ksh {item.transactionAmount.toFixed(2)}</PrimaryFontMedium>
+                                <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
+                            </View>
+                        </TouchableOpacity>
+                    )
+                }}
+                // contentContainerStyle={{ padding: 16 }}
+                showsVerticalScrollIndicator={false}
+            />
     )
 }
 

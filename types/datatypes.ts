@@ -119,11 +119,15 @@ export interface TotalFeeResponse {
 
 export interface MobileTransaction {
   id: string
+  type: string | null
   recipientName: string
   destinationChannel: string  // e.g. "M-PESA"
   transactionDate: string     // "YYYYMMDDHHmmss"
   transactionAmount: number
-  // …other fields…
+  txHash: string
+  thirdPartyTransactionCode: string
+  recipientAccountNumber: string
+  sasaPayTransactionCode: string
 }
 
 export interface Section {

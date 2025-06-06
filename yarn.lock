@@ -3948,7 +3948,12 @@ expo-local-authentication@~14.0.1:
   dependencies:
     invariant "^2.2.4"
 
-expo-modules-autolinking@1.11.3:
+expo-media-library@~16.0.5:
+  version "16.0.5"
+  resolved "https://registry.npmjs.org/expo-media-library/-/expo-media-library-16.0.5.tgz"
+  integrity sha512-O9RUqBWgJVRF0mO6EiLSBFyfb5wR1/ZqovbT43V0TAo5sgcjrHRs+0NID/U6BWDRuiFeX2AU516JgNDutNUFSw==
+
+expo-modules-autolinking@>=0.8.1, expo-modules-autolinking@1.11.3:
   version "1.11.3"
   resolved "https://registry.npmjs.org/expo-modules-autolinking/-/expo-modules-autolinking-1.11.3.tgz"
   integrity sha512-oYh8EZEvYF5TYppxEKUTTJmbr8j7eRRnrIxzZtMvxLTXoujThVPMFS/cbnSnf2bFm1lq50TdDNABhmEi7z0ngQ==
@@ -3967,6 +3972,11 @@ expo-modules-core@1.12.26:
   integrity sha512-y8yDWjOi+rQRdO+HY+LnUlz8qzHerUaw/LUjKPU/mX8PRXP4UUPEEp5fjAwBU44xjNmYSHWZDwet4IBBE+yQUA==
   dependencies:
     invariant "^2.2.4"
+
+expo-print@~13.0.1:
+  version "13.0.1"
+  resolved "https://registry.npmjs.org/expo-print/-/expo-print-13.0.1.tgz"
+  integrity sha512-o8LuCguGrkyC5RaWEfL5N2J0V9mfbZ3GVzLpaf3KU5RrdYzGEjoiv4xlhVVzh/++hMUqOgnIrtF7tzWYhwu/7g==
 
 expo-router@~3.5.24:
   version "3.5.24"
@@ -3988,7 +3998,12 @@ expo-secure-store@~13.0.2:
   resolved "https://registry.npmjs.org/expo-secure-store/-/expo-secure-store-13.0.2.tgz"
   integrity sha512-3QYgoneo8p8yeeBPBiAfokNNc2xq6+n8+Ob4fAlErEcf4H7Y72LH+K/dx0nQyWau2ZKZUXBxyyfuHFyVKrEVLg==
 
-expo-splash-screen@0.27.7, expo-splash-screen@~0.27.7:
+expo-sharing@~12.0.1:
+  version "12.0.1"
+  resolved "https://registry.npmjs.org/expo-sharing/-/expo-sharing-12.0.1.tgz"
+  integrity sha512-wBT+WeXwapj/9NWuLJO01vi9bdlchYu/Q/xD8slL/Ls4vVYku8CPqzkTtDFcjLrjtlJqyeHsdQXwKLvORmBIew==
+
+expo-splash-screen@~0.27.7, expo-splash-screen@0.27.7:
   version "0.27.7"
   resolved "https://registry.npmjs.org/expo-splash-screen/-/expo-splash-screen-0.27.7.tgz"
   integrity sha512-s+eGcG185878nixlrjhhLD6UDYrvoqBUaBkIEozBVWFg3pkdsKpONPiUAco4XR3h7I/9ODq4quN28RJLFO+s0Q==

@@ -105,7 +105,7 @@ export default function SendMoney() {
                         keyboardType='numeric'
                     />
 
-                    <TouchableOpacity style={styles.chooseContainer} onPress={toggleContacts}>
+                    <TouchableOpacity style={styles.chooseContainer} onPress={toggleContacts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                         <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
                         <Animated.View style={{ transform: [{ rotate }] }}>
                             <Feather name="chevron-down" size={18} color="grey" style={{  marginTop: showContacts ? -2 : 3 }} />
