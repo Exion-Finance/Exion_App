@@ -29,7 +29,7 @@ export default function Profile() {
 
 
   const copyToClipboard = () => {
-    Clipboard.setStringAsync(userdetails?.wallet?.publicKey as string);
+    Clipboard.setStringAsync(userdetails?.wallet?.publicKey as string  || "Someuser" as string);
 
     if (Platform.OS === 'android') {
       ToastAndroid.show('Text copied to clipboard!',
@@ -63,9 +63,9 @@ export default function Profile() {
         <Image source={userIcon} style={styles.userIcon} />
         <View>
           <View style={styles.flexRow}>
-            <PrimaryFontBold style={{ fontSize: 19 }}>{userdetails.userName}</PrimaryFontBold>
+            <PrimaryFontBold style={{ fontSize: 19 }}>{userdetails.userName || "Someuser"}</PrimaryFontBold>
           </View>
-          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{userdetails.email}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{userdetails.email || "Someemail"}</PrimaryFontText>
         </View>
       </View>
 
@@ -95,7 +95,7 @@ export default function Profile() {
           <View style={styles.separator}></View>
 
           <PrimaryFontMedium style={{ fontSize: 15, color: '#3A3B3C' }}>Wallet address</PrimaryFontMedium>
-          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{userdetails.wallet?.publicKey}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{userdetails.wallet?.publicKey|| "Somewallet"}</PrimaryFontText>
           <TouchableOpacity style={[styles.buttonContainer]} onPress={copyToClipboard}>
             <MaterialIcons name="content-copy" size={15} color="#00C48F" />
             <PrimaryFontMedium style={[styles.text]}>Tap to copy</PrimaryFontMedium>

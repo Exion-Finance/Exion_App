@@ -66,14 +66,9 @@ export default function Login() {
         try {
             setButtonClicked(true)
             const res = await onLogin!(email, password);
-            if (res && res.data) {
+            if (res && res.data.accesstoken) {
                 setButtonClicked(false)
-                route.push({
-                    pathname: '/(tabs)',
-                    params: {
-                        userName: JSON.stringify(res.data.data.userName)
-                    }
-                });
+                route.push('/(tabs)');
             } else if (!res.data) {
                 setButtonClicked(false)
                 if (res.message === "Invalid credentials") {
