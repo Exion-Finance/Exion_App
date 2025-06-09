@@ -1,19 +1,14 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, NavigationContainer, ThemeProvider } from '@react-navigation/native';
-import { Redirect, useRouter } from "expo-router";
+import {  useRouter } from "expo-router";
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from './context/queryProvider';
 import { persistor, store } from './state/store';
 import { Provider } from 'react-redux';
-
-
-import { useColorScheme } from '@/components/useColorScheme';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 import { ActivityIndicator } from 'react-native';
 
@@ -27,7 +22,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: 'landing',
+  initialRouteName: 'login',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -46,7 +41,7 @@ export default function RootLayout() {
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) {
-      console.log("Erorrrrrrrrrrrrrrrrxxxxxxx")
+      console.log("Erorrrrrrrrrrrrrrrrxxxxxxx", error)
       throw error
     };
   }, [error]);
@@ -84,6 +79,7 @@ function RootLayoutNav() {
       if (!authState?.authenticated) {
         route.push("/landing")
       } else {
+        console.log("Pushing to tabs screen")
         route.push("/(tabs)")
 
       }

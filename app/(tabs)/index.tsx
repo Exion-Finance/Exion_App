@@ -72,7 +72,7 @@ export default function TabOneScreen() {
   const [userdata, setUserData] = useState<any>()
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
-  const [savedUserName, setSavedUserName] = useState<string>("")
+  // const [savedUserName, setSavedUserName] = useState<string>("")
   const [isHidden, setIsHidden] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [mobileTransactions, setMobileTransactions] = useState<Section[]>([])
@@ -183,12 +183,14 @@ export default function TabOneScreen() {
       if (token) {
         const parsedToken = JSON.parse(token);
         setAuthToken(parsedToken.token)
-        setSavedUserName(parsedToken.data.userName)
+        // setSavedUserName(parsedToken.data.userName)
         setUserData(parsedToken)
       }
     }
     token()
   }, [])
+
+  console.log("Parsed local store data in index", userdata)
 
 
 
@@ -331,7 +333,7 @@ export default function TabOneScreen() {
                     <PrimaryFontText style={{ color: '#FEFEFE', fontSize: 15 }}>{greeting}{'  '}</PrimaryFontText>
                     <Image source={image} style={{ height: 20, width: 20 }} />
                   </View>
-                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 18 }}>{userdata?.data?.userName || savedUserName}</PrimaryFontBold>
+                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 18 }}>{userdata?.data?.userName || "Someuser"}</PrimaryFontBold>
                 </View>
               </View>
               <View>
