@@ -13,7 +13,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { tokens } from '@/utill/tokens';
 import * as SecureStore from "expo-secure-store"
-import { TOKEN_KEY } from './context/AuthContext';
+import { TOKEN_KEY, useAuth } from './context/AuthContext';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { SecondaryFontText } from '@/components/SecondaryFontText';
 import LottieAnimation from '@/components/LottieAnimation';
@@ -22,6 +22,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
 
 export default function OptionalMessage() {
+
+    const { refreshToken, authState } = useAuth()
+
     const route = useRouter()
     const [message, setMessage] = useState<string>('');
     const [responseReceived, setResponseReceived] = useState<boolean>(false);
@@ -58,7 +61,8 @@ export default function OptionalMessage() {
         if (success) {
             try {
                 bottomSheetRef.current?.snapToIndex(0)
-                const token = await getParsedToken(TOKEN_KEY);
+                // const token = await getParsedToken(TOKEN_KEY);
+                const token = authState?.token
 
                 if (token) {
                     const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
@@ -83,7 +87,16 @@ export default function OptionalMessage() {
                     bottomSheetRef.current?.close();
                     Alert.alert("Oops😕", "Something went wrong, please try again");
                 }
-            } catch (error) {
+            } catch (error: any) {
+                if (error.status === 403) {
+                    const refreshed = await refreshToken!()
+                    console.log("<---Refreshed token---->", refreshed)
+                    if (refreshed) {
+                        await handleSend();
+                    }
+                    return;
+                }
+
                 bottomSheetRef.current?.close();
                 Alert.alert("Oops😕", "An error occurred while sending money, please try again");
             }
@@ -97,7 +110,7 @@ export default function OptionalMessage() {
     const handleButtonClick = () => {
         bottomSheetRef.current?.close();
         route.push("/(tabs)")
-    } 
+    }
 
 
     useEffect(() => {
@@ -194,7 +207,7 @@ export default function OptionalMessage() {
                             :
                             require('@/assets/animations/loading.json')}
                             animationStyle={{ width: "100%", height: responseReceived ? "80%" : "40%", marginTop: responseReceived ? -28 : 15 }}
-                            loop={ responseReceived ? false : true }
+                            loop={responseReceived ? false : true}
                         />
                         <SecondaryFontText
                             style={[reusableStyle.paddingContainer,

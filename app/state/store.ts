@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./slices";
 
 import {
-  persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
+  persistStore, persistReducer } from "redux-persist";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const balancePersitConfig = {
@@ -29,17 +29,25 @@ const tokenBalances = {
   whitelist: ["value"]
 }
 
+const userProfile = {
+  key: "user",
+  storage: AsyncStorage,
+  whitelist: ["value"]
+}
+
 const persistedBalanceReducer = persistReducer(balancePersitConfig, rootReducer.balance)
 const persistedUserTransactionsReducer = persistReducer(userTransactions, rootReducer.transactions)
 const persistedMobileTransactionsReducer = persistReducer(mobileTransactions, rootReducer.mobileTransactions)
 const persistedTokenBalancesReducer = persistReducer(tokenBalances, rootReducer.tokenBalances)
+const persistedUserProfileReducer = persistReducer(userProfile, rootReducer.user)
 
 const store = configureStore({
   reducer: {
     balance: persistedBalanceReducer,
     transactions: persistedUserTransactionsReducer,
     mobileTransactions: persistedMobileTransactionsReducer,
-    tokenBalances: persistedTokenBalancesReducer
+    tokenBalances: persistedTokenBalancesReducer,
+    user: persistedUserProfileReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

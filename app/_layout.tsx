@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {  useRouter } from "expo-router";
+import {  useRouter, usePathname } from "expo-router";
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -72,6 +72,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const route = useRouter()
+  const pathname = usePathname();
   const { authState, onLogout } = useAuth()
   useEffect(() => {
     // onLogout!()
@@ -79,9 +80,13 @@ function RootLayoutNav() {
       if (!authState?.authenticated) {
         route.push("/landing")
       } else {
-        console.log("Pushing to tabs screen")
-        route.push("/(tabs)")
-
+        if (pathname === "/landing") {
+          // console.log("Pushing to tabs screen")
+          // console.log("pathname-->", pathname)
+          route.push("/(tabs)");
+          return;
+        }
+        // console.log("Tried pushing to tabs")
       }
     }
     catch (error) {
@@ -89,7 +94,7 @@ function RootLayoutNav() {
       console.log("/layout error-->", error)
     }
 
-  }, [authState])
+  }, [authState?.authenticated])
 
 
 

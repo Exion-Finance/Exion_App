@@ -17,11 +17,10 @@ import * as Clipboard from 'expo-clipboard';
 import Dropdown from '@/assets/icons/Dropdown';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-//import TokenList from '@/components/TokenList';
+import { PESACHAIN_URL } from "@/constants/urls";
+import axios from "axios";
 import TokenListPayment, { Token } from '@/components/MakePaymentTokenList';
 import reusableStyle from '@/constants/ReusableStyles'
-import * as SecureStore from "expo-secure-store"
-import { TOKEN_KEY } from './context/AuthContext';
 import { getBalances } from './Apiconfig/api';
 import { BalanceData, ResponseBalance } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
@@ -29,7 +28,9 @@ import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
+import { useAuth } from "./context/AuthContext";
 import Loading from "@/components/Loading";
+
 
 
 
@@ -43,6 +44,8 @@ type TokenType = {
 
 
 const CustomKeyboard = () => {
+  const { refreshToken, authState } = useAuth()
+
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState(false);
   const [errorDescription, setErrorDescription] = useState('');
@@ -58,7 +61,6 @@ const CustomKeyboard = () => {
   const [jwtTokens, setJwtToken] = useState<string>("")
   const [send, setSend] = useState<boolean>(false)
   const [fees, setFees] = useState<TotalFeeResponse>()
-  const [isSheetVisible, setIsSheetVisible] = useState<boolean>(false);
   const [transactionCode, setTransactionCode] = useState<string>("Qwerty")
   const [transactionState, setTransactionState] = useState<string>("Initiating transaction...")
   const [transactionLoading, setTransactionLoading] = useState<boolean>()
@@ -80,14 +82,15 @@ const CustomKeyboard = () => {
 
   const { handleFingerprintScan } = useFingerprintAuthentication();
 
-  const calculateTransactionFee = async (amount: string) => {
+  const calculateTransactionFee = async (amount: string, txToken?: string) => {
     setSend(true)
     if (jwtTokens) {
       try {
         const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
         // const tokenAmount = activeToken.token
+        let token = txToken ? txToken : jwtTokens
         const response = await calculateFee({
-          auth: jwtTokens,
+          auth: token,
           recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
           amount,
           tokenId: tokenId as number,
@@ -100,6 +103,13 @@ const CustomKeyboard = () => {
         }
 
       } catch (error: any) {
+        if (error.status === 403) {
+          const refreshed = await refreshToken!()
+          if (refreshed) {
+            await calculateTransactionFee(amount, refreshed)
+          }
+          return;
+        }
         Alert.alert("Oops😕", "Couldn't calculate transaction fees, please try again")
       }
       finally {
@@ -114,9 +124,10 @@ const CustomKeyboard = () => {
     route.push("/(tabs)")
   }
 
-  const handleButtonClick = async () => {
+  const handleButtonClick = async (sendToken?: string) => {
     try {
       setSend(true)
+      const sendTkn = sendToken ? sendToken : jwtTokens
       if (inputValue === "") {
         setError(true)
         setErrorDescription('Enter a valid amount')
@@ -141,7 +152,7 @@ const CustomKeyboard = () => {
         let conversionToUsd: number
         if (activeToken.token === "CKES") {
           conversionToUsd = inputValueFloat
-        }        
+        }
         else {
           conversionToUsd = inputValueFloat * conversionRate.data.usd
         }
@@ -195,7 +206,7 @@ const CustomKeyboard = () => {
           const tokenName = activeToken.token
           const channel = "Mpesa"
           const phonenumber = normalizePhoneNumber(phoneNumber as string)
-          const res = await SendMoney(jwtTokens, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
+          const res = await SendMoney(sendTkn, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
           // console.log('send money response is', res)
           if (res.error) {
             bottomSheetRef2.current?.close();
@@ -267,7 +278,7 @@ const CustomKeyboard = () => {
           const chainId = 1
           const tokenName = activeToken.token.toUpperCase()
           const networkCode = "Mpesa"
-          const res = await BuyGoods(jwtTokens, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
+          const res = await BuyGoods(sendTkn, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
           // console.log('<---Buy goods response is--->', res)
           if (res.error) {
             bottomSheetRef2.current?.close();
@@ -343,7 +354,7 @@ const CustomKeyboard = () => {
           const chainId = 1
           const tokenName = activeToken.token.toUpperCase()
           const networkCode = "Mpesa"
-          const res = await PayBill(jwtTokens, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
+          const res = await PayBill(sendTkn, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
 
           if (res.error) {
             bottomSheetRef2.current?.close();
@@ -397,8 +408,16 @@ const CustomKeyboard = () => {
           setSend(false)
         }
       }
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      // console.log(error)
+      if (error.status === 403) {
+        const refreshed = await refreshToken!()
+        console.log("<---Refreshed token---->", refreshed)
+        if (refreshed) {
+          await handleButtonClick(refreshed);
+        }
+        return;
+      }
     }
     finally {
       setSend(false)
@@ -443,34 +462,58 @@ const CustomKeyboard = () => {
   };
 
   useEffect(() => {
-    const fetchBalances = async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    const fetchBalances = async (authToken?: string) => {
+      try {
+        let tokenFromAuth = authToken ? authToken : authState?.token
+        // console.log("<---token from auth(useeffect called)---->", tokenFromAuth)
+        // if(tokenFromAuth){
+        //   console.log("<---token from auth---->", tokenFromAuth)
+        // }
+        // const token = await SecureStore.getItemAsync(TOKEN_KEY);
 
-      if (token) {
-        const parsedToken = JSON.parse(token);
-        const response = await getBalances(parsedToken.token);
-        setJwtToken(parsedToken.token)
-
-        if (response && response.balance) {
-          setTokens(response);
-
-          // Set active token to the first token with a valid balance
-          const tokenEntries = Object.entries(response.balance) as [string, { token: string; kes: string }][];
-          const tokenWithHighestBalance = tokenEntries.reduce((prev, curr) => {
-            const prevBalance = Number(prev[1].token);
-            const currBalance = Number(curr[1].token);
-            return currBalance > prevBalance ? curr : prev;
+        if (tokenFromAuth) {
+          // const parsedToken = JSON.parse(token);
+          // const response = await getBalances(parsedToken.token);
+          setJwtToken(tokenFromAuth)
+          // const response = await getBalances(tokenFromAuth);
+          const response = await axios.get(`${PESACHAIN_URL}/tx/balances`, {
+            headers: {
+              'Authorization': `Bearer ${tokenFromAuth}`
+            }
           });
-          // Destructure selected token
-          const [selectedKey, selectedData] = tokenWithHighestBalance;
-          if (selectedTokenId === 0) {
-            setActiveToken({
-              token: selectedKey.toUpperCase(),
-              balance: Number(selectedData.token),
-              ksh: Number(selectedData.kes),
-            });
-          }
+          // console.log("<---getBalances res---->", response)
 
+          if (response.data && response.data.balance) {
+            setTokens(response.data);
+
+            // Set active token to the first token with a valid balance
+            const tokenEntries = Object.entries(response.data.balance) as [string, { token: string; kes: string }][];
+            const tokenWithHighestBalance = tokenEntries.reduce((prev, curr) => {
+              const prevBalance = Number(prev[1].token);
+              const currBalance = Number(curr[1].token);
+              return currBalance > prevBalance ? curr : prev;
+            });
+            // Destructure selected token
+            const [selectedKey, selectedData] = tokenWithHighestBalance;
+            if (selectedTokenId === 0) {
+              setActiveToken({
+                token: selectedKey.toUpperCase(),
+                balance: Number(selectedData.token),
+                ksh: Number(selectedData.kes),
+              });
+            }
+
+          }
+        }
+      }
+      catch (error: any) {
+        if (error.status === 403) {
+          const refreshed = await refreshToken!()
+          console.log("<---Refreshed token---->", refreshed)
+          if (refreshed) {
+            await fetchBalances(refreshed);
+          }
+          return;
         }
       }
     };
@@ -570,7 +613,7 @@ const CustomKeyboard = () => {
         </View>
 
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <TouchableOpacity onPress={handleButtonClick} style={styles.button}>
+          <TouchableOpacity onPress={() => handleButtonClick()} style={styles.button}>
             <PrimaryFontBold style={{ color: 'white', fontSize: 19 }}>{send ? (
               <Loading color='#fff' description='Verifying' />
             ) :

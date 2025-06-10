@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, Pressable, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import NavBar from '@/components/NavBar';
@@ -8,46 +8,10 @@ import Paybill from '@/assets/icons/Paybill';
 import MakePaymentOption from '@/components/MakePaymentOption';
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import reusableStyles from '@/constants/ReusableStyles';
-import { SecondaryFontText } from '@/components/SecondaryFontText';
-import { useEffect, useState } from 'react';
-import { TOKEN_KEY } from './context/AuthContext';
-import * as SecureStore from "expo-secure-store"
-// const couponBackground = require('@/assets/images/coupon.png');
-// import { RedeemPromo } from './Apiconfig/api';
 
 
 export default function MakePayments() {
   const route = useRouter()
-  const [token,setToken] = useState<string>("")
-  const [coupon,setCoupon]= useState<string>("")
-  useEffect(() => {
-    const fetchtoken = async () => {
-      try {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
-        if (token) {
-          const parsedToken = JSON.parse(token);
-          setToken(parsedToken.token);
-        }
-      } catch (error) {
-        console.error("Failed to fetch token", error);
-      }
-    };
-    fetchtoken();
-  }, []); // Empty dependency array to run only once
-
-  // const handleRedeemPress = async () => {
-  //   if (token) {
-  //     const response = await RedeemPromo(token, 1, coupon);
-  //     if (response.error) {
-  //       console.error(response.msg);
-  //     } else {
-  //       console.log("Coupon redeemed successfully", response);
-  //       // Handle success response
-  //     }
-  //   } else {
-  //     console.error("No token found");
-  //   }
-  // };
 
   return (
     <View style={styles.container}>

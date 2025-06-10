@@ -15,21 +15,23 @@ import Settings from '@/assets/icons/Settings';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Clipboard from 'expo-clipboard';
 import { useEffect, useState } from 'react';
-import { TOKEN_KEY } from '../context/AuthContext';
-import { UserDetails } from '@/types/datatypes';
+// import { TOKEN_KEY } from '../context/AuthContext';
+// import { UserDetails } from '@/types/datatypes';
 import * as SecureStore from "expo-secure-store"
 import { useAuth } from '../context/AuthContext';
+import { selectUserProfile } from '../state/slices';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function Profile() {
   const route = useRouter()
   const { onLogout } = useAuth()
 
-  const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
+  // const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
 
-
+  const user_profile = useSelector(selectUserProfile)
 
   const copyToClipboard = () => {
-    Clipboard.setStringAsync(userdetails?.wallet?.publicKey as string  || "Someuser" as string);
+    Clipboard.setStringAsync(user_profile?.wallet?.publicKey as string);
 
     if (Platform.OS === 'android') {
       ToastAndroid.show('Text copied to clipboard!',
@@ -38,17 +40,17 @@ export default function Profile() {
       alert('Text copied to clipboard!');
     }
   };
-  useEffect(() => {
-    const token = async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  // useEffect(() => {
+  //   const token = async () => {
+  //     const token = await SecureStore.getItemAsync(TOKEN_KEY);
 
-      if (token) {
-        const parsedToken = JSON.parse(token);
-        setUserDetails(parsedToken.data)
-      }
-    }
-    token()
-  }, [])
+  //     if (token) {
+  //       const parsedToken = JSON.parse(token);
+  //       setUserDetails(parsedToken.data)
+  //     }
+  //   }
+  //   token()
+  // }, [])
 
   const handleLogout = async () => {
     await onLogout!()
@@ -63,9 +65,9 @@ export default function Profile() {
         <Image source={userIcon} style={styles.userIcon} />
         <View>
           <View style={styles.flexRow}>
-            <PrimaryFontBold style={{ fontSize: 19 }}>{userdetails.userName || "Someuser"}</PrimaryFontBold>
+            <PrimaryFontBold style={{ fontSize: 19 }}>{user_profile?.userName || ""}</PrimaryFontBold>
           </View>
-          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{userdetails.email || "Someemail"}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{user_profile?.email || ""}</PrimaryFontText>
         </View>
       </View>
 
@@ -95,7 +97,7 @@ export default function Profile() {
           <View style={styles.separator}></View>
 
           <PrimaryFontMedium style={{ fontSize: 15, color: '#3A3B3C' }}>Wallet address</PrimaryFontMedium>
-          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{userdetails.wallet?.publicKey|| "Somewallet"}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{user_profile?.wallet?.publicKey|| ""}</PrimaryFontText>
           <TouchableOpacity style={[styles.buttonContainer]} onPress={copyToClipboard}>
             <MaterialIcons name="content-copy" size={15} color="#00C48F" />
             <PrimaryFontMedium style={[styles.text]}>Tap to copy</PrimaryFontMedium>
