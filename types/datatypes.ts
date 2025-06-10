@@ -16,6 +16,22 @@ export interface UserDetails {
   wallet?: Wallet;
 }
 
+export interface WalletAddress {
+  publicKey: string;
+}
+
+export interface UserProfile {
+  accountStatus: string;
+  createdAt: string;
+  email: string;
+  id: string;
+  phoneNumber: string;
+  role: string;
+  userName: string;
+  wallet: WalletAddress;
+}
+
+
 // Define the UserData interface
 export interface UserData {
   data: UserDetails;

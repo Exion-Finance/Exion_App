@@ -2,7 +2,10 @@ import { createContext, useCallback, useState, useEffect, useContext } from "rea
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { PESACHAIN_URL } from "@/constants/urls";
-import { UserData } from "@/types/datatypes";
+import { UserData, UserProfile } from "@/types/datatypes";
+import { fetchUser } from '../Apiconfig/api';
+import { setUserProfile } from '../state/slices';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 interface AuthProps {
@@ -10,6 +13,7 @@ interface AuthProps {
     onLogin?: (email: string, password: string) => Promise<any>;
     onLogout?: () => Promise<void>;
     onRegister?: (phoneNumber: string, password: string, email: string, username: string, otp: string) => Promise<any>;
+    refreshToken?: () => Promise<string | undefined>;
 }
 
 export const TOKEN_KEY = "ExionTokenKey";
@@ -25,18 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         authenticated: null,
     });
 
-    // const loadToken = useCallback(async () => {
-    //     const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
-    //     if (storedToken) {
-    //         const parsedToken = JSON.parse(storedToken);
-    //         axios.defaults.headers.common["Authorization"] = `Bearer ${parsedToken.token}`;
-    //         setAuthState({
-    //             token: parsedToken.token,
-    //             authenticated: true,
-    //             // data: parsedToken.data,
-    //         });
-    //     }
-    // }, []);
+    const dispatch = useDispatch();
 
     const loadToken = useCallback(async () => {
         const stored = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -46,38 +39,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         const parsed = JSON.parse(stored);
-        const { accesstoken, refreshToken } = parsed;
+        const { token, refreshToken } = parsed;
+        // console.log("<---Parsed token object loadtoken---->", parsed)
 
         try {
             // Try using access token
-            axios.defaults.headers.common["Authorization"] = `Bearer ${accesstoken}`;
-            const checkIfValid = await axios.get(`${PESACHAIN_URL}/tx/balances`); // some endpoint that needs auth
-            console.log("Check if user is authenticated res", checkIfValid.data)
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            const checkIfValid = await axios.get(`${PESACHAIN_URL}/user/profile`);
+            // console.log("Check if user is authenticated res", checkIfValid.data)
 
-            setAuthState({ token: accesstoken, authenticated: true });
-            if (!checkIfValid?.data.balance && refreshToken) {
-                // Refresh the token
+            if (checkIfValid.data.success) {
+                dispatch(setUserProfile(checkIfValid.data.data))
+                setAuthState({ token, authenticated: true });
+                console.log("Authenticated")
+            }
+
+        } catch (error: any) {
+            console.log(error)
+            console.log("Check isAuthenticated catch error=-->", error.status)
+            if (error.status === 403 && refreshToken) {
+                // Refresh token
                 try {
-                    const refreshResp = await axios.post(`${PESACHAIN_URL}/auth/refresh-token-native`, {
-                        refreshToken,
-                    });
-                    console.log("New access token res", refreshResp.data)
-
-                    const newAccessToken = refreshResp.data.accesstoken;
-                    const updated = { token: newAccessToken, refreshToken };
-
-                    await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(updated));
-                    axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-
-                    setAuthState({ token: newAccessToken, authenticated: true });
+                    await handleTokenRefresh()
                 } catch (refreshError) {
                     await logout();
+                    console.log("Refresh token error", refreshError)
                 }
-            } else {
+            }
+            else {
                 await logout();
             }
-        } catch (error) {
-            console.log(error)
         }
     }, []);
 
@@ -96,34 +87,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             },
             (error) => Promise.reject(error)
         );
-
-        // const responseInterceptor = axios.interceptors.response.use(
-        //     (response) => response,
-        //     async (error) => {
-        //         const originalRequest = error.config;
-        //         if (error.response?.status === 401 && !originalRequest._retry) {
-        //             originalRequest._retry = true;
-        //             try {
-        //                 const refreshResponse = await axios.post(
-        //                     `${PESACHAIN_URL}/authtoken/refresh`,
-        //                     {},
-        //                     { withCredentials: true }
-        //                 );
-        //                 const newToken = refreshResponse.data.token;
-
-        //                 await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify({ token: newToken, data: authState.data }));
-        //                 axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
-        //                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        //                 return axios(originalRequest);
-        //             } catch (refreshError) {
-        //                 await logout();
-        //                 return Promise.reject(refreshError);
-        //             }
-        //         }
-        //         return Promise.reject(error);
-        //     }
-        // );
-
 
         const responseInterceptor = axios.interceptors.response.use(
             (response) => response,
@@ -192,18 +155,62 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = async (email: string, password: string) => {
         const response = await axios.post(`${PESACHAIN_URL}/auth/signin`, { email, pass: password });
-        console.log("Login response", response.data)
+        // console.log("Login response", response.data)
 
         const { accesstoken, refreshToken } = response.data;
         const tokenObject = { token: accesstoken, refreshToken };
 
         await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(tokenObject));
-        // axios.defaults.headers.common["Authorization"] = `Bearer ${accesstoken}`;
+        const user = await fetchUser(accesstoken)
+
+        if (user.data.success) {
+            // console.log("User profile res", user.data)
+            dispatch(setUserProfile(user.data.data))
+        }
 
         setAuthState({ token: accesstoken, authenticated: true });
 
         return response;
     };
+
+
+    //Error fetching balances: [AxiosError: Request failed with status code 403]
+    const handleTokenRefresh = async() =>{
+        console.log("Refreshing token...")
+        const stored = await SecureStore.getItemAsync(TOKEN_KEY);
+        if (!stored) {
+            console.log("No token found in local store")
+            await logout();
+            return;
+        };
+        const parsed = JSON.parse(stored);
+        const { refreshToken } = parsed;
+
+        const refreshResp = await axios.post(`${PESACHAIN_URL}/auth/refresh-token-native`, {
+            refreshToken,
+        });
+        console.log("<-----New access token ressssssss--->", refreshResp.data)
+
+        const newAccessToken = refreshResp.data.accesstoken;
+        const updated = { token: newAccessToken, refreshToken };
+
+        await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(updated));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+        const user = await fetchUser(newAccessToken)
+
+        if (user.data.success) {
+            // console.log("User profile res", user.data)
+            dispatch(setUserProfile(user.data.data))
+        }
+
+        setAuthState({ token: newAccessToken, authenticated: true });
+        // setAuthState(prev => ({ ...prev, token: newAccessToken }));
+
+        return newAccessToken;
+    }
+// useEffect(() => {
+//      handleTokenRefresh()
+// }, [])
 
 
 
@@ -222,6 +229,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         onRegister: register,
         onLogin: login,
         onLogout: logout,
+        refreshToken: handleTokenRefresh
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -11,12 +11,15 @@ import { useEffect, useState } from 'react';
 import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY } from './context/AuthContext';
 import { useLocalSearchParams} from 'expo-router';
+import { selectUserProfile } from './state/slices';
+import { useSelector } from 'react-redux';
 
 
 export default function FundingMethod() {
     const route = useRouter()
     const params = useLocalSearchParams();
     const { id  } = params;
+    const user_profile = useSelector(selectUserProfile)
     const name = "Mpesa"
     //const phoneNumber = "+254792271915"
     const [phoneNumber,setPhoneNumber] = useState<string>("")
@@ -29,20 +32,21 @@ export default function FundingMethod() {
     }
     useEffect(()=>{
         const token = async () => {
-          const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        //   const token = await SecureStore.getItemAsync(TOKEN_KEY);
          
-          if(token){
-            const parsedToken = JSON.parse(token);
-            console.log("userdetails",parsedToken.data)
+          if(user_profile){
+            // const parsedToken = JSON.parse(token);
+            console.log("userdetails", user_profile)
             
-            setPhoneNumber(parsedToken.data.phoneNumber)
+            setPhoneNumber(user_profile?.phoneNumber)
     
           }
     
         }
         token()
     
-      },[phoneNumber])
+      },[])
+
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />

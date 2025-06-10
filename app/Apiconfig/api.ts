@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { PESACHAIN_URL } from "@/constants/urls";
-import { SendTokenv1Type } from "@/types/datatypes";
-
+import { SendTokenv1Type } from "@/types/datatypes"
 
 export const getBalances = async (token: string) => {
     try {
@@ -13,7 +12,7 @@ export const getBalances = async (token: string) => {
         return response.data;
     } catch (error) {
         console.error("Error fetching balances:", error);
-        throw error;
+        // throw error;
     }
 };
 
@@ -150,6 +149,16 @@ export const checkPhoneNumber = async (identifier: string) => {
 
     const response = await axios.get(`${PESACHAIN_URL}/auth/checkidentifier`, {
         params: { identifier },
+    })
+    return response;
+}
+
+export const fetchUser = async (token: string) => {
+
+    const response = await axios.get(`${PESACHAIN_URL}/user/profile`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
     })
     return response;
 }

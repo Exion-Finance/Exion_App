@@ -118,18 +118,13 @@ export default function OTP({ }) {
                 return;
             }
             else if(res.status == 201){
-                console.log("Else called meaning no res.error")
+                // console.log("Else called meaning no res.error")
                 // console.log("Register user response->", res.data)
                 const login = await onLogin!(parsedUser.email, parsedUser.password)
                 if (login && login.data) {
                     setButtonClicked(false)
                     Alert.alert("Success🎉", "Your account has been created successfully")
-                    route.push({
-                        pathname: '/(tabs)',
-                        params: {
-                            userName: JSON.stringify(login.data.data.userName)
-                        }
-                    });
+                    setTimeout(() => route.push('/(tabs)'), 2000)
                 }
             }
             setButtonClicked(false)

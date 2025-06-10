@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
-import { TransactionData, Section, MobileTransaction, MobileTransactionData, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
+import { TransactionData, Section, MobileTransaction, UserProfile, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
 
 
 type TotalAmounts = {
@@ -11,6 +11,12 @@ interface BalanceState {
   data: ResponseBalance | null;
 }
 
+interface UserState {
+  profile: UserProfile | null;
+}
+
+
+
 const initialState = {
   value: {
     usd: 0,
@@ -21,6 +27,9 @@ const initialTransactionState: TransactionData = {};
 const initialMobileTransactionState: Section[] = [];
 const initialTokenState: BalanceState = {
   data: null,
+};
+const initialProfileState: UserState = {
+  profile: null,
 };
 
 export const balanceSlice = createSlice({
@@ -80,19 +89,33 @@ const tokenBalanceSlice = createSlice({
   },
 });
 
+//User profile slice
+const userSlice = createSlice({
+  name: 'user',
+  initialState: initialProfileState,
+  reducers: {
+    setUserProfile(state, action: PayloadAction<UserProfile>) {
+      // console.log("Data sent to redux", action.payload)
+      state.profile = action.payload;
+    },
+    clearUserProfile(state) {
+      state.profile = null;
+    },
+  },
+});
+
 
 export const { updateBalance } = balanceSlice.actions;
 export const { addTransaction } = transactionSlice.actions;
 export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransactions } = mobileTransactionSlice.actions;
 export const { setTokenBalance } = tokenBalanceSlice.actions;
+export const { setUserProfile, clearUserProfile } = userSlice.actions;
+
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
 export const selectTransactions = (state: { transactions: { value: TransactionData } }) => state.transactions.value
-// export const selectTokenBalances = (state: { balance: { value: TokenBalanceData | null } }) =>
-//   state.balance.value ? state.balance.value.balance : null;
-export const selectTokenBalances = (state: {
-  tokenBalances: BalanceState;
-}): TokenBalanceData | null => {
+export const selectUserProfile = (state: { user: UserState }) => state.user.profile;
+export const selectTokenBalances = (state: { tokenBalances: BalanceState; }): TokenBalanceData | null => {
   return state.tokenBalances.data ? state.tokenBalances.data.balance : null;
 };
 
@@ -115,5 +138,6 @@ const rootReducer = {
   transactions: transactionSlice.reducer,
   mobileTransactions: mobileTransactionSlice.reducer,
   tokenBalances: tokenBalanceSlice.reducer,
+  user: userSlice.reducer,
 }
 export default rootReducer;

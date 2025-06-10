@@ -451,6 +451,23 @@
                     }
                 ]
             }
-        ]
+        ],
+
+        
+        {
+            "data": {
+                "accountStatus": "ACTIVE",
+                "createdAt": "2025-06-03T14:13:57.971Z",
+                "email": "otienolarry833@gmail.com",
+                "id": "b967d49b-4b9d-4d2a-a453-2b770ae16219",
+                "phoneNumber": "+254792271915",
+                "role": "USER",
+                "userName": "George",
+                "wallet": {
+                    "publicKey": "0xe1d6c9cc1aa24bf0f3b7a19115bc441e3c1c1306"
+                }
+            },
+            "success": true
+        }
     ]
 }

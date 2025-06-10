@@ -18,12 +18,6 @@ import { sendOtpEmail } from "./Apiconfig/api";
 
 export default function Signup() {
 
-    const countries = [
-        { country: "Kenya", countryCode: "+254", flag: "https://flagsapi.com/KE/flat/64.png" },
-        // { country: "Uganda", countryCode: "+256", flag: "https://flagsapi.com/UG/flat/64.png" },
-        // { country: "Tanzania", countryCode: "+255", flag: "https://flagsapi.com/TZ/flat/64.png" },
-    ];
-
     const route = useRouter()
     const { onLogin, onRegister } = useAuth()
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);

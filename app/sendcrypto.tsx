@@ -17,6 +17,8 @@ import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY } from './context/AuthContext';
 import LottieAnimation from '@/components/LottieAnimation';
 import { SendMoneyV1 } from "./Apiconfig/api";
+import { selectUserProfile } from './state/slices';
+import { useSelector } from 'react-redux';
 
 const statusBarHeight = StatusBar.currentHeight || 0;
 
@@ -34,6 +36,7 @@ const CryptoScreen: React.FC = () => {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     const snapPoints = useMemo(() => ['72%'], []);
+    const user_profile = useSelector(selectUserProfile)
 
     //bottomSheetRef.current?.close();  // Close the BottomSheet after selection
 
@@ -47,12 +50,12 @@ const CryptoScreen: React.FC = () => {
             const { status } = await Camera.requestCameraPermissionsAsync();
             setHasPermission(status === "granted");
 
-            const token = await SecureStore.getItemAsync(TOKEN_KEY);
+            // const token = await SecureStore.getItemAsync(TOKEN_KEY);
 
-            if (token) {
-                const parsedToken = JSON.parse(token);
-                setWalletAddress(parsedToken.data.wallet.publicKey)
-                setUserName(parsedToken.data.userName)
+            if (user_profile) {
+                // const parsedToken = JSON.parse(token);
+                setWalletAddress(user_profile?.wallet.publicKey)
+                setUserName(user_profile?.userName)
             }
         };
         getCameraPermissions();

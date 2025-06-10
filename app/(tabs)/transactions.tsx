@@ -15,7 +15,8 @@ import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import * as SecureStore from "expo-secure-store"
 import { Transactions as Trans, MobileTransaction, Section } from '@/types/datatypes';
 import { TOKEN_KEY } from '../context/AuthContext';
-import { getBalances, Transactionss, transactionHistory, fetchMobileTransactions } from '../Apiconfig/api';
+import { fetchMobileTransactions } from '../Apiconfig/api';
+import { useAuth } from "../context/AuthContext";
 import { userTransactions } from '../hooks/query/userTransactions';
 import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
@@ -25,6 +26,9 @@ import { useSelector, useDispatch } from 'react-redux';
 const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 25 : 0;
 
 export default function Transactions() {
+
+    const { refreshToken, authState } = useAuth()
+
     const [transactions, setTransactions] = useState(useSelector(selectTransactions))
     const [authToken, setAuthToken] = useState<string>("");
     const [refreshing, setRefreshing] = useState<boolean>(false)
@@ -41,15 +45,16 @@ export default function Transactions() {
 
     useEffect(() => {
         const token = async () => {
-            const token = await SecureStore.getItemAsync(TOKEN_KEY);
-
+            // const token = await SecureStore.getItemAsync(TOKEN_KEY);
+            const token = authState?.token
             if (token) {
-                const parsedToken = JSON.parse(token);
-                setAuthToken(parsedToken.token)
+                // const parsedToken = JSON.parse(token);
+                // setAuthToken(parsedToken.token)
+                setAuthToken(token)
             }
         }
         token()
-    }, [authToken])
+    }, [authState])
 
 
 
@@ -122,10 +127,11 @@ export default function Transactions() {
     // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
     // console.log("sections-->", sections.length)
 
-    const refetchMobileTx = async () => {
+    const refetchMobileTx = async (refetchToken?: string) => {
         try {
+            let token = refetchToken ? refetchToken : authToken
             const pageSize: number = 500;
-            const tx = await fetchMobileTransactions(authToken, pageSize)
+            const tx = await fetchMobileTransactions(token, pageSize)
             if (tx.data) {
                 // setMobileTransactions(tx.data)
                 const fullSections = makeSections(tx.data)
@@ -134,6 +140,14 @@ export default function Transactions() {
 
 
         } catch (e: any) {
+            if (e.status === 403) {
+                // console.log("errrrrrrr")
+                const refreshed = await refreshToken!()
+                if (refreshed) {
+                    await refetchMobileTx(refreshed)
+                    return;
+                }
+              }
             setError(e.message || 'Failed to load transactions')
 
         } finally {

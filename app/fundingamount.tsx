@@ -7,11 +7,12 @@ import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AddFund } from './Apiconfig/api';
-import * as SecureStore from "expo-secure-store"
-import { TOKEN_KEY } from './context/AuthContext';
 import Loading from '@/components/Loading';
+import { useAuth } from "./context/AuthContext";
 
 export default function FundingAmount() {
+    const { refreshToken, authState } = useAuth()
+
     const [amount, setAmount] = useState('');
     const [error, setError] = useState(false);
     const [errorDescription, setErrorDescription] = useState('');
@@ -65,16 +66,18 @@ export default function FundingAmount() {
     };
     useEffect(() => {
         const token = async () => {
-            const token = await SecureStore.getItemAsync(TOKEN_KEY);
+            // const token = await SecureStore.getItemAsync(TOKEN_KEY);
+            const token = authState?.token
 
             if (token) {
-                const parsedToken = JSON.parse(token);
-                setToken(parsedToken.token)
+                // const parsedToken = JSON.parse(token);
+                // setToken(parsedToken.token)
+                setToken(token)
             }
         }
         token()
 
-    }, [token])
+    }, [authState])
 
     return (
         <View style={styles.container}>
