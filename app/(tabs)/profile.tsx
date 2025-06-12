@@ -14,17 +14,16 @@ import Lock from '@/assets/icons/Lock';
 import Settings from '@/assets/icons/Settings';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Clipboard from 'expo-clipboard';
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from 'react';
-// import { TOKEN_KEY } from '../context/AuthContext';
-// import { UserDetails } from '@/types/datatypes';
-import * as SecureStore from "expo-secure-store"
-import { useAuth } from '../context/AuthContext';
+import { useAuth, TOKEN_KEY } from '../context/AuthContext';
 import { selectUserProfile } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function Profile() {
   const route = useRouter()
   const { onLogout } = useAuth()
+
 
   // const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
 
@@ -40,20 +39,23 @@ export default function Profile() {
       alert('Text copied to clipboard!');
     }
   };
-  // useEffect(() => {
-  //   const token = async () => {
-  //     const token = await SecureStore.getItemAsync(TOKEN_KEY);
 
-  //     if (token) {
-  //       const parsedToken = JSON.parse(token);
-  //       setUserDetails(parsedToken.data)
-  //     }
-  //   }
-  //   token()
-  // }, [])
+
+  const getRefreshToken = async () => {
+    const stored = await SecureStore.getItemAsync(TOKEN_KEY);
+    if(!stored){
+      return null;
+    }
+    const parsed = JSON.parse(stored);
+    const { refreshToken } = parsed;
+    return refreshToken;
+  }
 
   const handleLogout = async () => {
-    await onLogout!()
+    const refreshToken = await getRefreshToken()
+    if(refreshToken){
+      await onLogout!(refreshToken)
+    }
   }
 
   return (
@@ -97,13 +99,13 @@ export default function Profile() {
           <View style={styles.separator}></View>
 
           <PrimaryFontMedium style={{ fontSize: 15, color: '#3A3B3C' }}>Wallet address</PrimaryFontMedium>
-          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{user_profile?.wallet?.publicKey|| ""}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{user_profile?.wallet?.publicKey || ""}</PrimaryFontText>
           <TouchableOpacity style={[styles.buttonContainer]} onPress={copyToClipboard}>
             <MaterialIcons name="content-copy" size={15} color="#00C48F" />
             <PrimaryFontMedium style={[styles.text]}>Tap to copy</PrimaryFontMedium>
           </TouchableOpacity>
         </View>
-        <PrimaryButton onPress={() => handleLogout()!} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} />
+        <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} />
       </View>
     </View>
   );

@@ -19,32 +19,18 @@ import FormErrorText from "@/components/FormErrorText";
 import Loading from "@/components/Loading";
 
 export default function Login() {
-
-    const countries = [
-        { country: "Kenya", countryCode: "+254", flag: "https://flagsapi.com/KE/flat/64.png" },
-        // { country: "Uganda", countryCode: "+256", flag: "https://flagsapi.com/UG/flat/64.png" },
-        // { country: "Tanzania", countryCode: "+255", flag: "https://flagsapi.com/TZ/flat/64.png" },
-    ];
-
     const route = useRouter()
     const { onLogin } = useAuth()
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-    const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
     const [emailError, setEmailError] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState(false);
     const [errorDescription, setErrorDescription] = useState<string>("");
     const [buttonClicked, setButtonClicked] = useState<boolean>(false);
     const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
-    const [userPhoneNumber, setUserPhoneNumber] = useState<string>("")
-
-    const handleSelectCountry = (country: typeof countries[0]) => {
-        setSelectedCountry(country);
-        setDropdownVisible(false);
-    };
+    const [isEmailFocused, setIsEmailFocused] = useState<boolean>(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
 
     const handleLogin = async () => {
         if (!isEmailValid) {
@@ -81,7 +67,9 @@ export default function Login() {
                 }
             }
         } catch (error) {
-            alert("Something went wrong")
+            setButtonClicked(false)
+            setPasswordError(true)
+            setErrorDescription("Invalid email or password")
         }
     };
 
@@ -104,36 +92,12 @@ export default function Login() {
 
                     <View style={styles.formView}>
                         <View style={styles.formContainer}>
-                            {/* <PrimaryFontMedium style={styles.label}>Phone Number</PrimaryFontMedium>
-                            <View style={styles.phoneContainer}>
-                                <TouchableOpacity
-                                    style={styles.dropdown}
-                                    onPress={() => setDropdownVisible(true)}
-                                >
-                                    <Image source={{ uri: selectedCountry.flag }} style={styles.flag} />
-                                    <PrimaryFontMedium style={styles.countryCode}>{selectedCountry.countryCode}</PrimaryFontMedium>
-                                </TouchableOpacity>
-
-                                <TextInput
-                                    style={styles.contactInput}
-                                    placeholder="701234567"
-                                    placeholderTextColor="#D2D2D2"
-                                    keyboardType="phone-pad"
-                                    onChangeText={(text) => {
-                                        setPhoneNumber(text);
-                                        setPhoneNumberError(false);
-                                        setPasswordError(false);
-                                    }}
-                                />
-                            </View>
-                            <FormErrorText error={phoneNumberError} errorDescription={errorDescription} /> */}
-
 
                             <PrimaryFontMedium style={styles.label}>Email</PrimaryFontMedium>
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, { borderColor: isEmailFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isEmailFocused ? 2 : 1 }]}
                                 placeholder="you@example.com"
-                                placeholderTextColor="#D2D2D2"
+                                placeholderTextColor="#C3C2C2"
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 onChangeText={(text) => {
@@ -142,22 +106,26 @@ export default function Login() {
                                     setEmailError(false)
                                     setIsEmailValid(validator.isEmail(text))
                                 }}
+                                onFocus={() => setIsEmailFocused(true)}
+                                onBlur={() => setIsEmailFocused(false)}
                                 value={email}
                             />
                             <FormErrorText error={emailError} errorDescription={errorDescription} />
 
                             <PrimaryFontMedium style={styles.label}>Password</PrimaryFontMedium>
-                            <View style={styles.passwordContainer}>
+                            <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
                                 <TextInput
                                     style={styles.passwordInput}
                                     placeholder="Password"
-                                    placeholderTextColor="#D2D2D2"
+                                    placeholderTextColor="#C3C2C2"
                                     secureTextEntry={!passwordVisible}
                                     onChangeText={(text) => {
                                         setPassword(text);
                                         setPasswordError(false);
                                         setEmailError(false);
                                     }}
+                                    onFocus={() => setIsPasswordFocused(true)}
+                                    onBlur={() => setIsPasswordFocused(false)}
                                     value={password}
                                 />
                                 <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -181,32 +149,6 @@ export default function Login() {
                             } widthProp={reusableStyles.width100} />
                         </View>
 
-                        <Modal visible={dropdownVisible} transparent={true} animationType="slide">
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalContainer}>
-                                    <FlatList
-                                        data={countries}
-                                        keyExtractor={(item) => item.countryCode}
-                                        renderItem={({ item }) => (
-                                            <TouchableOpacity
-                                                style={styles.modalItem}
-                                                onPress={() => handleSelectCountry(item)}
-                                            >
-                                                <Image source={{ uri: item.flag }} style={styles.flag} />
-                                                <PrimaryFontText style={styles.countryName}>{item.country}</PrimaryFontText>
-                                            </TouchableOpacity>
-                                        )}
-                                    />
-                                    <TouchableOpacity
-                                        onPress={() => setDropdownVisible(false)}
-                                        style={styles.closeButton}
-                                    >
-                                        <PrimaryFontMedium style={styles.closeText}>Close</PrimaryFontMedium>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </Modal>
-
                         <PrimaryFontText style={{ fontSize: 18, justifyContent: 'center', display: 'flex' }}>
                             Don't have an account?{' '}
                             <Text style={{ fontSize: 18, color: '#008662', fontFamily: 'DMSansRegular' }} onPress={() => route.push('/signup')}>Sign Up</Text>
@@ -218,52 +160,6 @@ export default function Login() {
         </ScrollView>
     )
 }
-
-
-const formatPhoneNumber = (phoneNumber: string, countryCode: string): string => {
-    // Remove whitespace and ensure phone number is a string
-    const cleanedNumber = phoneNumber.trim();
-
-    // Check for empty phone number
-    if (!cleanedNumber || cleanedNumber.trim() === "") {
-        return "Phone number required";
-    }
-
-    // Check for valid length
-    if (cleanedNumber.length < 9 || cleanedNumber.length > 10) {
-        return "Invalid phone number format";
-    }
-
-    // Handle cases starting with "07"
-    if (cleanedNumber.startsWith("07") && cleanedNumber.length === 10) {
-        return `${countryCode}${cleanedNumber.slice(1)}`;
-    }
-
-    // Handle cases starting with "7"
-    if (cleanedNumber.startsWith("7")) {
-        return `${countryCode}${cleanedNumber}`;
-    }
-
-    // Handle cases not starting with either 0, 7, 254, +254
-    if (
-        !cleanedNumber.startsWith("0") &&
-        !cleanedNumber.startsWith("7") &&
-        !cleanedNumber.startsWith("254") &&
-        !cleanedNumber.startsWith("+254") &&
-        !cleanedNumber.startsWith("011")
-    ) {
-        return "Invalid phone number";
-    }
-
-    // Handle cases starting with "011"
-    if (cleanedNumber.startsWith("011") && cleanedNumber.length === 10) {
-        return `${countryCode}${cleanedNumber}`;
-    }
-
-    // Default case for unsupported formats
-    return "Invalid phone number format";
-};
-
 
 const styles = StyleSheet.create({
     container: {
@@ -300,104 +196,24 @@ const styles = StyleSheet.create({
     passwordContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
         borderRadius: 5,
         paddingHorizontal: 10,
-        height: 55,
+        height: 57,
         backgroundColor: '#F8F8F8'
     },
     passwordInput: {
         flex: 1,
-        fontSize: 17,
+        fontSize: 18,
         color: '#000',
         fontFamily: 'DMSansRegular'
     },
     input: {
-        height: 55,
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
+        height: 57,
         borderRadius: 5,
-        paddingHorizontal: 10,
-        fontSize: 17,
-        color: '#000',
-        backgroundColor: '#F8F8F8',
-        fontFamily: 'DMSansRegular'
-    },
-
-
-
-
-
-
-
-    // Changes
-    phoneContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    dropdown: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#F8F8F8",
-        paddingHorizontal: 10,
-        height: 55,
-        fontSize: 16,
-        color: '#000',
-        borderColor: '#00C48F',
-        borderWidth: 1,
-        borderRadius: 5,
-        marginRight: 7
-    },
-    flag: {
-        width: 22,
-        height: 14,
-        marginRight: 8,
-    },
-    countryCode: {
-        fontSize: 17,
-        color: "#333",
-        marginRight: 4
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContainer: {
-        backgroundColor: "white",
-        width: "86%",
-        borderRadius: 10,
-        padding: 16,
-    },
-    modalItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 10,
-    },
-    countryName: {
-        fontSize: 18,
-        marginLeft: 10,
-    },
-    closeButton: {
-        marginTop: 20,
-        alignSelf: "center",
-    },
-    closeText: {
-        fontSize: 18,
-        color: "#00C48F",
-    },
-    contactInput: {
-        flex: 1,
         paddingHorizontal: 15,
-        height: 55,
-        fontSize: 17,
+        fontSize: 18,
         color: '#000',
         backgroundColor: '#F8F8F8',
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
-        borderRadius: 5,
         fontFamily: 'DMSansRegular'
-    }
+    },
 })

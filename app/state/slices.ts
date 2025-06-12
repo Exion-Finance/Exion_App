@@ -85,7 +85,11 @@ const tokenBalanceSlice = createSlice({
   reducers: {
     setTokenBalance(state, action: PayloadAction<ResponseBalance>) {
       state.data = action.payload;
-    }
+    },
+    clearTokenBalance(state, action: PayloadAction<ResponseBalance>) {
+      console.log("Balance cleared")
+      state.data = null;
+    },
   },
 });
 
@@ -108,7 +112,7 @@ const userSlice = createSlice({
 export const { updateBalance } = balanceSlice.actions;
 export const { addTransaction } = transactionSlice.actions;
 export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransactions } = mobileTransactionSlice.actions;
-export const { setTokenBalance } = tokenBalanceSlice.actions;
+export const { setTokenBalance, clearTokenBalance } = tokenBalanceSlice.actions;
 export const { setUserProfile, clearUserProfile } = userSlice.actions;
 
 

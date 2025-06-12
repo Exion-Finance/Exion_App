@@ -1,6 +1,6 @@
 
-import React, { useRef, useMemo, useCallback } from 'react';
-import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useRef, useCallback } from 'react';
+import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -25,11 +25,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { MobileTransaction, Section } from '@/types/datatypes';
-import { TOKEN_KEY } from '../context/AuthContext';
-import * as SecureStore from "expo-secure-store"
 import { getBalances, fetchMobileTransactions } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
-import { useQuery } from '@tanstack/react-query';
 import {
   updateBalance,
   selectUserBalance,
@@ -68,8 +65,10 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 
 export default function TabOneScreen() {
+  // const { publicAPI, authAPI } = useAxios();
   const route = useRouter()
-  const { refreshToken, authState } = useAuth()
+  const { authState } = useAuth()
+  // const { api } = useAxios()
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
@@ -78,6 +77,7 @@ export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
+  const [tokensBalance, setTokensBalance] = useState<BalanceData>();
 
   const toggleVisibility = () => {
     setIsHidden((prev) => !prev);
@@ -88,7 +88,7 @@ export default function TabOneScreen() {
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  // console.log("User from redux...>", user_profile)
+  // console.log("user_balance from redux...>", user_balance)
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetTxRef = useRef<BottomSheet>(null);
@@ -101,48 +101,40 @@ export default function TabOneScreen() {
   };
 
   //fetch user balance
-  const fetchBalance = async (jwttoken: string): Promise<BalanceData | undefined> => {
+  const fetchBalance = useCallback(async (): Promise<any> => {
     try {
-      const response = await getBalances(jwttoken)
-      setTokens(response)
-      dispatch(setTokenBalance(response))
-
-      return response.balance
-    } catch (error: any) {
-      if (error.status === 403) {
-        console.log("errrrrrrr")
-        const refreshed = await refreshToken!()
-        if (refreshed) {
-          return await fetchBalance(refreshed)
-        }
+      const response = await getBalances();
+      if (response.balance) {
+        setTokensBalance(response.balance)
+        setTokens(response);
+        dispatch(setTokenBalance(response));
+        return response.balance;
       }
-      return undefined;
+      else if (response.error) {
+        console.log("errror in tx<<-->>", response.error)
+        return;
+      }
+    } catch (error: any) {
+      console.error("fetchBalance error:", error);
     }
-  }
-
-
-  const {
-    data: tokensbalance,
-    isLoading: balanceLoading,
-    isError: balErro,
-    error: err,
-    refetch: refetchBalance,
-  } = useQuery({
-    queryKey: ['balances', authToken],
-    queryFn: () => fetchBalance(authToken),
-    enabled: !!authToken,
-  });
+  }, []);
 
   useEffect(() => {
-    if (tokensbalance) {
-      const totalBalance = Object.values(tokensbalance).reduce<TotalAmounts>((acc, currency) => {
+    if (authToken) {
+      fetchBalance();
+    }
+  }, [authToken]);
+
+  useEffect(() => {
+    if (tokensBalance) {
+      const totalBalance = Object.values(tokensBalance).reduce<TotalAmounts>((acc, currency) => {
         acc.usd += parseFloat(currency.usd);
         acc.kes += parseFloat(currency.kes);
         return acc;
       }, { usd: 0, kes: 0 });
       dispatch(updateBalance(totalBalance))
     }
-  }, [tokensbalance]);
+  }, [tokensBalance]);
 
   function sliceSectionsToFirstNTransactions(sections: Section[], limit: number = 5): Section[] {
     const result: Section[] = [];
@@ -190,12 +182,8 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     const token = async () => {
-      // const token = await SecureStore.getItemAsync(TOKEN_KEY);
       const token = authState?.token
-      // console.log("<---Parsed token object index---->", token)
       if (token) {
-        // const parsedToken = JSON.parse(token);
-        // setAuthToken(parsedToken.token)
         setAuthToken(token)
       }
     }
@@ -221,47 +209,33 @@ export default function TabOneScreen() {
 
   //Fetch Mobile Transactions
   useEffect(() => {
-    let isMounted = true
-
-    const loadTx = async (loadToken?: string) => {
-      // console.log("fetchMobileTransactions Useeffect authtoken-->", authToken)
+    const loadTx = async () => {
       if (!authToken) return
       try {
-        let token = loadToken ? loadToken : authToken
-        // console.log("fetchMobileTransactions Useeffect called-->")
         const pageSize: number = 500;
-        const tx = await fetchMobileTransactions(token, pageSize)
-        if (isMounted && tx.data) {
+        const tx = await fetchMobileTransactions(pageSize)
+
+        if (tx.data) {
+          // console.log("mobile txdata fetch found<<..>>")
           const fullSections = makeSections(tx.data)
           const firstFive = sliceSectionsToFirstNTransactions(fullSections, 5);
           setMobileTransactions(firstFive)
-          // console.log("fullSections.length in load", fullSections.length)
           dispatch(addMobileTransactions(fullSections))
-
-        }
-      } catch (e: any) {
-        if (e.status === 403) {
-          const refreshed = await refreshToken!()
-          if (refreshed) {
-            await loadTx(refreshed)
-          }
           return;
         }
-        if (isMounted) {
-          setError(e.message || 'Failed to load transactions')
+        else if (tx.error) {
+          console.log("errror in tx<<-->>", tx.error)
+          return;
         }
+        // else console.log("tx else in refetch res", tx)/
+      } catch (e: any) {
+        Alert.alert("Oops😕", 'Failed to load transactions')
       } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
+        setIsLoading(false)
       }
     }
 
     loadTx()
-
-    return () => {
-      isMounted = false
-    }
   }, [authToken])
 
   //Helpers to parse & group mobile transactions by date
@@ -298,38 +272,30 @@ export default function TabOneScreen() {
     return Object.entries(groups).map(([title, data]) => ({ title, data }))
   }
 
-  //Memoize sections so they only recompute when mobileTransactions changes
-  // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
-  // console.log("sections-->", sections.length)
-
-  // const sections = useMemo(() => {
-  //   if (!mobileTransactions) return [];
-  //   return makeSections(mobileTransactions);
-  // }, [mobileTransactions]);
-
-  const refetchMobileTx = async (refetchTkn?: string) => {
+  const refetchMobileTx = async () => {
     try {
-      let token = refetchTkn ? refetchTkn : authToken
       const pageSize: number = 500;
-      const tx = await fetchMobileTransactions(token, pageSize)
-      const fullSections = makeSections(tx.data)
-      dispatch(addMobileTransactions(fullSections))
-      await refetchBalance()
-
-    } catch (e: any) {
-      if (e.status === 403) {
-        const refreshed = await refreshToken!()
-        if (refreshed) {
-          await refetchMobileTx(refreshed)
-        }
+      const tx = await fetchMobileTransactions(pageSize)
+      if (tx.data) {
+        const fullSections = makeSections(tx.data)
+        dispatch(addMobileTransactions(fullSections))
+        await fetchBalance()
+        console.log("Refreshed")
         return;
       }
-      setError(e.message || 'Failed to load transactions')
+      else if (tx.error) {
+        // console.log("errror in fetch tx<<-->>", tx.error)
+        return;
+      }
 
+    } catch (e: any) {
+      console.log("CAtch in catch boy..", e)
+      Alert.alert("Oops😕", 'Failed to load transactions')
     } finally {
       setIsLoading(false)
     }
   }
+
   const handleMobileTransactionsRefresh = useCallback(async () => {
     setRefreshing(true)
     await Promise.all([

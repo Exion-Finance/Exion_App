@@ -14,6 +14,7 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = ({ label, placeholder, onInputChange, error, errorDescription, keyboardType }) => {
     const [value, setValue] = useState('');
+    const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
 
     const handleChange = (text: string) => {
         setValue(text);
@@ -23,14 +24,16 @@ const InputField: React.FC<InputFieldProps> = ({ label, placeholder, onInputChan
         <View style={styles.container}>
             <PrimaryFontMedium style={styles.label}>{label}</PrimaryFontMedium>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: isInputFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isInputFocused ? 2 : 1 }]}
                 placeholder={placeholder}
-                placeholderTextColor={'#D2D2D2'}
+                placeholderTextColor={'#C3C2C2'}
                 value={value}
                 onChangeText={handleChange}
                 keyboardType={keyboardType}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
             />
-            {error ? <PrimaryFontText style={{marginTop: 10, color: 'red', fontSize: 15}}>{errorDescription}</PrimaryFontText> : null}
+            {error ? <PrimaryFontText style={{ marginTop: 10, color: 'red', fontSize: 15 }}>{errorDescription}</PrimaryFontText> : null}
         </View>
     );
 };
@@ -45,15 +48,13 @@ const styles = StyleSheet.create({
         color: '#052330',
     },
     input: {
-        height: 55,
-        borderColor: '#C3C3C3',
-        borderWidth: 1,
-        paddingHorizontal: 10,
+        height: 57,
+        paddingHorizontal: 15,
         borderRadius: 5,
         backgroundColor: '#F8F8F8',
         fontFamily: 'DMSansRegular',
         paddingLeft: 20,
-        fontSize: 18,
+        fontSize: 19,
         color: 'black'
     },
 });

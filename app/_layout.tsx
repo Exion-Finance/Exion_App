@@ -1,18 +1,18 @@
+import { useState, useCallback } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {  useRouter, usePathname } from "expo-router";
+import { useRouter, usePathname, router } from "expo-router";
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth, TOKEN_KEY } from './context/AuthContext';
+// import { AxiosProvider } from './context/AxiosProvider';
 import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from './context/queryProvider';
 import { persistor, store } from './state/store';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 import { ActivityIndicator } from 'react-native';
-
-
 
 //const Stack = createNativeStackNavigator();
 export {
@@ -61,7 +61,7 @@ export default function RootLayout() {
       <PersistGate loading={<ActivityIndicator size="small" />} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RootLayoutNav />
+              <RootLayoutNav />
           </AuthProvider>
         </QueryClientProvider>
       </PersistGate>
@@ -73,14 +73,23 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const route = useRouter()
   const pathname = usePathname();
-  const { authState, onLogout } = useAuth()
+  const { authState, onLogout, setAuthState } = useAuth()
   useEffect(() => {
     // onLogout!()
     try {
-      if (!authState?.authenticated) {
-        route.push("/landing")
-      } else {
-        if (pathname === "/landing") {
+      // console.log("pathname-->", pathname)
+      if (!authState?.authenticated && pathname === "/login") {
+        // route.replace("/login")
+        router.replace("/login");
+        return;
+      }
+      else if (!authState?.authenticated) {
+        // route.replace("/landing")
+        router.replace("/landing");
+        return;
+      }
+      else {
+        if (pathname === "/landing" || pathname === "/login") {
           // console.log("Pushing to tabs screen")
           // console.log("pathname-->", pathname)
           route.push("/(tabs)");
@@ -90,7 +99,7 @@ function RootLayoutNav() {
       }
     }
     catch (error) {
-      onLogout!()
+      // onLogout!()
       console.log("/layout error-->", error)
     }
 
