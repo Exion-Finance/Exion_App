@@ -9,7 +9,7 @@ interface ButtonProps extends PressableProps  {
 }
 export default function PrimaryButton({ route, textOnButton, widthProp,onPress }: ButtonProps) {
     const router = useRouter();
-    const handlePress = (event: GestureResponderEvent) => {
+    const handlePress = async(event: GestureResponderEvent) => {
         if (onPress) {
             onPress(event); // Execute the custom onPress function if provided
         }

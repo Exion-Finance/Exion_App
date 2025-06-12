@@ -124,7 +124,6 @@ type Response = {
 //v1 send
 
 export interface SendTokenv1Type {
-  token: string;
   recipient?: string;
   amount: number;
   tokenId: number;

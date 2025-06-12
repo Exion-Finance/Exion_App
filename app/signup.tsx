@@ -29,9 +29,12 @@ export default function Signup() {
     const [usernameError, setUsernameError] = useState<boolean>(false);
     const [otpError, setOtpError] = useState<boolean>(false);
     const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
-
     const [errorDescription, setErrorDescription] = useState("");
     const [buttonClicked, setButtonClicked] = useState(false);
+    const [isEmailFocused, setIsEmailFocused] = useState<boolean>(false);
+    const [isUsernameFocused, setIsUsernameFocused] = useState<boolean>(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
+
 
     const handleContinueRegistration = async () => {
         if (!isEmailValid) {
@@ -110,9 +113,9 @@ export default function Signup() {
                         <View style={styles.formContainer}>
                             <PrimaryFontMedium style={styles.label}>Email Address</PrimaryFontMedium>
                             <TextInput
-                                style={styles.input}
-                                placeholder="you@example.com"
-                                placeholderTextColor="#D2D2D2"
+                                style={[styles.input, { borderColor: isEmailFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isEmailFocused ? 2 : 1 }]}
+                                placeholder="user@example.com"
+                                placeholderTextColor="#C3C2C2"
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 onChangeText={(text) => {
@@ -123,6 +126,8 @@ export default function Signup() {
                                     setOtpError(false)
                                     setIsEmailValid(validator.isEmail(text))
                                 }}
+                                onFocus={() => setIsEmailFocused(true)}
+                                onBlur={() => setIsEmailFocused(false)}
                                 value={email}
                             />
                             <FormErrorText error={emailError} errorDescription={errorDescription} />
@@ -130,9 +135,9 @@ export default function Signup() {
 
                             <PrimaryFontMedium style={styles.label}>Username</PrimaryFontMedium>
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, { borderColor: isUsernameFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isUsernameFocused ? 2 : 1 }]}
                                 placeholder="Donnie"
-                                placeholderTextColor="#D2D2D2"
+                                placeholderTextColor="#C3C2C2"
                                 keyboardType="default"
                                 onChangeText={(text) => {
                                     setUsername(text);
@@ -140,16 +145,18 @@ export default function Signup() {
                                     setUsernameError(false);
                                     setOtpError(false)
                                 }}
+                                onFocus={() => setIsUsernameFocused(true)}
+                                onBlur={() => setIsUsernameFocused(false)}
                                 value={username}
                             />
                             <FormErrorText error={usernameError} errorDescription={errorDescription} />
 
                             <PrimaryFontMedium style={styles.label}>Password</PrimaryFontMedium>
-                            <View style={styles.passwordContainer}>
+                            <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
                                 <TextInput
                                     style={styles.passwordInput}
                                     placeholder="Password"
-                                    placeholderTextColor="#D2D2D2"
+                                    placeholderTextColor="#C3C2C2"
                                     secureTextEntry={!passwordVisible}
                                     onChangeText={(text) => {
                                         setPassword(text);
@@ -157,6 +164,8 @@ export default function Signup() {
                                         setUsernameError(false);
                                         setOtpError(false)
                                     }}
+                                    onFocus={() => setIsPasswordFocused(true)}
+                                    onBlur={() => setIsPasswordFocused(false)}
                                     value={password}
                                 />
                                 <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -219,75 +228,26 @@ const styles = StyleSheet.create({
         color: '#79828E',
     },
     input: {
-        height: 55,
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
+        height: 57,
         borderRadius: 5,
-        paddingHorizontal: 10,
-        // marginBottom: 20,
-        fontSize: 17,
-        color: '#000',
-        backgroundColor: '#F8F8F8',
-        fontFamily: 'DMSansRegular'
-    },
-    contactInput: {
-        flex: 1,
         paddingHorizontal: 15,
-        height: 55,
-        fontSize: 17,
+        fontSize: 18,
         color: '#000',
         backgroundColor: '#F8F8F8',
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
-        borderRadius: 5,
         fontFamily: 'DMSansRegular'
     },
     passwordContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderColor: '#D4D4D4',
-        borderWidth: 0.7,
         borderRadius: 5,
-        // marginBottom: 14,
-        paddingHorizontal: 10,
-        height: 55,
+        paddingHorizontal: 15,
+        height: 57,
         backgroundColor: '#F8F8F8'
     },
     passwordInput: {
         flex: 1,
-        fontSize: 17,
+        fontSize: 18,
         color: '#000',
         fontFamily: 'DMSansRegular'
     },
-
-
-
-    // Changes
-    phoneContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    dropdown: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#F8F8F8",
-        paddingHorizontal: 10,
-        height: 55,
-        fontSize: 16,
-        color: '#000',
-        borderColor: '#00C48F',
-        borderWidth: 1,
-        borderRadius: 5,
-        marginRight: 7
-    },
-    flag: {
-        width: 22,
-        height: 14,
-        marginRight: 8,
-    },
-    countryCode: {
-        fontSize: 17,
-        color: "#333",
-        marginRight: 4
-    }
 })

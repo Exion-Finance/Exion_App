@@ -11,7 +11,7 @@ import Loading from '@/components/Loading';
 import { useAuth } from "./context/AuthContext";
 
 export default function FundingAmount() {
-    const { refreshToken, authState } = useAuth()
+    const { authState } = useAuth()
 
     const [amount, setAmount] = useState('');
     const [error, setError] = useState(false);

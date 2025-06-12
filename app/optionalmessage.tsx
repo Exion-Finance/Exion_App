@@ -23,7 +23,7 @@ import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
 
 export default function OptionalMessage() {
 
-    const { refreshToken, authState } = useAuth()
+    const { authState } = useAuth()
 
     const route = useRouter()
     const [message, setMessage] = useState<string>('');
@@ -56,47 +56,32 @@ export default function OptionalMessage() {
     }
     // console.log("tokenId", id as number)
 
-    const handleSend = async () => {
+    const handleSend = async (sendToken?: string) => {
         const success = await handleFingerprintScan()
         if (success) {
             try {
                 bottomSheetRef.current?.snapToIndex(0)
-                // const token = await getParsedToken(TOKEN_KEY);
-                const token = authState?.token
+                const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
+                const response = await SendMoneyV1({
+                    chainId: 1,
+                    tokenId: id as number,
+                    recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
+                    amount: Number(amountFloat)
+                });
+                // console.log("<---send money--->", response)
 
-                if (token) {
-                    const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
-                    const response = await SendMoneyV1({
-                        token: token,
-                        chainId: 1,
-                        tokenId: id as number,
-                        recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
-                        amount: Number(amountFloat)
-                    });
-                    // console.log("<---response--->", response)
-
-                    if (response && !response.error) {
-                        setResponseReceived(true);
-                        bottomSheetRef.current?.snapToIndex(1)
-                        setTransactionDescription("Transaction sent successfully🎉")
-                    } else {
-                        bottomSheetRef.current?.close();
-                        Alert.alert("Oops😕", "Failed to send money, please try again");
-                    }
-                } else {
+                if (response.hash && !response.error) {
+                    setResponseReceived(true);
+                    bottomSheetRef.current?.snapToIndex(1)
+                    setTransactionDescription("Transaction sent successfully🎉")
+                }
+                else if (response.error) {
+                    console.log("errror in send<<-->>", response.error)
                     bottomSheetRef.current?.close();
                     Alert.alert("Oops😕", "Something went wrong, please try again");
-                }
-            } catch (error: any) {
-                if (error.status === 403) {
-                    const refreshed = await refreshToken!()
-                    console.log("<---Refreshed token---->", refreshed)
-                    if (refreshed) {
-                        await handleSend();
-                    }
                     return;
                 }
-
+            } catch (error) {
                 bottomSheetRef.current?.close();
                 Alert.alert("Oops😕", "An error occurred while sending money, please try again");
             }
@@ -174,7 +159,7 @@ export default function OptionalMessage() {
                     </View>
                     {gasFees ? (
                         <PrimaryButton
-                            onPress={handleSend}
+                            onPress={() => handleSend()}
                             textOnButton={`Send (${totalAmountSent ? Number(totalAmountSent).toFixed(2) : 0} Ksh)`}
                             widthProp={reusableStyles.width100}
                         />

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, StatusBar as RNStatusBar, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, StatusBar as RNStatusBar, Platform, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import GroupedTransactions from '@/components/Transactions';
 import { MobileTransactions } from '@/components/MobileTransactions';
@@ -12,29 +12,25 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
-import * as SecureStore from "expo-secure-store"
 import { Transactions as Trans, MobileTransaction, Section } from '@/types/datatypes';
-import { TOKEN_KEY } from '../context/AuthContext';
 import { fetchMobileTransactions } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
 import { userTransactions } from '../hooks/query/userTransactions';
 import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
-// import { useQuery } from '@tanstack/react-query';
 
 
 const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 25 : 0;
 
 export default function Transactions() {
 
-    const { refreshToken, authState } = useAuth()
+    const { authState } = useAuth()
 
     const [transactions, setTransactions] = useState(useSelector(selectTransactions))
     const [authToken, setAuthToken] = useState<string>("");
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
-    const [error, setError] = useState<string | null>(null)
     const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
@@ -45,27 +41,17 @@ export default function Transactions() {
 
     useEffect(() => {
         const token = async () => {
-            // const token = await SecureStore.getItemAsync(TOKEN_KEY);
             const token = authState?.token
             if (token) {
-                // const parsedToken = JSON.parse(token);
-                // setAuthToken(parsedToken.token)
                 setAuthToken(token)
             }
         }
         token()
     }, [authState])
 
+    const { data } = userTransactions(authToken);
 
-
-
-    const {
-        data,
-        isLoading: isTxLding,
-    } = userTransactions(authToken);
-    // console.log("isTxLding-->", isTxLding)
     useEffect(() => {
-        // console.log("Cache transactions useeffect")
         if (data) {
             dispatch(addTransaction(data))
         }
@@ -75,6 +61,14 @@ export default function Transactions() {
         if (mobileTx.length > 0) {
             setIsMobileTxLoading(false)
         }
+    }, [])
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (mobileTx.length === 0) {
+                setIsMobileTxLoading(false)
+            }
+        }, 2000)
     }, [])
 
     const handleRefresh = useCallback(async () => {
@@ -117,38 +111,16 @@ export default function Transactions() {
         return Object.entries(groups).map(([title, data]) => ({ title, data }))
     }
 
-
-    // const sections = useMemo(() => {
-    //     if (!mobileTransactions) return [];
-    //     return makeSections(mobileTransactions);
-    // }, [mobileTransactions]);
-
-    //Memoize sections so they only recompute when mobileTransactions changes
-    // const sections = useMemo(() => makeSections(mobileTransactions), [mobileTransactions])
-    // console.log("sections-->", sections.length)
-
-    const refetchMobileTx = async (refetchToken?: string) => {
+    const refetchMobileTx = async () => {
         try {
-            let token = refetchToken ? refetchToken : authToken
             const pageSize: number = 500;
-            const tx = await fetchMobileTransactions(token, pageSize)
+            const tx = await fetchMobileTransactions(pageSize)
             if (tx.data) {
-                // setMobileTransactions(tx.data)
                 const fullSections = makeSections(tx.data)
                 dispatch(addMobileTransactions(fullSections))
             }
-
-
         } catch (e: any) {
-            if (e.status === 403) {
-                // console.log("errrrrrrr")
-                const refreshed = await refreshToken!()
-                if (refreshed) {
-                    await refetchMobileTx(refreshed)
-                    return;
-                }
-              }
-            setError(e.message || 'Failed to load transactions')
+            Alert.alert("Oops😕", 'Failed to load transactions')
 
         } finally {
             setIsMobileTxLoading(false)
@@ -162,8 +134,6 @@ export default function Transactions() {
         ]);
         setRefreshing(false)
     }, [])
-
-    // console.log("crypto ransactions-->", transactions)
 
     const handleSelectTransaction = (tx: MobileTransaction) => {
         setSelectedTx(tx);
@@ -188,7 +158,6 @@ export default function Transactions() {
 
 
             <View style={styles.tabContainer}>
-
                 <TouchableOpacity
                     style={[
                         styles.tabButton,

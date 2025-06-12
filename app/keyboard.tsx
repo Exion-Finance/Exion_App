@@ -44,7 +44,7 @@ type TokenType = {
 
 
 const CustomKeyboard = () => {
-  const { refreshToken, authState } = useAuth()
+  const { authState } = useAuth()
 
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState(false);
@@ -82,41 +82,29 @@ const CustomKeyboard = () => {
 
   const { handleFingerprintScan } = useFingerprintAuthentication();
 
-  const calculateTransactionFee = async (amount: string, txToken?: string) => {
+  const calculateTransactionFee = async (amount: string) => {
     setSend(true)
-    if (jwtTokens) {
-      try {
-        const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
-        // const tokenAmount = activeToken.token
-        let token = txToken ? txToken : jwtTokens
-        const response = await calculateFee({
-          auth: token,
-          recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
-          amount,
-          tokenId: tokenId as number,
-          chainId: 1,
-        });
+    try {
+      const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
+      const response = await calculateFee({
+        recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
+        amount,
+        tokenId: tokenId as number,
+        chainId: 1,
+      });
 
-        if (response.status === 200) {
-          setFees(response.data)
-          return response.data
-        }
+      if (response.status === 200) {
+        setFees(response.data)
+        return response.data
+      }
 
-      } catch (error: any) {
-        if (error.status === 403) {
-          const refreshed = await refreshToken!()
-          if (refreshed) {
-            await calculateTransactionFee(amount, refreshed)
-          }
-          return;
-        }
-        Alert.alert("Oops😕", "Couldn't calculate transaction fees, please try again")
-      }
-      finally {
-        setSend(false)
-      }
+    } catch (error: any) {
+      Alert.alert("Oops😕", "Couldn't calculate transaction fees, please try again")
     }
-    else Alert.alert("Oops😕", "Unauthorized")
+    finally {
+      setSend(false)
+    }
+
   }
 
   const handleDone = () => {
@@ -127,7 +115,6 @@ const CustomKeyboard = () => {
   const handleButtonClick = async (sendToken?: string) => {
     try {
       setSend(true)
-      const sendTkn = sendToken ? sendToken : jwtTokens
       if (inputValue === "") {
         setError(true)
         setErrorDescription('Enter a valid amount')
@@ -206,16 +193,10 @@ const CustomKeyboard = () => {
           const tokenName = activeToken.token
           const channel = "Mpesa"
           const phonenumber = normalizePhoneNumber(phoneNumber as string)
-          const res = await SendMoney(sendTkn, parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-          // console.log('send money response is', res)
-          if (res.error) {
-            bottomSheetRef2.current?.close();
-            setError(true)
-            setErrorDescription(res.msg)
-            console.log(res.msg)
-            return;
-          }
-          if (res.message === "Processing") {
+          const res = await SendMoney(parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
+          console.log('send money response is', res)
+
+          if (res.message === "Processing" && !res.error) {
             setTransactionState("Processing...")
             const merchantRequestID: string = res.response.OriginatorConversationID;
 
@@ -243,6 +224,15 @@ const CustomKeyboard = () => {
 
             setTimeout(() => checkStatus(), 2500);
           }
+          else if (res.error) {
+            console.log("errror in send<<-->>", res.error)
+            bottomSheetRef2.current?.close();
+            setError(true)
+            setErrorDescription(res.msg)
+            console.log(res.msg)
+            return;
+          }
+          else console.log("send else in res", res)
 
         } catch (err) {
           console.log('error is', err)
@@ -278,7 +268,7 @@ const CustomKeyboard = () => {
           const chainId = 1
           const tokenName = activeToken.token.toUpperCase()
           const networkCode = "Mpesa"
-          const res = await BuyGoods(sendTkn, parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
+          const res = await BuyGoods(parseFloat(inputValue), tokenName, chainId, tillNumber as string, networkCode)
           // console.log('<---Buy goods response is--->', res)
           if (res.error) {
             bottomSheetRef2.current?.close();
@@ -354,7 +344,7 @@ const CustomKeyboard = () => {
           const chainId = 1
           const tokenName = activeToken.token.toUpperCase()
           const networkCode = "Mpesa"
-          const res = await PayBill(sendTkn, parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
+          const res = await PayBill(parseFloat(inputValue), tokenName, chainId, paybillNumber as string, businessNumber as string, networkCode)
 
           if (res.error) {
             bottomSheetRef2.current?.close();
@@ -409,15 +399,7 @@ const CustomKeyboard = () => {
         }
       }
     } catch (error: any) {
-      // console.log(error)
-      if (error.status === 403) {
-        const refreshed = await refreshToken!()
-        console.log("<---Refreshed token---->", refreshed)
-        if (refreshed) {
-          await handleButtonClick(refreshed);
-        }
-        return;
-      }
+      console.log("paybill error>", error)
     }
     finally {
       setSend(false)
@@ -462,59 +444,34 @@ const CustomKeyboard = () => {
   };
 
   useEffect(() => {
-    const fetchBalances = async (authToken?: string) => {
+    const fetchBalances = async () => {
       try {
-        let tokenFromAuth = authToken ? authToken : authState?.token
-        // console.log("<---token from auth(useeffect called)---->", tokenFromAuth)
-        // if(tokenFromAuth){
-        //   console.log("<---token from auth---->", tokenFromAuth)
-        // }
-        // const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        const response = await getBalances();
+        if (response && response.balance) {
+          setTokens(response);
 
-        if (tokenFromAuth) {
-          // const parsedToken = JSON.parse(token);
-          // const response = await getBalances(parsedToken.token);
-          setJwtToken(tokenFromAuth)
-          // const response = await getBalances(tokenFromAuth);
-          const response = await axios.get(`${PESACHAIN_URL}/tx/balances`, {
-            headers: {
-              'Authorization': `Bearer ${tokenFromAuth}`
-            }
+          // Set active token to the first token with a valid balance
+          const tokenEntries = Object.entries(response.balance) as [string, { token: string; kes: string }][];
+          const tokenWithHighestBalance = tokenEntries.reduce((prev, curr) => {
+            const prevBalance = Number(prev[1].kes);
+            const currBalance = Number(curr[1].kes);
+            return currBalance > prevBalance ? curr : prev;
           });
-          // console.log("<---getBalances res---->", response)
-
-          if (response.data && response.data.balance) {
-            setTokens(response.data);
-
-            // Set active token to the first token with a valid balance
-            const tokenEntries = Object.entries(response.data.balance) as [string, { token: string; kes: string }][];
-            const tokenWithHighestBalance = tokenEntries.reduce((prev, curr) => {
-              const prevBalance = Number(prev[1].token);
-              const currBalance = Number(curr[1].token);
-              return currBalance > prevBalance ? curr : prev;
+          // Destructure selected token
+          const [selectedKey, selectedData] = tokenWithHighestBalance;
+          if (selectedTokenId === 0) {
+            setActiveToken({
+              token: selectedKey.toUpperCase(),
+              balance: Number(selectedData.token),
+              ksh: Number(selectedData.kes),
             });
-            // Destructure selected token
-            const [selectedKey, selectedData] = tokenWithHighestBalance;
-            if (selectedTokenId === 0) {
-              setActiveToken({
-                token: selectedKey.toUpperCase(),
-                balance: Number(selectedData.token),
-                ksh: Number(selectedData.kes),
-              });
-            }
+          }
 
-          }
-        }
+        }else console.log("Fetch nothingggggggggg")
       }
+      
       catch (error: any) {
-        if (error.status === 403) {
-          const refreshed = await refreshToken!()
-          console.log("<---Refreshed token---->", refreshed)
-          if (refreshed) {
-            await fetchBalances(refreshed);
-          }
-          return;
-        }
+        console.log("Fetch balances error", error)
       }
     };
 

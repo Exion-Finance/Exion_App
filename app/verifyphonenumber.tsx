@@ -30,6 +30,7 @@ export default function VerifyPhone() {
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
     const [selectedCountry, setSelectedCountry] = useState(countries[24]);
     const [phoneNumber, setPhoneNumber] = useState<string>('');
+    const [isPhoneFocused, setIsPhoneFocused] = useState<boolean>(false);
 
     const route = useRouter()
 
@@ -155,14 +156,16 @@ export default function VerifyPhone() {
                         </TouchableOpacity>
 
                         <TextInput
-                            style={styles.contactInput}
+                            style={[styles.contactInput, { borderColor: isPhoneFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPhoneFocused ? 2 : 1 }]}
                             placeholder="701234567"
-                            placeholderTextColor="#D2D2D2"
+                            placeholderTextColor="#C3C2C2"
                             keyboardType="phone-pad"
                             onChangeText={(text) => {
                                 setPhoneNumber(text);
                                 setError(false);
                             }}
+                            onFocus={() => setIsPhoneFocused(true)}
+                            onBlur={() => setIsPhoneFocused(false)}
                             value={phoneNumber}
                         />
                     </View>
@@ -170,7 +173,7 @@ export default function VerifyPhone() {
 
                     <View style={styles.disclaimerContainer}>
                         <Feather name="info" size={15} color="grey" />
-                        <PrimaryFontText style={{color: "grey"}}>  You will receive an OTP via WhatsApp</PrimaryFontText>
+                        <PrimaryFontText style={{ color: "grey" }}>  You will receive an OTP via WhatsApp</PrimaryFontText>
                     </View>
                 </View>
 
@@ -253,7 +256,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#F8F8F8",
         paddingHorizontal: 10,
-        height: 55,
+        height: 57,
         fontSize: 16,
         color: '#000',
         borderColor: '#00C48F',
@@ -269,12 +272,10 @@ const styles = StyleSheet.create({
     contactInput: {
         flex: 1,
         paddingHorizontal: 15,
-        height: 55,
-        fontSize: 17,
+        height: 57,
+        fontSize: 18,
         color: '#000',
         backgroundColor: '#F8F8F8',
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
         borderRadius: 5,
         fontFamily: 'DMSansRegular'
     },
