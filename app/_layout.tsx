@@ -132,6 +132,7 @@ function RootLayoutNav() {
       <Stack.Screen name="sendcrypto" options={{ headerShown: false }} />
       <Stack.Screen name="emailaddress" options={{ headerShown: false }} />
       <Stack.Screen name="verifyphonenumber" options={{ headerShown: false }} />
+      <Stack.Screen name="webview" options={{ headerShown: false }} />
       <Stack.Screen name="resetpassword" options={{ headerTitle: 'Reset Password', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
     </Stack>
   );
