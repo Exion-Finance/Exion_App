@@ -96,6 +96,15 @@ export default function Signup() {
         }
     }
 
+    const handleWebview = (uri: string) =>{
+        route.push({
+            pathname: '/webview',
+            params: {
+                uri: uri
+            }
+        });
+    }
+
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
@@ -179,7 +188,7 @@ export default function Signup() {
                             <FormErrorText error={passwordError} errorDescription={errorDescription} />
 
                             <View style={[reusableStyles.width100, { alignItems: 'center', marginBottom: 15, marginTop: 25 }]}>
-                                <PrimaryFontText style={{ fontSize: 16, color: '#008662', textAlign: 'center' }}>By pressing continue you agree to our terms of service and privacy policy</PrimaryFontText>
+                                <PrimaryFontText style={{ fontSize: 16, color: '#008662', textAlign: 'center' }}>By pressing continue you agree to our <PrimaryFontText style={{ textDecorationLine: 'underline' }} onPress={() => handleWebview('https://exion.finance/terms-of-use')}>terms of service</PrimaryFontText> and <PrimaryFontText style={{ textDecorationLine: 'underline' }} onPress={() => handleWebview('https://exion.finance/privacy-policy')}>privacy policy</PrimaryFontText></PrimaryFontText>
                             </View>
                             <PrimaryButton onPress={() => handleContinueRegistration()} textOnButton={buttonClicked ?
                                 <Loading color='#fff' description='Please wait...' />
