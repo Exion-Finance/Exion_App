@@ -29,7 +29,7 @@ export default function Profile() {
   // const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
 
   const user_profile = useSelector(selectUserProfile)
-  const appVersion = Constants.manifest?.version ?? '1.0.0';
+  const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0';
 
   const copyToClipboard = () => {
     Clipboard.setStringAsync(user_profile?.wallet?.publicKey as string);
