@@ -179,6 +179,11 @@ const CustomKeyboard = () => {
           setErrorDescription("Minimum amount is Ksh 10")
           return;
         }
+        if (Number(inputValue) > 10000) {
+          setError(true)
+          setErrorDescription('Maximum amount is Ksh 10,000')
+          return;
+        }
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
@@ -255,6 +260,11 @@ const CustomKeyboard = () => {
           setErrorDescription("Minimum amount is Ksh 10")
           return;
         }
+        if (Number(inputValue) > 10000) {
+          setError(true)
+          setErrorDescription('Maximum amount is Ksh 10,000')
+          return;
+        }
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
@@ -329,6 +339,11 @@ const CustomKeyboard = () => {
         if (Number(inputValue) < 10) {
           setError(true)
           setErrorDescription("Minimum amount is Ksh 10")
+          return;
+        }
+        if (Number(inputValue) > 10000) {
+          setError(true)
+          setErrorDescription('Maximum amount is Ksh 10,000')
           return;
         }
         const success = await handleFingerprintScan()
@@ -467,7 +482,7 @@ const CustomKeyboard = () => {
             });
           }
 
-        }else console.log("Fetch nothingggggggggg")
+        }else console.log("Fetch nothing")
       }
       
       catch (error: any) {
