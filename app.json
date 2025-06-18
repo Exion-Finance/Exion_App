@@ -26,7 +26,7 @@
       "permissions": [
         "READ_CONTACTS"
       ],
-      "package": "com.lemon_r.Exion"
+      "package": "com.ExionPay.Exion"
     },
     "web": {
       "bundler": "metro",
@@ -46,7 +46,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "1eeb1b75-8586-4b6a-9908-34d99ab2d618"
+        "projectId": "6e4e9adc-17f3-49c2-bc62-16c14edeb0e8"
       }
     }
   }
