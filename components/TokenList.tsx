@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 18.5,
-        paddingHorizontal: 23
+        paddingHorizontal: 23,
+        // backgroundColor: "#E0FFDD",
     },
     logo: {
         width: 38,

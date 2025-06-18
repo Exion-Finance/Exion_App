@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { useAuth, TOKEN_KEY } from '../context/AuthContext';
 import { selectUserProfile } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
+import Constants from 'expo-constants';
 
 export default function Profile() {
   const route = useRouter()
@@ -28,6 +29,7 @@ export default function Profile() {
   // const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
 
   const user_profile = useSelector(selectUserProfile)
+  const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0';
 
   const copyToClipboard = () => {
     Clipboard.setStringAsync(user_profile?.wallet?.publicKey as string);
@@ -67,9 +69,9 @@ export default function Profile() {
         <Image source={userIcon} style={styles.userIcon} />
         <View>
           <View style={styles.flexRow}>
-            <PrimaryFontBold style={{ fontSize: 19 }}>{user_profile?.userName || ""}</PrimaryFontBold>
+            <PrimaryFontBold style={{ fontSize: 19 }}>{user_profile?.userName || "--"}</PrimaryFontBold>
           </View>
-          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{user_profile?.email || ""}</PrimaryFontText>
+          <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{user_profile?.email || "--"}</PrimaryFontText>
         </View>
       </View>
 
@@ -99,13 +101,22 @@ export default function Profile() {
           <View style={styles.separator}></View>
 
           <PrimaryFontMedium style={{ fontSize: 15, color: '#3A3B3C' }}>Wallet address</PrimaryFontMedium>
-          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>{user_profile?.wallet?.publicKey || ""}</PrimaryFontText>
+
+          <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>
+          {user_profile.wallet.publicKey
+            ? `${user_profile.wallet.publicKey.slice(0, 13)}...${user_profile.wallet.publicKey.slice(-5)}`
+            : "--"}
+          </PrimaryFontText>
+
           <TouchableOpacity style={[styles.buttonContainer]} onPress={copyToClipboard}>
             <MaterialIcons name="content-copy" size={15} color="#00C48F" />
             <PrimaryFontMedium style={[styles.text]}>Tap to copy</PrimaryFontMedium>
           </TouchableOpacity>
         </View>
+        <View style={{ alignItems: 'center'}}>
+        <PrimaryFontBold style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontBold>
         <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} />
+        </View>
       </View>
     </View>
   );
@@ -142,13 +153,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 11,
-    // paddingHorizontal: 16,
-    // paddingRight: 21,
     borderRadius: 10,
     backgroundColor: 'white',
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: '#DFE4E5',
-    width: 180
+    width: 160
   },
   text: {
     color: '#00C48F',
