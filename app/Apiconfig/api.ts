@@ -161,6 +161,11 @@ export const sendOtpEmail = async (identifier: string): Promise<AxiosResponse> =
     return await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier });
 };
 
+export const sendSignUpEmailOtp = async (email: string): Promise<AxiosResponse> => {
+    return await axios.post(`${PESACHAIN_URL}/verification/sendEmailotp`, { email });
+};
+
+
 export const verifyEmailOTP = async (otp: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/verifyOtp`, { otp });
 };

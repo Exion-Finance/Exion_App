@@ -101,7 +101,7 @@ export default function Login() {
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 onChangeText={(text) => {
-                                    setEmail(text);
+                                    setEmail(text.trim());
                                     setPasswordError(false);
                                     setEmailError(false)
                                     setIsEmailValid(validator.isEmail(text))
@@ -120,7 +120,7 @@ export default function Login() {
                                     placeholderTextColor="#C3C2C2"
                                     secureTextEntry={!passwordVisible}
                                     onChangeText={(text) => {
-                                        setPassword(text);
+                                        setPassword(text.trim());
                                         setPasswordError(false);
                                         setEmailError(false);
                                     }}
