@@ -72,7 +72,7 @@ const CustomKeyboard = () => {
   let textOnButton
   if (source === 'contacts' || source === "sendcrypto") {
     textOnButton = "NEXT"
-  } else textOnButton = "CONFIRM"
+  } else textOnButton = "SEND"
 
   const handlePress = (value: string) => {
     // Update the input value when a number or dot is pressed
@@ -522,7 +522,7 @@ const CustomKeyboard = () => {
       <View style={styles.container}>
         <StatusBar style={'light'} />
         <View style={styles.balanceContainer}>
-          <Pressable style={styles.closeContainer} onPress={() => route.push(`/${source}` as Href<string | object>)}>
+          <Pressable style={styles.closeContainer} onPress={() => route.push(source? `/${source}` as Href<string | object> : '/(tabs)')}>
             <Feather name='x' color={'#E31D1A'} size={28} />
           </Pressable>
 
