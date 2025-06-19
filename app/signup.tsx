@@ -14,7 +14,7 @@ const signupBackground = require('@/assets/images/SignupBackground.png');
 import { useAuth } from "./context/AuthContext";
 import FormErrorText from "@/components/FormErrorText";
 import Loading from "@/components/Loading";
-import { sendOtpEmail } from "./Apiconfig/api";
+import { sendSignUpEmailOtp } from "./Apiconfig/api";
 
 export default function Signup() {
 
@@ -65,13 +65,13 @@ export default function Signup() {
                     username,
                     password,
                     email,
-                    source: 'verify-email',
+                    source: 'signup',
                     textOnButton: 'Verify OTP',
                     loadingText: 'Verifying..',
                     title: 'Verify Email',
                     description: `Please enter the OTP sent to ${email} to finish setting up your account`
                 }
-                const res = await sendOtpEmail(email)
+                const res = await sendSignUpEmailOtp(email)
                 if (res.data.success) {
                     route.push({
                         pathname: '/otp',
@@ -111,7 +111,7 @@ export default function Signup() {
     const title = 'Create Account'
     const description = 'Enter the details below to create an account'
     return (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={styles.scrollview}>
             <View style={styles.container}>
                 <NavBar title='Sign Up' onBackPress={() => route.push('/login')} />
 
@@ -128,7 +128,7 @@ export default function Signup() {
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 onChangeText={(text) => {
-                                    setEmail(text);
+                                    setEmail(text.trim());
                                     setEmailError(false);
                                     setPasswordError(false);
                                     setUsernameError(false);
@@ -149,7 +149,7 @@ export default function Signup() {
                                 placeholderTextColor="#C3C2C2"
                                 keyboardType="default"
                                 onChangeText={(text) => {
-                                    setUsername(text);
+                                    setUsername(text.trim());
                                     setPasswordError(false);
                                     setUsernameError(false);
                                     setOtpError(false)
@@ -168,7 +168,7 @@ export default function Signup() {
                                     placeholderTextColor="#C3C2C2"
                                     secureTextEntry={!passwordVisible}
                                     onChangeText={(text) => {
-                                        setPassword(text);
+                                        setPassword(text.trim());
                                         setPasswordError(false);
                                         setUsernameError(false);
                                         setOtpError(false)
@@ -206,24 +206,44 @@ export default function Signup() {
 
 
 const styles = StyleSheet.create({
+    scrollview: {
+        // height: '180%',
+        backgroundColor: 'red',
+        // borderWidth: 5,
+        // borderColor: 'blue',
+        flex: 1
+    },
     container: {
         flex: 1,
+        // height: '100%',
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        // borderWidth: 3,
+        // borderColor: 'blue'
     },
     formView: {
-        height: 590,
+        // height: 590,
+        // height: '90%',
+        flex: 1,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 55,
+        // paddingBottom: 95,
+        // borderWidth: 2,
+        // borderColor: 'grey'
     },
     background: {
-        height: '100%',
+        height: '120%',
+        // flex: 1,
         resizeMode: 'cover',
         width: '100%',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        // marginTop: 10
+        // borderWidth: 2,
+        // borderColor: 'red'
     },
     formContainer: {
         height: '60%',

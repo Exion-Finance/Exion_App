@@ -20,13 +20,13 @@ import { useAuth, TOKEN_KEY } from '../context/AuthContext';
 import { selectUserProfile } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 import Constants from 'expo-constants';
+import Loading from "@/components/Loading";
+// import { authAPI, publicAPI } from "../context/AxiosProvider";
 
 export default function Profile() {
   const route = useRouter()
-  const { onLogout } = useAuth()
-
-
-  // const [userdetails, setUserDetails] = useState<UserDetails>({ id: "", userName: "", email: "" })
+  const { onClearData, onLogout } = useAuth()
+  const [logout, setLogout] = useState<boolean>(false)
 
   const user_profile = useSelector(selectUserProfile)
   const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0';
@@ -45,18 +45,48 @@ export default function Profile() {
 
   const getRefreshToken = async () => {
     const stored = await SecureStore.getItemAsync(TOKEN_KEY);
-    if(!stored){
+    if (!stored) {
       return null;
     }
     const parsed = JSON.parse(stored);
-    const { refreshToken } = parsed;
-    return refreshToken;
+    const { refreshToken, token } = parsed;
+    return token;
   }
 
+  // const handleLogout = async () => {
+  //   try {
+  //     setLogout(true)
+  //     const refreshToken = await getRefreshToken()
+  //     console.log("token", refreshToken)
+  //     if (refreshToken) {
+  //       const response = await publicAPI.post(`/auth/logout`, { refreshToken });
+  //       console.log(response.data)
+  //       if (response.data.success) {
+  //         await onClearData!()
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  //   finally {
+  //     setLogout(false)
+  //   }
+  // }
+
   const handleLogout = async () => {
-    const refreshToken = await getRefreshToken()
-    if(refreshToken){
-      await onLogout!(refreshToken)
+    try {
+      setLogout(true)
+      const refreshToken = await getRefreshToken()
+      if (refreshToken) {
+        await onLogout!(refreshToken)
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }
+    finally {
+      setLogout(false)
+      route.push('/login')
     }
   }
 
@@ -103,9 +133,9 @@ export default function Profile() {
           <PrimaryFontMedium style={{ fontSize: 15, color: '#3A3B3C' }}>Wallet address</PrimaryFontMedium>
 
           <PrimaryFontText style={{ fontSize: 18, color: '#79828E', marginTop: 10, marginBottom: 15 }}>
-          {user_profile.wallet.publicKey
-            ? `${user_profile.wallet.publicKey.slice(0, 13)}...${user_profile.wallet.publicKey.slice(-5)}`
-            : "--"}
+            {user_profile?.wallet.publicKey
+              ? `${user_profile.wallet.publicKey.slice(0, 13)}...${user_profile.wallet.publicKey.slice(-5)}`
+              : "--"}
           </PrimaryFontText>
 
           <TouchableOpacity style={[styles.buttonContainer]} onPress={copyToClipboard}>
@@ -113,9 +143,20 @@ export default function Profile() {
             <PrimaryFontMedium style={[styles.text]}>Tap to copy</PrimaryFontMedium>
           </TouchableOpacity>
         </View>
-        <View style={{ alignItems: 'center'}}>
-        <PrimaryFontBold style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontBold>
-        <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} />
+        <View style={{ alignItems: 'center' }}>
+          <PrimaryFontBold style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontBold>
+          {/* <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} /> */}
+
+          <View style={[{ justifyContent: 'center', alignItems: 'center' }, reusableStyle.width100]}>
+            <TouchableOpacity onPress={() => handleLogout()} style={styles.button}>
+              <PrimaryFontBold style={{ color: 'white', fontSize: 19 }}>{logout ? (
+                <Loading color='#fff' description='Logging out' />
+              ) :
+                "Logout"
+              }
+              </PrimaryFontBold>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -163,5 +204,15 @@ const styles = StyleSheet.create({
     color: '#00C48F',
     fontSize: 16,
     marginLeft: 5,
+  },
+  button: {
+    backgroundColor: '#00C48F',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    paddingVertical: 18,
+    width: '100%',
+    marginBottom: 10,
+    // opacity: 0
   }
 });

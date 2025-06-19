@@ -36,7 +36,7 @@ export default function Email() {
 
             const user = {
                 email,
-                source: 'reset-password',
+                source: 'emailaddress',
                 textOnButton: 'Continue',
                 loadingText: 'Verifying..',
                 title: 'Verify identity',

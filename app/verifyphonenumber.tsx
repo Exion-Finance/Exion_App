@@ -104,11 +104,11 @@ export default function VerifyPhone() {
                 const user = {
                     ...parsedUser,
                     phoneNumber: phone_number,
-                    source: 'verify-phone',
+                    source: 'verifyphonenumber',
                     textOnButton: 'Create Account',
                     loadingText: 'Creating Account',
                     title: 'Verify contact',
-                    description: `To ensure your account\'s security, we\'ve sent a secure OTP to ${masked}. Please enter it here to reset your password.`
+                    description: `To ensure your account\'s security, we\'ve sent a secure OTP to ${masked}. Please enter it here to create your account.`
                 }
 
                 const res = await sendOtpWhatsapp(phone_number)

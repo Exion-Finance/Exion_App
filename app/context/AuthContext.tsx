@@ -14,6 +14,7 @@ interface AuthProps {
     authState?: { token: string | null; authenticated: boolean | null };
     onLogin?: (email: string, password: string) => Promise<any>;
     onLogout?: (refreshToken: string) => Promise<void>;
+    onClearData?: () => Promise<void>;
     onRegister?: (phoneNumber: string, password: string, email: string, username: string, otp: string) => Promise<any>;
     getAccessToken?: () => string | null;
 }
@@ -24,7 +25,7 @@ export const useAuth = () => useContext(AuthContext);
 
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    
+
     const [authState, setAuthState] = useState<{
         token: string | null;
         authenticated: boolean | null;
@@ -162,12 +163,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const clearData = async () => {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+        setAuthState({
+            token: null,
+            authenticated: false,
+        });
+        console.log("Successfully logged out")
+    };
+
     const value: AuthProps = {
         setAuthState,
         authState,
         onRegister: register,
         onLogin: login,
         onLogout: logout,
+        onClearData: clearData,
         getAccessToken,
     };
     // console.log("Auth value:", {

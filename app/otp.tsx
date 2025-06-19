@@ -93,7 +93,7 @@ export default function OTP({ }) {
     };
 
     const handleOtpSubmit = async () => {
-        if (parsedUser?.source === "verify-phone") {
+        if (parsedUser?.source === "verifyphonenumber") {
             setButtonClicked(true)
             const filteredOtp = filterOTP(otp) ?? ""
             if (!filteredOtp) {
@@ -129,7 +129,7 @@ export default function OTP({ }) {
             }
             setButtonClicked(false)
         }
-        else if (parsedUser?.source === "reset-password") {
+        else if (parsedUser?.source === "emailaddress") {
             try {
                 setButtonClicked(true)
                 const filteredOtp = filterOTP(otp) ?? ""
@@ -153,7 +153,7 @@ export default function OTP({ }) {
                 setErrorDescription("Please enter a valid OTP.")
             }
         }
-        else if (parsedUser?.source === "verify-email") {
+        else if (parsedUser?.source === "signup") {
             try {
                 setButtonClicked(true)
                 const filteredOtp = filterOTP(otp) ?? ""
