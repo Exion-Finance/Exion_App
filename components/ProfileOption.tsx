@@ -1,7 +1,8 @@
 import React from 'react';
-import { Pressable, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, TouchableOpacity, View } from 'react-native';
 import { useRouter, Href } from 'expo-router';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
+import Feather from '@expo/vector-icons/Feather';
 
 type OptionProps = {
     route?: Href<string | object>;
@@ -21,16 +22,19 @@ export default function ProfileOption({
     const router = useRouter();
 
     const handlePress = () => {
-        if(route){
+        if (route) {
             router.push(route);
         }
     };
 
     return (
-        <Pressable style={[styles.container, containerStyle]} onPress={handlePress}>
-            {icon}
-            <PrimaryFontMedium style={[styles.text, textStyle]}>{option}</PrimaryFontMedium>
-        </Pressable>
+        <TouchableOpacity style={[styles.container, containerStyle]} onPress={handlePress}>
+            <View style={styles.optionLeft}>
+                {icon}
+                <PrimaryFontMedium style={[styles.text, textStyle]}>{option}</PrimaryFontMedium>
+            </View>
+            <Feather name="chevron-right" size={20} color="#00C48F" />
+        </TouchableOpacity>
     );
 }
 
@@ -38,9 +42,17 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        paddingVertical: 8,
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        paddingHorizontal: 5,
         backgroundColor: 'white',
+        // borderBottomWidth: 1,
+        // marginBottom: 10
+    },
+    optionLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
     },
     text: {
         color: '#79828E',

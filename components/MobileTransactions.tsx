@@ -53,7 +53,7 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
             >
                 <Image
                     source={Empty}
-                    style={{ height: 150, width: 130, marginTop: -80 }}
+                    style={{ height: 130, width: 110, marginTop: 40 }}
                 />
                 <PrimaryFontMedium style={styles.emptyText}>
                     No transactions found
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     empty: {
         flex: 1,
         width: '100%',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: 'white',
     },

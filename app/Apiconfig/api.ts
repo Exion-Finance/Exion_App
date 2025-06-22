@@ -148,26 +148,57 @@ export const fetchUser = async (token: string) => {
     return response;
 }
 
+export const updateUser = async ({ email, otp, username, phoneNumber }: {
+    email?: string;
+    otp?: string;
+    username?: string;
+    phoneNumber?: string;
+}) => {
+    console.log("Updating user")
+    console.log("username", username)
+    console.log("email", email)
+    console.log("phoneNumber", phoneNumber)
+    console.log("otp", otp)
+
+    const payload = { email, otp, username, phoneNumber };
+
+    // Optionally: remove undefined fields
+    const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([_, value]) => value !== undefined)
+    );
+    console.log("cleanPayload", cleanPayload)
+    const response = await authAPI.put(`/user/profile`, cleanPayload)
+    return response;
+}
 
 //send otp
 export const sendOtpWhatsapp = async (phoneNumber: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier: phoneNumber });
 };
 export const sendEmailOtpForPasswordReset = async (email: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/passwordResetOTP`, { identifier: email });
+    return await authAPI.post(`/verification/passwordResetOTP`, { identifier: email });
 };
 
 export const sendOtpEmail = async (identifier: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier });
+    return await authAPI.post(`/verification/sendotp`, { identifier });
 };
 
 export const sendSignUpEmailOtp = async (email: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/sendEmailotp`, { email });
 };
 
+export const sendUpdateEmailOTP = async (email: string): Promise<AxiosResponse> => {
+    console.log("Sending otp", email)
+    return await authAPI.post(`/verification/sendProfileOtp`, { identifier: email });
+};
+
 
 export const verifyEmailOTP = async (otp: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/verifyOtp`, { otp });
+};
+
+export const verifyEditProfileOTP = async (otp: string): Promise<AxiosResponse> => {
+    return await authAPI.post(`/verification/verifyProlieOtp`, { otp });
 };
 
 
