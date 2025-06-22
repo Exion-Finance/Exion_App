@@ -7,12 +7,13 @@ import FormErrorText from "@/components/FormErrorText";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { useRouter } from 'expo-router';
 import Loading from '@/components/Loading';
-import { sendEmailOtpForPasswordReset } from "./Apiconfig/api";
+import { sendOtpEmail } from "./Apiconfig/api";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import Feather from '@expo/vector-icons/Feather';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 
-export default function Email() {
+
+export default function ChangeEmail() {
     const [email, setEmail] = useState<string>('');
     const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
     const [error, setError] = useState<boolean>(false);
@@ -39,14 +40,14 @@ export default function Email() {
 
             const user = {
                 email,
-                source: 'emailaddress',
-                textOnButton: 'Continue',
-                loadingText: 'Verifying..',
+                source: 'changeemail',
+                textOnButton: 'Finish',
+                loadingText: 'Please wait..',
                 title: 'Verify identity',
-                description: 'To ensure your account\'s security, we\'ve sent a secure OTP to your email. Please enter it here to reset your password.'
+                description: 'To ensure account security, we\'ve sent a secure OTP to the new email. Enter it here to finish making changes.'
             }
 
-            const res = await sendEmailOtpForPasswordReset(email)
+            const res = await sendOtpEmail(email)
 
             if (res.status === 200) {
                 route.push({
@@ -65,7 +66,7 @@ export default function Email() {
             }
         } catch (error: any) {
             setError(true)
-            setErrorDescription("User does not exist")
+            setErrorDescription("User already exists")
             setButtonClicked(false)
         } finally {
             setButtonClicked(false)
@@ -74,10 +75,10 @@ export default function Email() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Email Address' onBackPress={() => route.push('/login')} />
+            <NavBar title='New Address' onBackPress={() => route.push('/editprofile')} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
-                    <PrimaryFontMedium style={styles.label}>To verify your identity, please enter your registered email</PrimaryFontMedium>
+                    <PrimaryFontMedium style={styles.label}>Enter the new email address <PrimaryFontMedium style={{ fontSize: 15 }}>⏳</PrimaryFontMedium></PrimaryFontMedium>
                     <TextInput
                         style={[styles.input, { borderColor: isEmailFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isEmailFocused ? 2 : 1 }]}
                         placeholder="user@example.com"

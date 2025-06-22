@@ -6,22 +6,19 @@ import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import reusableStyle from '@/constants/ReusableStyles';
-import PrimaryButton from "@/components/PrimaryButton";
 import ProfileOption from '@/components/ProfileOption';
 import NavBar from '@/components/NavBar';
-import Edit from '@/assets/icons/Edit';
-import Lock from '@/assets/icons/Lock';
-import Settings from '@/assets/icons/Settings';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Clipboard from 'expo-clipboard';
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth, TOKEN_KEY } from '../context/AuthContext';
 import { selectUserProfile } from '../state/slices';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
 import Loading from "@/components/Loading";
 // import { authAPI, publicAPI } from "../context/AxiosProvider";
+import Feather from '@expo/vector-icons/Feather';
 
 export default function Profile() {
   const route = useRouter()
@@ -109,21 +106,23 @@ export default function Profile() {
         <View>
           <ProfileOption
             option="Edit profile"
-            icon={<Edit />}
+            icon={<Feather name="user" size={22} color="#00C48F" />}
             containerStyle={{ backgroundColor: 'white', marginTop: 20 }}
             textStyle={{ fontSize: 18 }}
+            route='/editprofile'
           />
 
           <ProfileOption
             option="Reset password"
-            icon={<Lock />}
+            icon={<Feather name="lock" size={20} color="#00C48F" />}
             containerStyle={{ backgroundColor: 'white' }}
             textStyle={{ fontSize: 18 }}
+            route='/changeemail'
           />
 
           <ProfileOption
             option="Settings"
-            icon={<Settings />}
+            icon={<Feather name="settings" size={20} color="#00C48F" />}
             containerStyle={{ backgroundColor: 'white' }}
             textStyle={{ fontSize: 18 }}
           />
@@ -144,7 +143,7 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'center' }}>
-          <PrimaryFontBold style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontBold>
+          <PrimaryFontMedium style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontMedium>
           {/* <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} /> */}
 
           <View style={[{ justifyContent: 'center', alignItems: 'center' }, reusableStyle.width100]}>
