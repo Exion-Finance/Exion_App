@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Alert, TouchableOpacity, StyleSheet, ImageBackground, StatusBar as RNStatusBar, Platform } from 'react-native';
+import { View, TextInput, Alert, TouchableOpacity, StyleSheet, ImageBackground, StatusBar as RNStatusBar, Platform, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUserProfile } from './state/slices';
@@ -9,7 +9,7 @@ import { SecondaryFontText } from "@/components/SecondaryFontText";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
-import { updateUser, sendUpdateEmailOTP } from './Apiconfig/api';
+import { updateUser, sendUpdateEmailOTP, sendUpdatePhoneNumberOTP } from './Apiconfig/api';
 import { setUserProfile } from './state/slices';
 import Loading from "@/components/Loading";
 
@@ -28,6 +28,7 @@ export default function EditProfileScreen() {
     const [saving, setSaving] = useState<boolean>(false);
     const [saved, setSaved] = useState<boolean>(false);
     const [changeEmailClicked, setChangeEmailClicked] = useState<boolean>(false)
+    const [changePhoneClicked, setChangePhoneClicked] = useState<boolean>(false)
 
     const handleUsernameSave = async () => {
         try {
@@ -65,9 +66,9 @@ export default function EditProfileScreen() {
         }
     };
 
-    const handleEmailChange = async() => {
-        try{
-            if(!user_profile?.email){
+    const handleEmailChange = async () => {
+        try {
+            if (!user_profile?.email) {
                 console.log("No email found")
                 return;
             }
@@ -94,12 +95,64 @@ export default function EditProfileScreen() {
             }
             else {
                 setChangeEmailClicked(false)
-                Alert.alert("Oops🌵", "Could not send otp, please try again" )
+                Alert.alert("Oops🌵", "Could not send otp, please try again")
             }
 
-        }catch(error){
+        } catch (error) {
             console.log(error)
-        }finally{}
+        } finally {
+            setChangeEmailClicked(false)
+        }
+
+    }
+
+    const handlePhoneNumberChange = async () => {
+        try {
+            if (!user_profile?.phoneNumber) {
+                console.log("No email found")
+                return;
+            }
+            setChangePhoneClicked(true)
+            const masked = user_profile?.phoneNumber.slice(0, 4) + '***' + user_profile?.phoneNumber.slice(-3);
+            const user = {
+                phoneNumber: user_profile?.phoneNumber,
+                source: 'editprofile',
+                textOnButton: 'Continue',
+                loadingText: 'Verifying..',
+                title: 'Verify identity',
+                description: `To ensure your account\'s security, we\'ve sent a secure OTP to ${masked}. Enter it here to verify it\'s you`
+            }
+
+            const otpRes = await sendUpdatePhoneNumberOTP(user_profile?.phoneNumber)
+            console.log(otpRes.status)
+            if (otpRes.status === 200) {
+                router.push({
+                    pathname: '/otp',
+                    params: {
+                        user: JSON.stringify(user)
+                    }
+                });
+                setChangePhoneClicked(false)
+            }
+            else {
+                setChangePhoneClicked(false)
+                Alert.alert("Oops🌵", "Could not send otp, please try again")
+            }
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setChangePhoneClicked(false)
+        }
+        // const sumn = true
+        // const recipientName = undefined
+        //         if (sumn) {
+        //             const rawName = recipientName ?? 'Mobile';
+        //             // console.log("Check response data", checkTx.data)
+        //             const [first='', second=''] = rawName.split(' ')
+        //             const fullName = first as string + " " + second as string
+        //             console.log("fullName", fullName)
+        //         }
 
     }
 
@@ -109,8 +162,8 @@ export default function EditProfileScreen() {
             <ImageBackground style={styles.editProfileHeader} source={editProfileBackground}>
 
                 <TouchableOpacity onPress={() => router.navigate('/profile')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 18 }}>
-                    <Ionicons name="arrow-back-outline" size={19} color="#353434" />
-                    <PrimaryFontMedium style={styles.title}>Edit Profile</PrimaryFontMedium>
+                    <Ionicons name="arrow-back-outline" size={19} color="#000" />
+                    <Text style={styles.title}>Edit Profile</Text>
                 </TouchableOpacity>
 
                 <View style={styles.initialContainer}>
@@ -183,8 +236,8 @@ export default function EditProfileScreen() {
                         editable={false}
                         style={styles.input}
                     />
-                    <TouchableOpacity onPress={() => router.push('/')}>
-                        <PrimaryFontText style={styles.changeText}>Change</PrimaryFontText>
+                    <TouchableOpacity onPress={handlePhoneNumberChange}>
+                        {changePhoneClicked ? <Loading color='green' description='' /> : <PrimaryFontText style={styles.changeText}>Change</PrimaryFontText>}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -217,7 +270,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         marginLeft: 5,
-        color: '#353434'
+        color: '#000'
         // fontWeight: '600',
         // marginBottom: 24,
     },

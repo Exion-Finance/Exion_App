@@ -110,7 +110,7 @@ const CustomKeyboard = () => {
     route.push("/(tabs)")
   }
 
-  const handleButtonClick = async (sendToken?: string) => {
+  const handleButtonClick = async () => {
     try {
       setSend(true)
       if (inputValue === "") {
@@ -197,7 +197,7 @@ const CustomKeyboard = () => {
           const channel = "Mpesa"
           const phonenumber = normalizePhoneNumber(phoneNumber as string)
           const res = await SendMoney(parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-          console.log('send money response is', res)
+          // console.log('send money response is', res)
 
           if (res.message === "Processing" && !res.error) {
             setTransactionState("Processing...")
@@ -209,7 +209,8 @@ const CustomKeyboard = () => {
 
               if (checkTx.data.txHash) {
                 // console.log("Check response data", checkTx.data)
-                const [first, second] = checkTx.data.recipientName.split(' ')
+                const rawName = checkTx.data.recipientName ?? 'Mobile';
+                const [first = '', second = ''] = rawName.split(' ')
                 const fullName = first as string + " " + second as string
                 seUserName(fullName)
                 setTxCode(checkTx.data.thirdPartyTransactionCode)
@@ -250,8 +251,6 @@ const CustomKeyboard = () => {
 
 
       else if (source === 'tillnumber') {
-        // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-        // console.log('tillnumber')
 
         if (Number(inputValue) < 10) {
           setError(true)

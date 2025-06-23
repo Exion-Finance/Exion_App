@@ -310,8 +310,8 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={'light'} />
       <ImageBackground style={styles.background} source={dashboardBackground}>
+      <StatusBar style={'light'} />
         <View style={styles.dashBackground}>
           <View style={reusableStyle.paddingContainer}>
 

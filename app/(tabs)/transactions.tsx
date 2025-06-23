@@ -68,7 +68,7 @@ export default function Transactions() {
             if (mobileTx.length === 0) {
                 setIsMobileTxLoading(false)
             }
-        }, 2000)
+        }, 1000)
     }, [])
 
     const handleRefresh = useCallback(async () => {

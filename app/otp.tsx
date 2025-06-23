@@ -110,13 +110,13 @@ export default function OTP({ }) {
     };
 
     const handleOtpSubmit = async (otpProp?: string[]) => {
-        console.log("otpProp", otpProp)
+        // console.log("otpProp", otpProp)
         const filteredOtp = otpProp ? filterOTP(otpProp) : filterOTP(otp) ?? ""
         if (!filteredOtp) {
             console.log("no filteredOtp")
             return;
         }
-        console.log(filteredOtp)
+        // console.log(filteredOtp)
 
 
         if (parsedUser?.source === "verifyphonenumber") {
@@ -154,18 +154,42 @@ export default function OTP({ }) {
         else if (parsedUser?.source === "emailaddress") {
             try {
                 setButtonClicked(true)
-                const res = await verifyEmailOTP(filteredOtp);
+                const res = await verifyEmailOTP(filteredOtp as string);
                 if (res.data.success) {
                     setButtonClicked(false)
                     route.push({
                         pathname: '/resetpassword',
                         params: {
                             email: parsedUser?.email,
-                            otp: filteredOtp
+                            otp: filteredOtp,
+                            source: "emailaddress"
                         }
                     })
                 }
             } catch (error) {
+                console.log(error)
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            }
+        }
+        else if (parsedUser?.source === "resetpasswordprofile") {
+            try {
+                setButtonClicked(true)
+                const res = await verifyEmailOTP(filteredOtp as string);
+                if (res.data.success) {
+                    setButtonClicked(false)
+                    route.push({
+                        pathname: '/resetpassword',
+                        params: {
+                            email: parsedUser?.email,
+                            otp: filteredOtp,
+                            source: "resetpasswordprofile"
+                        }
+                    })
+                }
+            } catch (error) {
+                console.log(error)
                 setButtonClicked(false)
                 setEmptyOtpError(true);
                 setErrorDescription("Please enter a valid OTP.")
@@ -197,7 +221,7 @@ export default function OTP({ }) {
                 setButtonClicked(false)
             }
         }
-        else if (parsedUser?.source === "editprofile") {
+        else if (parsedUser?.source === "editprofile" && parsedUser?.email) {
             try {
                 setButtonClicked(true)
                 const res = await verifyEditProfileOTP(filteredOtp);
@@ -213,13 +237,29 @@ export default function OTP({ }) {
                 setButtonClicked(false)
             }
         }
+        else if (parsedUser?.source === "editprofile" && parsedUser?.phoneNumber) {
+            try {
+                setButtonClicked(true)
+                const res = await verifyEditProfileOTP(filteredOtp);
+                if (res.data.success) {
+                    setButtonClicked(false)
+                    route.push('/changephonenumber')
+                }
+            } catch (error) {
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
         else if (parsedUser?.source === "changeemail") {
             try {
                 setButtonClicked(true)
                 const email = parsedUser?.email as string
                 const otp = filteredOtp as string
-                const updateRes = await updateUser( {email, otp });
-                console.log(updateRes.data)
+                const updateRes = await updateUser({ email, otp });
+                // console.log(updateRes.data)
                 if (updateRes.data.success) {
                     Alert.alert("Success🎉", "Your email was changed successfully")
                     dispatch(setUserProfile(updateRes.data.data))
@@ -230,6 +270,33 @@ export default function OTP({ }) {
                 else {
                     // setUsernameFocused(false)
                     Alert.alert("Oops😕", "Couldn't update email, try again")
+                }
+            } catch (error) {
+                console.log(error)
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
+        else if (parsedUser?.source === "changephonenumber") {
+            try {
+                setButtonClicked(true)
+                const phoneNumber = parsedUser?.phoneNumber as string
+                const otp = filteredOtp as string
+                const updateRes = await updateUser({ phoneNumber, otp });
+                // console.log(updateRes.data)
+                if (updateRes.data.success) {
+                    Alert.alert("Success🎉", "Your phone number was changed successfully")
+                    dispatch(setUserProfile(updateRes.data.data))
+                    setTimeout(() => {
+                        route.navigate('/editprofile')
+                    }, 1500)
+                }
+                else {
+                    // setUsernameFocused(false)
+                    Alert.alert("Oops🌵", "Couldn't update phone number, try again")
                 }
             } catch (error) {
                 console.log(error)
