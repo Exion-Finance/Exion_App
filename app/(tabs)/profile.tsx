@@ -117,7 +117,7 @@ export default function Profile() {
             icon={<Feather name="lock" size={20} color="#00C48F" />}
             containerStyle={{ backgroundColor: 'white' }}
             textStyle={{ fontSize: 18 }}
-            route='/changeemail'
+            route='/resetpasswordprofile'
           />
 
           <ProfileOption
@@ -125,6 +125,7 @@ export default function Profile() {
             icon={<Feather name="settings" size={20} color="#00C48F" />}
             containerStyle={{ backgroundColor: 'white' }}
             textStyle={{ fontSize: 18 }}
+            route='/settings'
           />
 
           <View style={styles.separator}></View>

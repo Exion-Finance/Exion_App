@@ -17,9 +17,11 @@ const ResetPassword = () => {
     const [passwordError, setPasswordError] = useState(false);
     const [resetError, setResetPasswordError] = useState(false);
     const [errorDescription, setErrorDescription] = useState("");
+    const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
+    const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState<boolean>(false);
 
     const route = useRouter()
-    const { email, otp } = useLocalSearchParams();
+    const { email, otp, source } = useLocalSearchParams();
 
     const handleResetPassword = async () => {
         try {
@@ -28,42 +30,54 @@ const ResetPassword = () => {
                 setErrorDescription('Both fields are required.');
                 return;
             }
-    
+
             if (newPassword !== confirmPassword) {
                 setPasswordError(true);
                 setErrorDescription('Passwords do not match.');
                 return;
             }
-    
+
+            if (newPassword.length <= 8) {
+                setPasswordError(true);
+                setErrorDescription('Password must be 8 characters or more');
+                return;
+            }
+
             setButtonClicked(true);
-    
+
             const res = await resetPassword(email as string, newPassword, otp as string);
-    
+
             if (res.status === 200) {
-                Alert.alert('Success 🎊', 'Your password has been reset successfully.');
-                route.push('/login');
+                if(source === "emailaddress"){
+                    Alert.alert('Success 🎊', 'Your password has been reset successfully.');
+                    route.push('/login');
+                }
+                else if(source === "resetpasswordprofile"){
+                    Alert.alert('Success 🎊', 'Your password has been reset successfully.');
+                    route.push('/editprofile');
+                }
             } else {
                 setResetPasswordError(true)
                 setErrorDescription('Failed to reset password');
             }
         } catch (err: any) {
             setResetPasswordError(true)
-            
+
             if (err.response) {
-                
+
                 setErrorDescription(err.response.data?.message || `Error: ${err.response.status}`);
             } else if (err.request) {
-               
+
                 setErrorDescription(' Please check your internet connection.');
             } else {
-               
+
                 setErrorDescription(err.message || 'An unexpected error occurred.');
             }
         } finally {
-            setButtonClicked(false); 
+            setButtonClicked(false);
         }
     };
-    
+
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -75,9 +89,9 @@ const ResetPassword = () => {
 
     return (
         <View style={styles.container}>
-            <PrimaryFontText style={styles.instructions}>Please enter the new password</PrimaryFontText>
+            <PrimaryFontText style={styles.instructions}>Please enter the new password 🫣</PrimaryFontText>
 
-            <View style={styles.passwordContainer}>
+            <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
                 <TextInput
                     style={styles.input}
                     placeholder="New Password"
@@ -85,10 +99,12 @@ const ResetPassword = () => {
                     secureTextEntry={!passwordVisible}
                     value={newPassword}
                     onChangeText={(text) => {
-                        setNewPassword(text);
+                        setNewPassword(text.trim());
                         setPasswordError(false);
                         setResetPasswordError(false)
                     }}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
                 />
 
                 <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -100,7 +116,7 @@ const ResetPassword = () => {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.passwordContainer}>
+            <View style={[styles.passwordContainer, { borderColor: isConfirmPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isConfirmPasswordFocused ? 2 : 1 }]}>
                 <TextInput
                     style={styles.input}
                     placeholder="Confirm Password"
@@ -108,9 +124,11 @@ const ResetPassword = () => {
                     secureTextEntry={!confirmPasswordVisible}
                     value={confirmPassword}
                     onChangeText={(text) => {
-                        setConfirmPassword(text);
+                        setConfirmPassword(text.trim());
                         setPasswordError(false);
                     }}
+                    onFocus={() => setIsConfirmPasswordFocused(true)}
+                    onBlur={() => setIsConfirmPasswordFocused(false)}
                 />
 
                 <TouchableOpacity onPress={toggleConfirmPasswordVisibility}>
@@ -136,7 +154,7 @@ const ResetPassword = () => {
                     }
                 </PrimaryFontBold>
             </TouchableOpacity>
-            
+
 
         </View>
     );
@@ -175,10 +193,10 @@ const styles = StyleSheet.create({
     passwordContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderColor: '#C3C3C3',
-        borderWidth: 0.7,
-        borderRadius: 5,
-        paddingHorizontal: 10,
+        // borderColor: '#C3C3C3',
+        // borderWidth: 0.7,
+        borderRadius: 8,
+        paddingHorizontal: 15,
         height: 55,
         backgroundColor: '#F8F8F8',
         marginTop: 20,

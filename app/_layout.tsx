@@ -135,6 +135,9 @@ function RootLayoutNav() {
       <Stack.Screen name="webview" options={{ headerShown: false }} />
       <Stack.Screen name="editprofile" options={{ headerShown: false }} />
       <Stack.Screen name="changeemail" options={{ headerShown: false }} />
+      <Stack.Screen name="resetpasswordprofile" options={{ headerShown: false }} />
+      <Stack.Screen name="changephonenumber" options={{ headerShown: false }} />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
       <Stack.Screen name="resetpassword" options={{ headerTitle: 'Reset Password', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
     </Stack>
   );
