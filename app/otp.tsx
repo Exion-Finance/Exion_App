@@ -8,7 +8,12 @@ import NavBar from '@/components/NavBar';
 import Loading from '@/components/Loading';
 import reusableStyles from '@/constants/ReusableStyles';
 import { useAuth } from "./context/AuthContext";
-import { verifyEmailOTP } from "./Apiconfig/api";
+import { verifyEmailOTP, verifyEditProfileOTP, updateUser } from "./Apiconfig/api";
+import * as Clipboard from 'expo-clipboard';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { StatusBar } from 'expo-status-bar';
+import { useDispatch } from 'react-redux';
+import { setUserProfile } from './state/slices';
 
 
 interface User {
@@ -33,6 +38,7 @@ export default function OTP({ }) {
     const { onLogin, onRegister } = useAuth()
 
     const route = useRouter()
+    const dispatch = useDispatch();
 
     const inputRefs = useRef<Array<TextInput | null>>([]);
 
@@ -46,10 +52,12 @@ export default function OTP({ }) {
         console.error('Failed to parse user:', error);
     }
 
-
     const handleChange = (text: string, index: number) => {
-        if (text.length > 1) return; // Only allow single-digit input
-        setEmptyOtpError(false)
+        setEmptyOtpError(false);
+
+        // Regular single-digit input
+        // if (text.length > 1) return;
+
         const newOtp = [...otp];
         newOtp[index] = text;
         setOtp(newOtp);
@@ -58,6 +66,15 @@ export default function OTP({ }) {
         if (text && index < 5) {
             setActiveIndex(index + 1);
             inputRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handlePaste = async () => {
+        const clipboardText = await Clipboard.getStringAsync();
+        if (clipboardText.length === otp.length && /^\d+$/.test(clipboardText)) {
+            setOtp(clipboardText.split(''));
+            inputRefs.current[otp.length - 1]?.focus();
+            await handleOtpSubmit(clipboardText.split(''))
         }
     };
 
@@ -92,13 +109,18 @@ export default function OTP({ }) {
         return filteredOtp;
     };
 
-    const handleOtpSubmit = async () => {
+    const handleOtpSubmit = async (otpProp?: string[]) => {
+        // console.log("otpProp", otpProp)
+        const filteredOtp = otpProp ? filterOTP(otpProp) : filterOTP(otp) ?? ""
+        if (!filteredOtp) {
+            console.log("no filteredOtp")
+            return;
+        }
+        // console.log(filteredOtp)
+
+
         if (parsedUser?.source === "verifyphonenumber") {
             setButtonClicked(true)
-            const filteredOtp = filterOTP(otp) ?? ""
-            if (!filteredOtp) {
-                return;
-            }
 
             if (!parsedUser?.username || !parsedUser.email || !parsedUser.password) {
                 throw new Error("Missing required user fields");
@@ -111,13 +133,13 @@ export default function OTP({ }) {
                 parsedUser.username,
                 filteredOtp
             )
-            if (res.error){
+            if (res.error) {
                 setEmptyOtpError(true)
                 setErrorDescription(res.message)
                 setButtonClicked(false)
                 return;
             }
-            else if(res.status == 201){
+            else if (res.status == 201) {
                 // console.log("Else called meaning no res.error")
                 // console.log("Register user response->", res.data)
                 const login = await onLogin!(parsedUser.email, parsedUser.password)
@@ -132,22 +154,42 @@ export default function OTP({ }) {
         else if (parsedUser?.source === "emailaddress") {
             try {
                 setButtonClicked(true)
-                const filteredOtp = filterOTP(otp) ?? ""
-                if (!filteredOtp) {
-                    return;
-                }
-                const res = await verifyEmailOTP(filteredOtp);
+                const res = await verifyEmailOTP(filteredOtp as string);
                 if (res.data.success) {
                     setButtonClicked(false)
                     route.push({
                         pathname: '/resetpassword',
                         params: {
                             email: parsedUser?.email,
-                            otp: filteredOtp
+                            otp: filteredOtp,
+                            source: "emailaddress"
                         }
                     })
                 }
             } catch (error) {
+                console.log(error)
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            }
+        }
+        else if (parsedUser?.source === "resetpasswordprofile") {
+            try {
+                setButtonClicked(true)
+                const res = await verifyEmailOTP(filteredOtp as string);
+                if (res.data.success) {
+                    setButtonClicked(false)
+                    route.push({
+                        pathname: '/resetpassword',
+                        params: {
+                            email: parsedUser?.email,
+                            otp: filteredOtp,
+                            source: "resetpasswordprofile"
+                        }
+                    })
+                }
+            } catch (error) {
+                console.log(error)
                 setButtonClicked(false)
                 setEmptyOtpError(true);
                 setErrorDescription("Please enter a valid OTP.")
@@ -156,10 +198,6 @@ export default function OTP({ }) {
         else if (parsedUser?.source === "signup") {
             try {
                 setButtonClicked(true)
-                const filteredOtp = filterOTP(otp) ?? ""
-                if (!filteredOtp) {
-                    return;
-                }
                 const res = await verifyEmailOTP(filteredOtp);
                 if (res.data.success) {
                     setButtonClicked(false)
@@ -179,6 +217,94 @@ export default function OTP({ }) {
                 setButtonClicked(false)
                 setEmptyOtpError(true);
                 setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
+        else if (parsedUser?.source === "editprofile" && parsedUser?.email) {
+            try {
+                setButtonClicked(true)
+                const res = await verifyEditProfileOTP(filteredOtp);
+                if (res.data.success) {
+                    setButtonClicked(false)
+                    route.push('/changeemail')
+                }
+            } catch (error) {
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
+        else if (parsedUser?.source === "editprofile" && parsedUser?.phoneNumber) {
+            try {
+                setButtonClicked(true)
+                const res = await verifyEditProfileOTP(filteredOtp);
+                if (res.data.success) {
+                    setButtonClicked(false)
+                    route.push('/changephonenumber')
+                }
+            } catch (error) {
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
+        else if (parsedUser?.source === "changeemail") {
+            try {
+                setButtonClicked(true)
+                const email = parsedUser?.email as string
+                const otp = filteredOtp as string
+                const updateRes = await updateUser({ email, otp });
+                // console.log(updateRes.data)
+                if (updateRes.data.success) {
+                    Alert.alert("Success🎉", "Your email was changed successfully")
+                    dispatch(setUserProfile(updateRes.data.data))
+                    setTimeout(() => {
+                        route.navigate('/editprofile')
+                    }, 1500)
+                }
+                else {
+                    // setUsernameFocused(false)
+                    Alert.alert("Oops😕", "Couldn't update email, try again")
+                }
+            } catch (error) {
+                console.log(error)
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
+            }
+        }
+        else if (parsedUser?.source === "changephonenumber") {
+            try {
+                setButtonClicked(true)
+                const phoneNumber = parsedUser?.phoneNumber as string
+                const otp = filteredOtp as string
+                const updateRes = await updateUser({ phoneNumber, otp });
+                // console.log(updateRes.data)
+                if (updateRes.data.success) {
+                    Alert.alert("Success🎉", "Your phone number was changed successfully")
+                    dispatch(setUserProfile(updateRes.data.data))
+                    setTimeout(() => {
+                        route.navigate('/editprofile')
+                    }, 1500)
+                }
+                else {
+                    // setUsernameFocused(false)
+                    Alert.alert("Oops🌵", "Couldn't update phone number, try again")
+                }
+            } catch (error) {
+                console.log(error)
+                setButtonClicked(false)
+                setEmptyOtpError(true);
+                setErrorDescription("Please enter a valid OTP.")
+            } finally {
+                setButtonClicked(false)
             }
         }
     }
@@ -186,6 +312,7 @@ export default function OTP({ }) {
 
     return (
         <View style={styles.container}>
+            <StatusBar style={'dark'} />
             <NavBar title='OTP' onBackPress={() => route.push(`/${parsedUser?.source}` as Href<string | object>)} />
             <FormDescription title={parsedUser && parsedUser.title || " "} description={parsedUser && parsedUser.description || " "} />
 
@@ -210,12 +337,13 @@ export default function OTP({ }) {
 
             {emptyOtpError ? <PrimaryFontText style={{ marginBottom: 10, color: 'red', fontSize: 16 }}>{errorDescription}</PrimaryFontText> : null}
 
-            <PrimaryFontText style={styles.retryText}>
-                {counter > 0 ? `Retry in ${counter} seconds` : "You can retry now"}
-            </PrimaryFontText>
+            <TouchableOpacity onPress={handlePaste} style={styles.pasteButton}>
+                <MaterialIcons name="content-paste" size={13} color="gray" />
+                <PrimaryFontText style={styles.pasteButtonText}>Paste OTP</PrimaryFontText>
+            </TouchableOpacity>
 
             <View style={reusableStyles.paddingContainer}>
-                <TouchableOpacity style={styles.button} onPress={handleOtpSubmit}>
+                <TouchableOpacity style={styles.button} onPress={() => handleOtpSubmit()}>
                     <PrimaryFontBold style={styles.text}>
                         {buttonClicked ?
                             <Loading color='#fff' description={parsedUser && parsedUser.loadingText || " "} />
@@ -276,12 +404,23 @@ const styles = StyleSheet.create({
     activeInputBox: {
         borderColor: "#00C48F",
     },
-    retryText: {
-        marginTop: 0,
+    pasteButton: {
+        marginTop: -5,
         marginBottom: 20,
-        fontSize: 15,
-        color: "#888",
         textAlign: "center",
+        backgroundColor: "#EEFFEF",
+        paddingVertical: 8,
+        paddingHorizontal: 13,
+        borderRadius: 25,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    pasteButtonText: {
+        fontSize: 16,
+        color: 'gray',
+        textAlign: "center",
+        marginLeft: 3
     },
     button: {
         backgroundColor: '#00C48F',

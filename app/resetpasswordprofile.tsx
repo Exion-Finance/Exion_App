@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import validator from "validator";
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
@@ -11,42 +10,38 @@ import { sendEmailOtpForPasswordReset } from "./Apiconfig/api";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import Feather from '@expo/vector-icons/Feather';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
+import { selectUserProfile } from './state/slices';
+import { useSelector } from 'react-redux';
 
-export default function Email() {
-    const [email, setEmail] = useState<string>('');
-    const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
+
+export default function ResetPwdProfile() {
     const [error, setError] = useState<boolean>(false);
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [buttonClicked, setButtonClicked] = useState<boolean>(false);
-    const [isEmailFocused, setIsEmailFocused] = useState<boolean>(false);
 
     const route = useRouter()
+    const user_profile = useSelector(selectUserProfile)
 
     const handleSubmit = async () => {
         try {
-            if (!isEmailValid) {
+            if (!user_profile?.email) {
                 setError(true)
                 setErrorDescription("Enter a valid email address")
-                return;
-            }
-            if (!email) {
-                setError(true)
-                setErrorDescription("Email cannot be empty")
                 return;
             }
 
             setButtonClicked(true)
 
             const user = {
-                email,
-                source: 'emailaddress',
+                email: user_profile?.email,
+                source: 'resetpasswordprofile',
                 textOnButton: 'Continue',
-                loadingText: 'Verifying..',
+                loadingText: 'Please wait..',
                 title: 'Verify identity',
-                description: 'To ensure your account\'s security, we\'ve sent a secure OTP to your email. Please enter it here to reset your password.'
+                description: 'To ensure account security, we\'ve sent a secure OTP to your email. Enter it here to reset your password.'
             }
 
-            const res = await sendEmailOtpForPasswordReset(email)
+            const res = await sendEmailOtpForPasswordReset(user_profile?.email)
 
             if (res.status === 200) {
                 route.push({
@@ -65,7 +60,7 @@ export default function Email() {
             }
         } catch (error: any) {
             setError(true)
-            setErrorDescription("User does not exist")
+            setErrorDescription("Email already registered")
             setButtonClicked(false)
         } finally {
             setButtonClicked(false)
@@ -74,24 +69,15 @@ export default function Email() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Email Address' onBackPress={() => route.push('/login')} />
+            <NavBar title='Reset password' onBackPress={() => route.push('/editprofile')} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
-                    <PrimaryFontMedium style={styles.label}>To verify your identity, please enter your registered email</PrimaryFontMedium>
+                    <PrimaryFontMedium style={styles.label}>To ensure account security, we'll send a secure OTP to your email address</PrimaryFontMedium>
                     <TextInput
-                        style={[styles.input, { borderColor: isEmailFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isEmailFocused ? 2 : 1 }]}
+                        style={styles.input}
                         placeholder="user@example.com"
-                        placeholderTextColor="#C3C2C2"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        onChangeText={(text) => {
-                            setEmail(text);
-                            setError(false)
-                            setIsEmailValid(validator.isEmail(text))
-                        }}
-                        onFocus={() => setIsEmailFocused(true)}
-                        onBlur={() => setIsEmailFocused(false)}
-                        value={email}
+                        editable={false}
+                        defaultValue={user_profile?.email}
                     />
                     <FormErrorText error={error} errorDescription={errorDescription} />
 
@@ -104,7 +90,7 @@ export default function Email() {
 
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <PrimaryFontBold style={styles.text}>
-                        {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
+                        {buttonClicked ? <Loading color='#fff' description="Sending..." /> : "Send OTP"}
                     </PrimaryFontBold>
                 </TouchableOpacity>
             </View>
@@ -125,9 +111,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingLeft: 15,
         fontSize: 18,
-        color: '#000',
+        color: '#504646',
         backgroundColor: '#F8F8F8',
-        fontFamily: 'DMSansRegular'
+        fontFamily: 'DMSansRegular',
+        borderColor: '#C3C3C3',
+        borderWidth: 1
     },
     button: {
         backgroundColor: '#00C48F',
@@ -144,7 +132,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 20,
-        marginBottom: 15,
+        marginBottom: 17,
         color: '#052330',
     },
     flexContainer: {

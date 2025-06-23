@@ -310,8 +310,8 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={'light'} />
       <ImageBackground style={styles.background} source={dashboardBackground}>
+      <StatusBar style={'light'} />
         <View style={styles.dashBackground}>
           <View style={reusableStyle.paddingContainer}>
 
@@ -367,9 +367,9 @@ export default function TabOneScreen() {
             <View style={[styles.flexRow, { height: '38%', marginTop: 0 }]}>
               <SecondaryButton
                 route={"/contacts" as Href<string | object>}
-                textOnButton="Send"
+                textOnButton="Transfer"
                 icon={<Feather name="arrow-up" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#E03A4E', padding: 17, paddingHorizontal: 20, paddingRight: 29 }}
+                containerStyle={{ backgroundColor: '#4781D9', padding: 17, paddingHorizontal: 17, paddingRight: 26 }}
                 textStyle={{ fontSize: 17, color: "white" }}
               />
 
@@ -377,7 +377,7 @@ export default function TabOneScreen() {
                 route={"/makepayment" as Href<string | object>}
                 textOnButton="Make Payment"
                 icon={<Feather name="arrow-down" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 24, paddingRight: 26, marginLeft: 17 }}
+                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 21, paddingRight: 24, marginLeft: 17 }}
                 textStyle={{ fontSize: 17, color: "white" }}
               />
             </View>
@@ -386,7 +386,7 @@ export default function TabOneScreen() {
       </ImageBackground>
 
       <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: 'white' }]}>
-        <PrimaryFontMedium style={{ fontSize: 25 }}>Recent activities</PrimaryFontMedium>
+        <PrimaryFontMedium style={{ fontSize: 25 }}>Recent activity</PrimaryFontMedium>
         <TouchableOpacity onPress={() => route.push('/transactions')}>
           <PrimaryFontMedium style={{ fontSize: 18, color: '#00C48F' }}>See all</PrimaryFontMedium>
         </TouchableOpacity>
@@ -419,7 +419,7 @@ export default function TabOneScreen() {
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={['46%']}
+        snapPoints={['50%']}
         enablePanDownToClose={true}
         animatedIndex={animatedTokenIndex}
       >

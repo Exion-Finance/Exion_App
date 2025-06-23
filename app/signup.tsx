@@ -29,6 +29,7 @@ export default function Signup() {
     const [usernameError, setUsernameError] = useState<boolean>(false);
     const [otpError, setOtpError] = useState<boolean>(false);
     const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
+    const [isUsernameEmail, setIsUsernameEmail] = useState<boolean>(false);
     const [errorDescription, setErrorDescription] = useState("");
     const [buttonClicked, setButtonClicked] = useState(false);
     const [isEmailFocused, setIsEmailFocused] = useState<boolean>(false);
@@ -40,6 +41,11 @@ export default function Signup() {
         if (!isEmailValid) {
             setEmailError(true)
             setErrorDescription("Incorrect email format")
+            return;
+        }
+        else if(isUsernameEmail){
+            setUsernameError(true)
+            setErrorDescription("Username cannot be an email")
             return;
         }
         else if (!email) {
@@ -55,6 +61,11 @@ export default function Signup() {
         else if (!password) {
             setPasswordError(true)
             setErrorDescription("Password empty")
+            return;
+        }
+        else if(password.toString().length <= 8){
+            setPasswordError(true)
+            setErrorDescription("Password must be 8 characters or more")
             return;
         }
 
@@ -149,10 +160,11 @@ export default function Signup() {
                                 placeholderTextColor="#C3C2C2"
                                 keyboardType="default"
                                 onChangeText={(text) => {
-                                    setUsername(text.trim());
+                                    setUsername(text);
                                     setPasswordError(false);
                                     setUsernameError(false);
                                     setOtpError(false)
+                                    setIsUsernameEmail(validator.isEmail(text))
                                 }}
                                 onFocus={() => setIsUsernameFocused(true)}
                                 onBlur={() => setIsUsernameFocused(false)}

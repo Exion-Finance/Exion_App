@@ -148,6 +148,21 @@ export const fetchUser = async (token: string) => {
     return response;
 }
 
+export const updateUser = async ({ email, otp, username, phoneNumber }: {
+    email?: string;
+    otp?: string;
+    username?: string;
+    phoneNumber?: string;
+}) => {
+
+    const payload = { email, otp, username, phoneNumber };
+
+    const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([_, value]) => value !== undefined)
+    );
+    const response = await authAPI.put(`/user/profile`, cleanPayload)
+    return response;
+}
 
 //send otp
 export const sendOtpWhatsapp = async (phoneNumber: string): Promise<AxiosResponse> => {
@@ -158,16 +173,28 @@ export const sendEmailOtpForPasswordReset = async (email: string): Promise<Axios
 };
 
 export const sendOtpEmail = async (identifier: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier });
+    return await authAPI.post(`/verification/sendotp`, { identifier });
 };
 
 export const sendSignUpEmailOtp = async (email: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/sendEmailotp`, { email });
 };
 
+export const sendUpdateEmailOTP = async (email: string): Promise<AxiosResponse> => {
+    return await authAPI.post(`/verification/sendProfileOtp`, { identifier: email });
+};
+
+export const sendUpdatePhoneNumberOTP = async (phoneNumber: string): Promise<AxiosResponse> => {
+    return await authAPI.post(`/verification/sendProfileOtp`, { identifier: phoneNumber });
+};
+
 
 export const verifyEmailOTP = async (otp: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/verifyOtp`, { otp });
+};
+
+export const verifyEditProfileOTP = async (otp: string): Promise<AxiosResponse> => {
+    return await authAPI.post(`/verification/verifyProlieOtp`, { otp });
 };
 
 

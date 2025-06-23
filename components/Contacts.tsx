@@ -150,7 +150,7 @@ export default function ContactsList({ from }: Props) {
         const cleanNumber = handlePhoneNumberPrefix(formattedNumber);
         const sendMoneyNumber = handleSendMoneyPhoneNumberPrefix(formattedNumber)
         try {
-            if(from === 'sendmoney'){
+            if (from === 'sendmoney') {
                 console.log(sendMoneyNumber)
                 route.push({
                     pathname: '/keyboard',
@@ -198,7 +198,7 @@ export default function ContactsList({ from }: Props) {
     return (
         <View style={[styles.container, from === "contacts" ? reusableStyle.paddingContainer : reusableStyle.width100]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%"}]}>
+                <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%" }]}>
                     <Ionicons name="search" size={20} color="#DADADA" style={styles.searchIcon} />
                     <TextInput
                         style={[styles.input, { fontFamily: 'DMSansRegular' }]}
@@ -208,7 +208,7 @@ export default function ContactsList({ from }: Props) {
                         onChangeText={handleSearch}
                     />
                 </View>
-                <TouchableOpacity style={[styles.qrButton, { display: from === "contacts" ? "flex" : "none"}]} onPress={() => route.push('/sendcrypto')}>
+                <TouchableOpacity style={[styles.qrButton, { display: from === "contacts" ? "flex" : "none" }]} onPress={() => route.push('/sendcrypto')}>
                     <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
                 </TouchableOpacity>
             </View>
@@ -222,7 +222,7 @@ export default function ContactsList({ from }: Props) {
                 style={{ backgroundColor: 'white' }}
                 keyExtractor={(item, index) => item.name + index}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.contactContainer} onPress={() => handleSelectContact(item)}>
+                    <TouchableOpacity style={[styles.contactContainer, { backgroundColor: contactClicked === item.phoneNumber ? "#F8F8F8" : "transparent" }]} onPress={() => handleSelectContact(item)}>
                         <View>
                             <PrimaryFontText style={styles.name}>{item.name}</PrimaryFontText>
                             <PrimaryFontText style={styles.phoneNumber}>{item.phoneNumber}</PrimaryFontText>
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
         paddingVertical: 18,
         flexDirection: "row",
         justifyContent: 'space-between',
-        alignItems: "center"
+        alignItems: "center",
     },
     name: {
         fontSize: 18,
