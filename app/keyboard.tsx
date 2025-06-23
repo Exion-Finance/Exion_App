@@ -17,12 +17,10 @@ import * as Clipboard from 'expo-clipboard';
 import Dropdown from '@/assets/icons/Dropdown';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { PESACHAIN_URL } from "@/constants/urls";
-import axios from "axios";
 import TokenListPayment, { Token } from '@/components/MakePaymentTokenList';
 import reusableStyle from '@/constants/ReusableStyles'
 import { getBalances } from './Apiconfig/api';
-import { BalanceData, ResponseBalance } from './(tabs)';
+import { ResponseBalance } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
@@ -112,7 +110,7 @@ const CustomKeyboard = () => {
     route.push("/(tabs)")
   }
 
-  const handleButtonClick = async (sendToken?: string) => {
+  const handleButtonClick = async () => {
     try {
       setSend(true)
       if (inputValue === "") {
@@ -199,7 +197,7 @@ const CustomKeyboard = () => {
           const channel = "Mpesa"
           const phonenumber = normalizePhoneNumber(phoneNumber as string)
           const res = await SendMoney(parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-          console.log('send money response is', res)
+          // console.log('send money response is', res)
 
           if (res.message === "Processing" && !res.error) {
             setTransactionState("Processing...")
@@ -211,7 +209,8 @@ const CustomKeyboard = () => {
 
               if (checkTx.data.txHash) {
                 // console.log("Check response data", checkTx.data)
-                const [first, second] = checkTx.data.recipientName.split(' ')
+                const rawName = checkTx.data.recipientName ?? 'Mobile';
+                const [first = '', second = ''] = rawName.split(' ')
                 const fullName = first as string + " " + second as string
                 seUserName(fullName)
                 setTxCode(checkTx.data.thirdPartyTransactionCode)
@@ -252,8 +251,6 @@ const CustomKeyboard = () => {
 
 
       else if (source === 'tillnumber') {
-        // Alert.alert("Feature coming soon⏳", "We\'re currently working round the clock to bring you this feature")
-        // console.log('tillnumber')
 
         if (Number(inputValue) < 10) {
           setError(true)
@@ -482,9 +479,9 @@ const CustomKeyboard = () => {
             });
           }
 
-        }else console.log("Fetch nothing")
+        } else console.log("Fetch nothing")
       }
-      
+
       catch (error: any) {
         console.log("Fetch balances error", error)
       }
@@ -522,8 +519,8 @@ const CustomKeyboard = () => {
       <View style={styles.container}>
         <StatusBar style={'light'} />
         <View style={styles.balanceContainer}>
-          <Pressable style={styles.closeContainer} onPress={() => route.push(source? `/${source}` as Href<string | object> : '/(tabs)')}>
-            <Feather name='x' color={'#E31D1A'} size={28} />
+          <Pressable style={styles.closeContainer} onPress={() => route.push(source ? `/${source}` as Href<string | object> : '/(tabs)')}>
+            <Feather name='x' color={'grey'} size={28} />
           </Pressable>
 
           <TouchableOpacity style={styles.balanceView} onPress={() => { bottomSheetRef1.current?.expand(); setError(false) }}>
@@ -535,28 +532,17 @@ const CustomKeyboard = () => {
             {activeToken.token ? <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 11 }}>≈ {activeToken.balance.toFixed(2)} {activeToken.token}</PrimaryFontMedium> : null}
           </TouchableOpacity>
 
-          <PrimaryFontMedium style={{ fontSize: 19, marginTop: 15, color: 'white' }}>How much would you like to send?</PrimaryFontMedium>
+          <PrimaryFontMedium style={{ fontSize: 19, marginTop: 15, color: '#E9E9E9' }}>How much would you like to send?</PrimaryFontMedium>
           {error ? <PrimaryFontText style={{ marginTop: 10, marginBottom: -27, color: 'red', fontSize: 15, textAlign: 'center' }}>{errorDescription}</PrimaryFontText> : null}
         </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.inputValue}>
-            <PrimaryFontBold style={styles.inputText}>
-              {inputValue ? null : 0}
-              {inputValue}
-            </PrimaryFontBold>
-
-            <View style={styles.conversion}>
-              <PrimaryFontBold style={{ color: '#FFFFFF', fontSize: 18 }}>
-                Ksh{""}
-              </PrimaryFontBold>
-
-              {/* <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 11.5 }}>
-                ≈ Ksh {activeToken.ksh}
-              </PrimaryFontMedium> */}
-            </View>
-
-          </View>
+        <View style={styles.inputValue}>
+          <PrimaryFontBold style={styles.inputText}>
+            {inputValue ? inputValue : 0}
+            <PrimaryFontMedium style={{ color: '#F8F8F8', fontSize: 16 }}>
+              {""}Ksh
+            </PrimaryFontMedium>
+          </PrimaryFontBold>
         </View>
 
         <View>
@@ -688,7 +674,8 @@ const background = '#052330'
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     padding: 10,
     paddingTop: statusBarHeight,
     paddingBottom: 40,
@@ -697,7 +684,9 @@ const styles = StyleSheet.create({
   balanceContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10
+    paddingBottom: 12,
+    // borderColor: 'white',
+    // borderWidth: 1
   },
   balanceView: {
     justifyContent: 'center',
@@ -712,30 +701,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     alignItems: 'flex-end'
   },
-  inputContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   inputValue: {
     flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center',
+    // borderColor: 'white',
+    // borderWidth: 1
   },
   inputText: {
-    fontSize: 62,
+    fontSize: 60,
     color: white,
-  },
-  conversion: {
-    flexDirection: 'row',
-    alignItems: "flex-end",
-    paddingBottom: 11.5,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    // marginBottom: 2,
     marginTop: 10,
-    paddingHorizontal: 18,
-    width: '100%'
+    paddingHorizontal: 10,
+    width: '100%',
+    // borderWidth: 1,
+    // borderColor: 'grey'
   },
   txRow: {
     flexDirection: 'row',
@@ -753,7 +738,7 @@ const styles = StyleSheet.create({
     backgroundColor: background,
   },
   keyText: {
-    fontSize: 25,
+    fontSize: 26,
     color: white
   },
   button: {
@@ -763,7 +748,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 18,
     width: '60%',
-    marginTop: 25,
+    marginTop: 20,
     // opacity: 0
   },
   text: {
@@ -798,22 +783,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center'
   },
-  // confirmationCode: {
-  //   fontSize: 17,
-  //   color: '#00C48F',
-  //   // marginTop: 7,
-  // },
-  // copyButton: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   backgroundColor: "#EBFFED",
-  //   paddingVertical: 8,
-  //   paddingHorizontal: 15,
-  //   borderRadius: 25,
-  //   marginTop: 10,
-  //   marginBottom: 20
-  // },
   confirmationCode: {
     fontSize: 17,
     color: '#00C48F',

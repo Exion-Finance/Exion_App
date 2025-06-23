@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     description:{
-        fontSize: 18.5,
+        fontSize: 18,
         marginTop: 8,
         paddingRight: 8
     }

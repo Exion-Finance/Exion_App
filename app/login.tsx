@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PrimaryButton from "@/components/PrimaryButton";
 import NavBar from "@/components/NavBar";
 import validator from "validator";
-import { StyleSheet, ScrollView, View, ImageBackground, TextInput, Text, TouchableOpacity, Image, FlatList, Modal, Animated } from "react-native";
+import { StyleSheet, ScrollView, View, ImageBackground, TextInput, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FormDescription } from "@/components/FormDescription";
 import { StatusBar } from "expo-status-bar";
@@ -10,9 +10,6 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import reusableStyles from '@/constants/ReusableStyles';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
-import * as SecureStore from "expo-secure-store"
-import { TOKEN_KEY } from './context/AuthContext';
-import { sendOtpWhatsapp } from "./Apiconfig/api";
 const loginBackground = require('@/assets/images/LoginBackground.png');
 import { useAuth } from "./context/AuthContext";
 import FormErrorText from "@/components/FormErrorText";
