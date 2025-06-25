@@ -123,7 +123,7 @@ const CryptoScreen: React.FC = () => {
             <View style={styles.container}>
                 {/* Top Navigation */}
                 <View style={styles.topNav}>
-                    <TouchableOpacity style={styles.closeIcon} onPress={() => route.push("/contacts")}>
+                    <TouchableOpacity style={styles.closeIcon} onPress={() => route.back()}>
                         <Feather name='x' color={'gray'} size={25} />
                     </TouchableOpacity>
 
@@ -214,7 +214,7 @@ const CryptoScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#f8f8f8",
     },
     topNav: {
         flexDirection: "row",

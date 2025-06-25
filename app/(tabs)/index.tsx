@@ -25,7 +25,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { MobileTransaction, Section } from '@/types/datatypes';
-import { getBalances, fetchMobileTransactions } from '../Apiconfig/api';
+import { getBalances, fetchMobileTransactions, fetchExchangeRate } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
 import {
   updateBalance,
@@ -78,6 +78,7 @@ export default function TabOneScreen() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
+  const [sellingRate, setSellingRate] = useState<string | null>(null)
 
   const toggleVisibility = () => {
     setIsHidden((prev) => !prev);
@@ -192,6 +193,21 @@ export default function TabOneScreen() {
     token()
   }, [authState])
 
+  useEffect(() => {
+    const exchangeRate = async () => {
+      if (!isLoading) {
+        const currencyCode: string = "USD"
+        const rates = await fetchExchangeRate(currencyCode)
+        if (rates.data.success){
+          // console.log(rates.data)
+          setSellingRate(rates.data.data.sellingRate)
+          return;
+        }
+      }
+    }
+    exchangeRate()
+  }, [isLoading])
+
   // console.log("<---Parsed authtoken object index---->", authToken)
 
   const getGreetingAndImage = () => {
@@ -252,27 +268,36 @@ export default function TabOneScreen() {
   }
 
   const makeSections = (txs: MobileTransaction[]): Section[] => {
-    const sorted = [...txs].sort((a, b) =>
-      parseTxDate(b.transactionDate).getTime() -
-      parseTxDate(a.transactionDate).getTime()
-    )
-    const today = new Date()
+    const sorted = [...txs].sort(
+      (a, b) =>
+        parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
+    );
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
     const isSameDay = (d1: Date, d2: Date) =>
       d1.getFullYear() === d2.getFullYear() &&
       d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
+      d1.getDate() === d2.getDate();
 
-    const groups: Record<string, MobileTransaction[]> = {}
+    const groups: Record<string, MobileTransaction[]> = {};
+
     for (const tx of sorted) {
-      const d = parseTxDate(tx.transactionDate)
+      const d = parseTxDate(tx.transactionDate);
       const key = isSameDay(d, today)
         ? 'Today'
-        : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-        ; (groups[key] ||= []).push(tx)
+        : isSameDay(d, yesterday)
+          ? 'Yesterday'
+          : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+
+      (groups[key] ||= []).push(tx);
     }
 
-    return Object.entries(groups).map(([title, data]) => ({ title, data }))
-  }
+    return Object.entries(groups).map(([title, data]) => ({ title, data }));
+  };
+
 
   const refetchMobileTx = async () => {
     try {
@@ -313,7 +338,7 @@ export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground style={styles.background} source={dashboardBackground}>
-      <StatusBar style={'light'} />
+        <StatusBar style={'light'} />
         <View style={styles.dashBackground}>
           <View style={reusableStyle.paddingContainer}>
 
@@ -371,7 +396,7 @@ export default function TabOneScreen() {
                 route={"/contacts" as Href<string | object>}
                 textOnButton="Transfer"
                 icon={<Feather name="arrow-up" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#4781D9', padding: 17, paddingHorizontal: 17, paddingRight: 26 }}
+                containerStyle={{ backgroundColor: '#4781D9', padding: 17, paddingHorizontal: 15, paddingRight: 25 }}
                 textStyle={{ fontSize: 17, color: "white" }}
               />
 
@@ -379,7 +404,7 @@ export default function TabOneScreen() {
                 route={"/makepayment" as Href<string | object>}
                 textOnButton="Make Payment"
                 icon={<Feather name="arrow-down" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 21, paddingRight: 24, marginLeft: 17 }}
+                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 19, paddingRight: 24, marginLeft: 17 }}
                 textStyle={{ fontSize: 17, color: "white" }}
               />
             </View>
@@ -424,6 +449,7 @@ export default function TabOneScreen() {
         snapPoints={['50%']}
         enablePanDownToClose={true}
         animatedIndex={animatedTokenIndex}
+        backgroundStyle={{ backgroundColor: '#fff' }}
       >
         {/* <PrimaryFontBold
             style={[reusableStyle.paddingContainer,
@@ -431,13 +457,16 @@ export default function TabOneScreen() {
           >
             Please choose a token
           </PrimaryFontBold> */}
+        <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+          <PrimaryFontBold style={{ fontSize: 22 }}>
+            Tokens
+          </PrimaryFontBold>
 
-        <PrimaryFontBold
-          style={[reusableStyle.paddingContainer,
-          { fontSize: 22, marginTop: 20, marginBottom: 15, paddingHorizontal: 23 }]}
-        >
-          Tokens
-        </PrimaryFontBold>
+          <PrimaryFontMedium style={styles.rate}>
+            {sellingRate ? `$1 ≈ ${sellingRate} KSh` : "Loading.."}
+          </PrimaryFontMedium>
+        </View>
+
 
         <TokenList response={tokens} />
         {/* <TokenList routeProp='/fundingmethod'/> */}
@@ -485,5 +514,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  rate: {
+    backgroundColor: '#f3f5f9',
+    padding: 7,
+    color: '#79828E',
+    borderRadius: 15,
+    paddingHorizontal: 13,
+    fontSize: 13
+  },
+  tokenListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 15
   }
 });

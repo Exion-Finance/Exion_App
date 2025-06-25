@@ -80,7 +80,7 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
                     </View>
                     <View style={styles.balanceContainer}>
                         <PrimaryFontMedium style={styles.balance}>
-                            {item.balance.toFixed(4)} {item.tokenName.toUpperCase()}
+                            {item.balance.toFixed(3)} {item.tokenName.toUpperCase()}
                         </PrimaryFontMedium>
                         <PrimaryFontText style={styles.ksh}>
                             {parseFloat(item.ksh).toFixed(2)} Ksh

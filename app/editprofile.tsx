@@ -43,7 +43,7 @@ export default function EditProfileScreen() {
             }
             setSaving(true)
             const updateRes = await updateUser({ username })
-            console.log(updateRes.data)
+            // console.log(updateRes.data)
             if (updateRes.data.success) {
                 setSaved(true)
                 dispatch(setUserProfile(updateRes.data.data))
@@ -83,7 +83,7 @@ export default function EditProfileScreen() {
             }
 
             const otpRes = await sendUpdateEmailOTP(user_profile?.email)
-            console.log(otpRes.status)
+            // console.log(otpRes.status)
             if (otpRes.status === 200) {
                 router.push({
                     pathname: '/otp',
@@ -124,7 +124,7 @@ export default function EditProfileScreen() {
             }
 
             const otpRes = await sendUpdatePhoneNumberOTP(user_profile?.phoneNumber)
-            console.log(otpRes.status)
+            // console.log(otpRes.status)
             if (otpRes.status === 200) {
                 router.push({
                     pathname: '/otp',
@@ -151,7 +151,7 @@ export default function EditProfileScreen() {
             <StatusBar style={'light'} />
             <ImageBackground style={styles.editProfileHeader} source={editProfileBackground}>
 
-                <TouchableOpacity onPress={() => router.navigate('/profile')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 18 }}>
+                <TouchableOpacity onPress={() => router.back()} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 18 }}>
                     <Ionicons name="arrow-back-outline" size={19} color="#000" />
                     <Text style={styles.title}>Edit Profile</Text>
                 </TouchableOpacity>
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     circle: {
         width: 50,
         height: 50,
-        borderRadius: 25,
+        borderRadius: 20,
         borderWidth: 2,
         borderColor: '#1BAE86',
         justifyContent: 'center',

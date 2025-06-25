@@ -9,12 +9,14 @@ import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { useRouter } from 'expo-router';
+import { verifyAccount } from './Apiconfig/api';
 
 export default function SendMoney() {
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [error, setError] = useState<boolean>(false);
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [showContacts, setShowContacts] = useState<boolean>(false);
+    const [disableButton, setDisableButton] = useState<boolean>(false);
     const rotateAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -25,7 +27,7 @@ export default function SendMoney() {
         setError(false)
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Trim any leading or trailing whitespace
         let cleanedNumber = phoneNumber.trim();
 
@@ -64,6 +66,12 @@ export default function SendMoney() {
                 source: 'sendmoney'
             }
         });
+
+
+
+        // const channel: string = "Mpesa"
+        // const result = await verifyAccount(channel, cleanedNumber)
+        // console.log(result.data)
     };
 
     const toggleContacts = () => {
@@ -108,7 +116,7 @@ export default function SendMoney() {
                     <TouchableOpacity style={styles.chooseContainer} onPress={toggleContacts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                         <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
                         <Animated.View style={{ transform: [{ rotate }] }}>
-                            <Feather name="chevron-down" size={18} color="grey" style={{  marginTop: showContacts ? -2 : 3 }} />
+                            <Feather name="chevron-down" size={18} color="grey" style={{ marginTop: showContacts ? -2 : 3 }} />
                         </Animated.View>
                     </TouchableOpacity>
 
@@ -128,12 +136,12 @@ export default function SendMoney() {
                         }}
                     >
                         <View style={{ backgroundColor: '#f0f0f0', marginTop: 10, flex: 1 }}>
-                            <ContactsList from='sendmoney'/>
+                            <ContactsList from='sendmoney' />
                         </View>
                     </Animated.View>
                 </View>
 
-               <TouchableOpacity style={[styles.button, { opacity: showContacts ? 0 : 1 }]} onPress={handleSubmit}>
+                <TouchableOpacity style={[styles.button, { opacity: showContacts ? 0 : 1 }]} onPress={handleSubmit}>
                     <PrimaryFontBold style={styles.text}>Continue</PrimaryFontBold>
                 </TouchableOpacity>
             </View>
@@ -147,7 +155,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     button: {
         backgroundColor: '#00C48F',
