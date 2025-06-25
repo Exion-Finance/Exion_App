@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         marginTop: 10,
-        backgroundColor: '#FFF',
+        backgroundColor: '#f8f8f8',
         width: '100%'
     },
     logo: {
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     shareButton: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#f8f8f8',
         borderWidth: 1,
         borderColor: '#00C48F',
         marginRight: 8,

@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         paddingBottom: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8f8',
     },
     title: {
         fontSize: 26,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     },
     optionsWrapper: {
         marginTop: -45,
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8f8',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         paddingTop: 90,

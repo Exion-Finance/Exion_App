@@ -53,7 +53,7 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
             >
                 <Image
                     source={Empty}
-                    style={{ height: 130, width: 110, marginTop: 40 }}
+                    style={{ height: 125, width: 110, marginTop: 40 }}
                 />
                 <PrimaryFontMedium style={styles.emptyText}>
                     No transactions found
@@ -72,33 +72,70 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                 transactionType = "Buy Goods";
                 break;
 
+            // case "MPESA":
+            //     const nameParts = item.recipientName.trim().split(" ");
+            //     const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
+            //     const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
+            //     username = `${first} ${last}`;
+            //     transactionType = "Send Money";
+            //     break;
+
             case "MPESA":
-                const nameParts = item.recipientName.trim().split(" ");
-                const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
-                const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
-                username = `${first} ${last}`;
+                if (item.recipientName && typeof item.recipientName === 'string' && item.recipientName.trim() !== "") {
+                    const nameParts = item.recipientName.trim().split(" ");
+                    const first = nameParts[0]
+                        ? nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase()
+                        : "";
+                    const last = nameParts.length > 1
+                        ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].slice(1).toLowerCase()
+                        : "";
+                    username = `${first} ${last}`.trim();
+                } else {
+                    username = item.recipientAccountNumber ?? "Unknown";
+                }
                 transactionType = "Send Money";
                 break;
+
 
             case "PAYBILL":
                 username = item.recipientAccountNumber;
                 transactionType = "Paybill";
                 break;
 
+            // default:
+            //     if (item.type === null) {
+            //         if (item.recipientName && item.recipientName.trim() !== "") {
+            //             const nameParts = item.recipientName.trim().split(" ");
+            //             const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
+            //             const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
+            //             username = `${first} ${last}`;
+            //             transactionType = "Send Money";
+            //         } else {
+            //             username = item.recipientAccountNumber;
+            //             transactionType = "Mpesa";
+            //         }
+            //     }
+            //     break;
+
             default:
                 if (item.type === null) {
-                    if (item.recipientName && item.recipientName.trim() !== "") {
+                    if (item.recipientName && typeof item.recipientName === 'string' && item.recipientName.trim() !== "") {
                         const nameParts = item.recipientName.trim().split(" ");
-                        const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
-                        const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
-                        username = `${first} ${last}`;
+                        const first = nameParts[0]
+                            ? nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase()
+                            : "";
+                        const last = nameParts.length > 1
+                            ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].slice(1).toLowerCase()
+                            : "";
+                        username = `${first} ${last}`.trim();
                         transactionType = "Send Money";
                     } else {
-                        username = item.recipientAccountNumber;
+                        username = item.recipientAccountNumber ?? "Unknown";
                         transactionType = "Mpesa";
                     }
                 }
                 break;
+
         }
 
         return { username, transactionType };
@@ -106,48 +143,48 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
 
     return (
-            <SectionList
-                sections={sections}
-                keyExtractor={(item, index) =>
-                    item.id
-                        ? item.id
-                        : `missing-id-${index}`
-                }
-                renderSectionHeader={({ section: { title } }) => (
-                    <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
-                )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
-                style={styles.section}
-                renderItem={({ item }) => {
-                    const { username, transactionType } = formatTransaction(item);
-                    return (
-                        <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]} onPress={() => onSelectTransaction(item)}>
-                            <View style={styles.flexRow}>
-                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
-                                <View style={{ marginLeft: 10 }}>
-                                    <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
-                                    <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
-                                </View>
+        <SectionList
+            sections={sections}
+            keyExtractor={(item, index) =>
+                item.id
+                    ? item.id
+                    : `missing-id-${index}`
+            }
+            renderSectionHeader={({ section: { title } }) => (
+                <PrimaryFontText style={styles.header}>{title}</PrimaryFontText>
+            )}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            style={styles.section}
+            renderItem={({ item }) => {
+                const { username, transactionType } = formatTransaction(item);
+                return (
+                    <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]} onPress={() => onSelectTransaction(item)}>
+                        <View style={styles.flexRow}>
+                            <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
+                            <View style={{ marginLeft: 10 }}>
+                                <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
+                                <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
                             </View>
+                        </View>
 
-                            <View style={styles.amountBlock}>
-                                <PrimaryFontMedium style={styles.amount}>Ksh {item.transactionAmount.toFixed(2)}</PrimaryFontMedium>
-                                <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
-                            </View>
-                        </TouchableOpacity>
-                    )
-                }}
-                // contentContainerStyle={{ padding: 16 }}
-                showsVerticalScrollIndicator={false}
-            />
+                        <View style={styles.amountBlock}>
+                            <PrimaryFontMedium style={styles.amount}>Ksh {item.transactionAmount.toFixed(2)}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
+                        </View>
+                    </TouchableOpacity>
+                )
+            }}
+            // contentContainerStyle={{ padding: 16 }}
+            showsVerticalScrollIndicator={false}
+        />
     )
 }
 
 const styles = StyleSheet.create({
     section: {
-        backgroundColor: 'white',
+        backgroundColor: '#f8f8f8',
         paddingLeft: 18,
         paddingRight: 30,
     },
@@ -193,7 +230,7 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: '#f8f8f8',
     },
     emptyText: {
         fontSize: 18,

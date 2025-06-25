@@ -144,16 +144,6 @@ export default function EditProfileScreen() {
         } finally {
             setChangePhoneClicked(false)
         }
-        // const sumn = true
-        // const recipientName = undefined
-        //         if (sumn) {
-        //             const rawName = recipientName ?? 'Mobile';
-        //             // console.log("Check response data", checkTx.data)
-        //             const [first='', second=''] = rawName.split(' ')
-        //             const fullName = first as string + " " + second as string
-        //             console.log("fullName", fullName)
-        //         }
-
     }
 
     return (
@@ -249,7 +239,7 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         height: '100%',
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8f8',
     },
     editProfileHeader: {
         height: 200,
@@ -265,7 +255,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -25,
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8f8',
     },
     title: {
         fontSize: 18,
