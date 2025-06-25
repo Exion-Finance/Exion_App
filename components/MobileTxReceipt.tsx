@@ -225,7 +225,7 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
 
     return (
-        <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} animatedIndex={animatedIndex} enablePanDownToClose={true}>
+        <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} animatedIndex={animatedIndex} enablePanDownToClose={true} backgroundStyle={{ backgroundColor: '#f8f8f8' }}>
             <View style={styles.contentContainer}>
 
                 <View style={styles.dataTable}>

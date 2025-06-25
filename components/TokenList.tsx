@@ -33,7 +33,7 @@ export default function TokenList({ response }: TokenListProps) {
     const route = useRouter()
     const handleTokenSelect = (id:number) => {
         // route.push('/fundingmethod')
-        // route.push({ pathname: "/fundingmethod", params: { id} });
+        route.push({ pathname: "/fundingmethod", params: { id} });
         console.log("Clicked")
     }
     const tokens = Object.keys(response.balance).map((key) => {
@@ -59,7 +59,7 @@ export default function TokenList({ response }: TokenListProps) {
                         <PrimaryFontText style={styles.fullName}>{item.fullName}</PrimaryFontText>
                     </View>
                     <View style={styles.balanceContainer}>
-                        <PrimaryFontMedium style={styles.balance}>{(item.balance).toFixed(4)} {item.tokenName.toUpperCase()}</PrimaryFontMedium>
+                        <PrimaryFontMedium style={styles.balance}>{(item.balance).toFixed(3)} {item.tokenName.toUpperCase()}</PrimaryFontMedium>
                         <PrimaryFontText style={styles.ksh}>{parseFloat(item.ksh).toFixed(2)} Ksh</PrimaryFontText>
                     </View>
                 </TouchableOpacity>

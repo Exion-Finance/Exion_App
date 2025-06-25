@@ -3,13 +3,15 @@ import { StyleSheet, Image, View } from 'react-native';
 import spaceImage from '@/assets/images/space.png'
 import { SecondaryFontText } from "@/components/SecondaryFontText";
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
+import { StatusBar } from 'expo-status-bar';
 
 export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!', headerShown: true }} />
       <View style={styles.container}>
-        <Image source={spaceImage} style={{ height: 200, width: 200, marginTop: -60 }} />
+        <StatusBar style='dark'/>
+        <Image source={spaceImage} style={{ height: 180, width: 180, marginTop: -60 }} />
         <SecondaryFontText style={styles.title}>This screen doesn't exist.</SecondaryFontText>
         <PrimaryFontMedium style={styles.linkText}>Looks like you lost your way</PrimaryFontMedium>
       </View>
