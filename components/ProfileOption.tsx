@@ -45,9 +45,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 10,
         paddingHorizontal: 5,
-        backgroundColor: 'white',
-        // borderBottomWidth: 1,
-        // marginBottom: 10
+        backgroundColor: '#f8f8f8',
     },
     optionLeft: {
         flexDirection: 'row',

@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         padding: 18,
         justifyContent: 'flex-start',
         width: '100%',
-        backgroundColor: '#fff'
+        backgroundColor: '#f8f8f8'
     },
     instructions: {
         fontSize: 19,

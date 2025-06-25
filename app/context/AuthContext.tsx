@@ -6,6 +6,7 @@ import { UserData, UserProfile } from "@/types/datatypes";
 import { fetchUser } from '../Apiconfig/api';
 import { setUserProfile } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
+import { authAPI } from "./AxiosProvider";
 // import { useAxios } from "./AxiosProvider";
 
 
@@ -15,6 +16,7 @@ interface AuthProps {
     onLogin?: (email: string, password: string) => Promise<any>;
     onLogout?: (refreshToken: string) => Promise<void>;
     onClearData?: () => Promise<void>;
+    onLoadToken?: () => Promise<boolean>;
     onRegister?: (phoneNumber: string, password: string, email: string, username: string, otp: string) => Promise<any>;
     getAccessToken?: () => string | null;
 }
@@ -95,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                     setAuthState({ token: newAccessToken, authenticated: true });
 
-                    // return true;
+                    return true;
                 } catch (refreshError) {
                     // await logout();
                     console.log("Refresh token error", refreshError)
@@ -108,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
         }
-        return true;
+        return false;
     }, []);
 
 
@@ -119,9 +121,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // useEffect(() => console.log("getAccessToken straight from authState", getAccessToken()),[authState])
 
 
-    useEffect(() => {
-        loadToken();
-    }, [loadToken]);
+    // useEffect(() => {
+    //     loadToken();
+    // }, [loadToken]);
 
 
     const register = async (phoneNumber: string, password: string, email: string, username: string, otp: string) => {
@@ -152,7 +154,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = async (refreshToken: string) => {
-        const response = await axios.post(`${PESACHAIN_URL}/auth/logout`, { refreshToken });
+        // console.log("Logout called-->")
+        const response = await authAPI.post(`/auth/logout`, { refreshToken });
+        // console.log("Logout responseeee-->", response.data)
         if (response.data.success) {
             await SecureStore.deleteItemAsync(TOKEN_KEY);
             setAuthState({
@@ -179,6 +183,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         onLogin: login,
         onLogout: logout,
         onClearData: clearData,
+        onLoadToken: loadToken,
         getAccessToken,
     };
     // console.log("Auth value:", {

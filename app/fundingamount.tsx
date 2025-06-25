@@ -81,7 +81,7 @@ export default function FundingAmount() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Amount' onBackPress={() => route.push('/fundingmethod')} />
+            <NavBar title='Amount' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <InputField
                     label="Enter the amount to send"

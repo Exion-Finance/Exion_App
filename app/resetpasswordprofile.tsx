@@ -69,7 +69,7 @@ export default function ResetPwdProfile() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Reset password' onBackPress={() => route.push('/editprofile')} />
+            <NavBar title='Reset password' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
                     <PrimaryFontMedium style={styles.label}>To ensure account security, we'll send a secure OTP to your email address</PrimaryFontMedium>
@@ -104,14 +104,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     input: {
         height: 57,
         borderRadius: 8,
         paddingLeft: 15,
         fontSize: 18,
-        color: '#504646',
+        color: '#473F3F',
         backgroundColor: '#F8F8F8',
         fontFamily: 'DMSansRegular',
         borderColor: '#C3C3C3',
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 20,
-        marginBottom: 17,
+        marginBottom: 16,
         color: '#052330',
     },
     flexContainer: {
@@ -143,6 +143,6 @@ const styles = StyleSheet.create({
     disclaimerContainer: {
         flexDirection: 'row',
         alignItems: "center",
-        marginTop: 5
+        marginTop: 2
     }
 });
