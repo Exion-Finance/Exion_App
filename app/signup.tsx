@@ -124,7 +124,7 @@ export default function Signup() {
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={styles.scrollview}>
             <View style={styles.container}>
-                <NavBar title='Sign Up' onBackPress={() => route.push('/login')} />
+                <NavBar title='Sign Up' onBackPress={() => route.back()} />
 
                 <ImageBackground style={styles.background} source={signupBackground}>
                     <FormDescription title={title} description={description} />

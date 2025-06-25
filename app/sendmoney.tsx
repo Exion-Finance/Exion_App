@@ -93,7 +93,7 @@ export default function SendMoney() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Send money' onBackPress={() => route.push('/makepayment')} />
+            <NavBar title='Send money' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
                     <InputField

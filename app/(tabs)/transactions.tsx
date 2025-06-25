@@ -24,10 +24,7 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 export default function Transactions() {
 
-    const { authState } = useAuth()
-
     const [transactions, setTransactions] = useState(useSelector(selectTransactions))
-    const [authToken, setAuthToken] = useState<string>("");
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
@@ -39,17 +36,7 @@ export default function Transactions() {
     const bottomSheetTxRef = useRef<BottomSheet>(null);
     const animatedTxIndex = useSharedValue(-1);
 
-    useEffect(() => {
-        const token = async () => {
-            const token = authState?.token
-            if (token) {
-                setAuthToken(token)
-            }
-        }
-        token()
-    }, [authState])
-
-    const { data } = userTransactions(authToken);
+    const { data } = userTransactions();
 
     useEffect(() => {
         if (data) {
@@ -144,13 +131,13 @@ export default function Transactions() {
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />
-            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: 'white' }]}>
+            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: '#f8f8f8' }]}>
                 <PrimaryFontBold style={{ fontSize: 28 }}>Transactions</PrimaryFontBold>
                 <SecondaryButton
                     // route="/modal"
                     textOnButton="Filter"
                     icon={<Ionicons name="filter-outline" size={15} color="black" />}
-                    containerStyle={{ backgroundColor: 'white', borderWidth: 0.8, borderColor: '#DFE4E5' }}
+                    containerStyle={{ backgroundColor: '#f8f8f8', borderWidth: 0.8, borderColor: '#DFE4E5' }}
                     textStyle={{ fontSize: 16, color: "#074A4F" }}
                 />
             </View>
@@ -215,7 +202,7 @@ export default function Transactions() {
 
                     </View>
                     :
-                    <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
+                    <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: '#f8f8f8' }]}>
                         <ActivityIndicator size="small" color='#00C48F' />
                     </View>}
 
@@ -237,7 +224,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingTop: statusBarHeight,
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     title: {
         fontSize: 20,
@@ -254,7 +241,7 @@ const styles = StyleSheet.create({
     tabButton: {
         flex: 1,
         paddingVertical: 15,
-        backgroundColor: '#F3F5F9',
+        backgroundColor: '#F0F0F0',
         alignItems: 'center',
     },
     tabButtonActive: {

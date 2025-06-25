@@ -112,7 +112,7 @@ export default function OptionalMessage() {
         <GestureHandlerRootView>
             <View style={styles.container}>
                 <StatusBar style={'dark'} />
-                <NavBar title={`Sending ${amount} Ksh`} onBackPress={() => route.push('/keyboard')} />
+                <NavBar title={`Sending ${amount} Ksh`} onBackPress={() => route.back()} />
 
                 <View style={reusableStyles.paddingContainer}>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 10 }]}>

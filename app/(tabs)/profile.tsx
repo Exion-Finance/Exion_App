@@ -47,7 +47,7 @@ export default function Profile() {
     }
     const parsed = JSON.parse(stored);
     const { refreshToken, token } = parsed;
-    return token;
+    return refreshToken;
   }
 
   // const handleLogout = async () => {
@@ -83,14 +83,14 @@ export default function Profile() {
     }
     finally {
       setLogout(false)
-      route.push('/login')
+      route.replace('/login');
     }
   }
 
   return (
     <View style={styles.container}>
       <StatusBar style={'dark'} />
-      <NavBar title='Profile' onBackPress={() => route.push('/(tabs)')} />
+      <NavBar title='Profile' onBackPress={() => route.back()} />
 
       <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 30 }]}>
         <Image source={userIcon} style={styles.userIcon} />
@@ -102,29 +102,29 @@ export default function Profile() {
         </View>
       </View>
 
-      <View style={[reusableStyle.paddingContainer, { flex: 1, justifyContent: 'space-between', backgroundColor: 'white', marginTop: 20, paddingBottom: 20 }]}>
+      <View style={[reusableStyle.paddingContainer, { flex: 1, justifyContent: 'space-between', backgroundColor: '#f8f8f8', marginTop: 20, paddingBottom: 20 }]}>
         <View>
           <ProfileOption
             option="Edit profile"
             icon={<Feather name="user" size={22} color="#00C48F" />}
-            containerStyle={{ backgroundColor: 'white', marginTop: 20 }}
-            textStyle={{ fontSize: 18 }}
+            containerStyle={{ backgroundColor: '#f8f8f8', marginTop: 20 }}
+            textStyle={{ fontSize: 19 }}
             route='/editprofile'
           />
 
           <ProfileOption
             option="Reset password"
             icon={<Feather name="lock" size={20} color="#00C48F" />}
-            containerStyle={{ backgroundColor: 'white' }}
-            textStyle={{ fontSize: 18 }}
+            containerStyle={{ backgroundColor: '#f8f8f8' }}
+            textStyle={{ fontSize: 19 }}
             route='/resetpasswordprofile'
           />
 
           <ProfileOption
             option="Settings"
             icon={<Feather name="settings" size={20} color="#00C48F" />}
-            containerStyle={{ backgroundColor: 'white' }}
-            textStyle={{ fontSize: 18 }}
+            containerStyle={{ backgroundColor: '#f8f8f8' }}
+            textStyle={{ fontSize: 19 }}
             route='/settings'
           />
 
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: 'white'
+    backgroundColor: '#f8f8f8'
   },
   title: {
     fontSize: 20,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 11,
     borderRadius: 10,
-    backgroundColor: 'white',
+    backgroundColor: '#f8f8f8',
     borderWidth: 1,
     borderColor: '#DFE4E5',
     width: 160

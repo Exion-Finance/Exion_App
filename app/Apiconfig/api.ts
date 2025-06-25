@@ -113,14 +113,11 @@ export const RedeemPromo = async (token: string, tokenId: number = 1, promoCode:
 
 
 
-export const transactionHistory = async (token: string, pagination?: number) => {
+export const transactionHistory = async ( pagination?: number) => {
     try {
         // Pass pagination as a query parameter
-        const response = await axios.get(`${PESACHAIN_URL}/tx/history`, {
-            params: { pagination },  // pagination is now passed as a query parameter
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+        const response = await authAPI.get(`/tx/history`, {
+            params: { pagination },
             timeout: 30000
         });
         return response.data;

@@ -48,17 +48,6 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         return () => unsubscribe();
     }, []);
 
-    // if (transactions && sections.length === 0) {
-    //     return (
-    //         <View style={[styles.empty, reusableStyles.paddingContainer]}>
-    //             <Image source={Empty} style={{ height: 160, width: 140, marginTop: -80 }} />
-    //             <PrimaryFontMedium style={styles.emptyText}>
-    //                 No transactions found
-    //             </PrimaryFontMedium>
-    //         </View>
-    //     )
-    // }
-
     if (transactions && sections.length === 0) {
         return (
             <ScrollView
@@ -69,7 +58,7 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
             >
                 <Image
                     source={Empty}
-                    style={{ height: 150, width: 130, marginTop: -80 }}
+                    style={{ height: 125, width: 110, marginTop: 40 }}
                 />
                 <PrimaryFontMedium style={styles.emptyText}>
                     No transactions found
@@ -82,7 +71,7 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         <SectionList
             sections={sections}
             keyExtractor={(item, index) => `${item.hash}-${index}`}
-            style={[reusableStyles.paddingContainer, { backgroundColor: 'white' }]}
+            style={[reusableStyles.paddingContainer, { backgroundColor: '#f8f8f8' }]}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
@@ -137,9 +126,9 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
 const styles = StyleSheet.create({
     empty: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: '#f8f8f8',
     },
     emptyText: {
         fontSize: 18,
@@ -149,7 +138,7 @@ const styles = StyleSheet.create({
     sectionHeader: {
         padding: 10,
         paddingLeft: 0,
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8f8',
     },
     sectionHeaderText: {
         fontSize: 15,

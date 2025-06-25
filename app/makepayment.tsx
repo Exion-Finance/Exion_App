@@ -16,7 +16,7 @@ export default function MakePayments() {
   return (
     <View style={styles.container}>
       <StatusBar style={'dark'} />
-      <NavBar title='Make payment' onBackPress={() => route.push('/(tabs)')} />
+      <NavBar title='Make payment' onBackPress={() => route.back()} />
 
       <ScrollView>
         <View style={{ flex: 1 }}>
