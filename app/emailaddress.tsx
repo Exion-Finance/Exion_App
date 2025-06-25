@@ -74,7 +74,7 @@ export default function Email() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Email Address' onBackPress={() => route.push('/login')} />
+            <NavBar title='Email Address' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
                     <PrimaryFontMedium style={styles.label}>To verify your identity, please enter your registered email</PrimaryFontMedium>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     input: {
         height: 57,
@@ -155,6 +155,6 @@ const styles = StyleSheet.create({
     disclaimerContainer: {
         flexDirection: 'row',
         alignItems: "center",
-        marginTop: 5
+        marginTop: 2
     }
 });

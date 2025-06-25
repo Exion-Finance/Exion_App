@@ -75,7 +75,7 @@ export default function ChangeEmail() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='New Email' onBackPress={() => route.push('/editprofile')} />
+            <NavBar title='New Email' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
                     <PrimaryFontMedium style={styles.label}>Enter the new email address</PrimaryFontMedium>
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     input: {
         height: 57,
@@ -156,6 +156,6 @@ const styles = StyleSheet.create({
     disclaimerContainer: {
         flexDirection: 'row',
         alignItems: "center",
-        marginTop: 5
+        marginTop: 2
     }
 });

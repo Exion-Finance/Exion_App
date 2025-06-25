@@ -313,7 +313,7 @@ export default function OTP({ }) {
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />
-            <NavBar title='OTP' onBackPress={() => route.push(`/${parsedUser?.source}` as Href<string | object>)} />
+            <NavBar title='OTP' onBackPress={() => route.back()} />
             <FormDescription title={parsedUser && parsedUser.title || " "} description={parsedUser && parsedUser.description || " "} />
 
             <View style={styles.otpContainer}>
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     label: {
         fontSize: 20,
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
         marginTop: -5,
         marginBottom: 20,
         textAlign: "center",
-        backgroundColor: "#EEFFEF",
+        backgroundColor: "#DDFEDF",
         paddingVertical: 8,
         paddingHorizontal: 13,
         borderRadius: 25,

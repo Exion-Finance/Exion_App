@@ -141,7 +141,7 @@ export default function VerifyPhone() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='One final step!' onBackPress={() => route.push('/emailaddress')} />
+            <NavBar title='One final step!' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
                     <PrimaryFontMedium style={styles.label}>Add a phone number to make it easier for contacts to send you money without a wallet address.</PrimaryFontMedium>
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     button: {
         backgroundColor: '#00C48F',
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     modalContainer: {
-        backgroundColor: "white",
+        backgroundColor: "#f8f8f8",
         width: "90%",
         borderRadius: 10,
         padding: 16,

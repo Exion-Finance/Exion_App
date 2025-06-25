@@ -39,7 +39,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 
-type CurrencyData = {
+export type CurrencyData = {
   usd: string;
   kes: string;
   token: number;
@@ -124,6 +124,8 @@ export default function TabOneScreen() {
       fetchBalance();
     }
   }, [authToken]);
+
+  // console.log("AuthToken in indexxxxxx<<<<<<<<<<<", authToken)
 
   useEffect(() => {
     if (tokensBalance) {
@@ -385,7 +387,7 @@ export default function TabOneScreen() {
         </View>
       </ImageBackground>
 
-      <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: 'white' }]}>
+      <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: '#f8f8f8' }]}>
         <PrimaryFontMedium style={{ fontSize: 25 }}>Recent activity</PrimaryFontMedium>
         <TouchableOpacity onPress={() => route.push('/transactions')}>
           <PrimaryFontMedium style={{ fontSize: 18, color: '#00C48F' }}>See all</PrimaryFontMedium>
@@ -404,7 +406,7 @@ export default function TabOneScreen() {
         </View>
 
         :
-        <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: 'white' }]}>
+        <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: '#f8f8f8' }]}>
           <ActivityIndicator size="small" color='#00C48F' />
         </View>}
 

@@ -20,7 +20,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import TokenListPayment, { Token } from '@/components/MakePaymentTokenList';
 import reusableStyle from '@/constants/ReusableStyles'
 import { getBalances } from './Apiconfig/api';
-import { ResponseBalance } from './(tabs)';
+import { ResponseBalance, CurrencyData } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
@@ -28,6 +28,8 @@ import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import { useAuth } from "./context/AuthContext";
 import Loading from "@/components/Loading";
+import { selectTokenBalances, setTokenBalance } from './state/slices';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 
@@ -42,7 +44,8 @@ type TokenType = {
 
 
 const CustomKeyboard = () => {
-  const { authState } = useAuth()
+  const dispatch = useDispatch()
+  const token_balance = useSelector(selectTokenBalances)
 
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState(false);
@@ -459,8 +462,10 @@ const CustomKeyboard = () => {
     const fetchBalances = async () => {
       try {
         const response = await getBalances();
+        // console.log("response",response)
         if (response && response.balance) {
           setTokens(response);
+          dispatch(setTokenBalance(response));
 
           // Set active token to the first token with a valid balance
           const tokenEntries = Object.entries(response.balance) as [string, { token: string; kes: string }][];
@@ -489,6 +494,41 @@ const CustomKeyboard = () => {
 
     fetchBalances();
   }, [])
+
+
+  useEffect(() => {
+    if(token_balance){
+      // console.log("token_balance", token_balance)
+      const cachedTokens: ResponseBalance = {
+        balance: token_balance,
+        message: "success"
+      };
+
+      setTokens(cachedTokens)
+
+      // Set active token to the first token with a valid balance
+      const tokenEntries = Object.entries(token_balance) as [string, CurrencyData][];
+      const tokenWithHighestBalance = tokenEntries.reduce((prev, curr) => {
+        const prevBalance = Number(prev[1].kes);
+        const currBalance = Number(curr[1].kes);
+        return currBalance > prevBalance ? curr : prev;
+      });
+      // Destructure selected token
+      const [selectedKey, selectedData] = tokenWithHighestBalance;
+      if (selectedTokenId === 0) {
+        setActiveToken({
+          token: selectedKey.toUpperCase(),
+          balance: Number(selectedData.token),
+          ksh: Number(selectedData.kes),
+        });
+      }
+    }
+
+    else console.log("Redux empty of tokens")
+  }, [token_balance])
+
+
+  
 
   useEffect(() => {
     const updateTransactionState = () => {
@@ -519,7 +559,7 @@ const CustomKeyboard = () => {
       <View style={styles.container}>
         <StatusBar style={'light'} />
         <View style={styles.balanceContainer}>
-          <Pressable style={styles.closeContainer} onPress={() => route.push(source ? `/${source}` as Href<string | object> : '/(tabs)')}>
+          <Pressable style={styles.closeContainer} onPress={() => route.back()}>
             <Feather name='x' color={'grey'} size={28} />
           </Pressable>
 
