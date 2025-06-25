@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 export default function Contacts() {
 const router = useRouter()
   return (
-    <View style={{backgroundColor: 'white', flex: 1}}>
+    <View style={{backgroundColor: '#f8f8f8', flex: 1}}>
         <StatusBar style={'dark'}/>
         <NavBar title='Who are you sending to?' onBackPress={() => router.back()} />
         <ContactsList from='contacts'/>

@@ -129,7 +129,7 @@ export const transactionHistory = async ( pagination?: number) => {
 
 export const checkPhoneNumber = async (identifier: string) => {
 
-    const response = await axios.get(`${PESACHAIN_URL}/auth/checkidentifier`, {
+    const response = await authAPI.get(`/auth/checkidentifier`, {
         params: { identifier },
     })
     return response;
@@ -142,6 +142,11 @@ export const fetchUser = async (token: string) => {
             'Authorization': `Bearer ${token}`,
         }
     })
+    return response;
+}
+
+export const fetchExchangeRate = async (currencyCode: string) => {
+    const response = await authAPI.get(`/exchange-rate/${currencyCode}` )
     return response;
 }
 
@@ -217,11 +222,14 @@ export const calculateFee = async ({ recipient, amount, tokenId, chainId = 1 }: 
     return await authAPI.post(`/tx/fee`, { recipient, amount, tokenId, chainId, });
 };
 
+export const verifyAccount = async (channel: string, account_number: string): Promise<AxiosResponse> => {
+    return await authAPI.post(`/payments/verify-account`, { channel, account_number });
+};
+
 export const fetchMobileTransactions = async (pageSize: number) => {
     try {
         const response = await authAPI.get(`/payments/history`, {
-            params: { pageSize },
-            timeout: 30000
+            params: { pageSize }
         });
         return response.data;
     } catch (error: any) {

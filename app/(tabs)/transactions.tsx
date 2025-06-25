@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     tabButton: {
         flex: 1,
         paddingVertical: 15,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: '#EBEDF2',
         alignItems: 'center',
     },
     tabButtonActive: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontSize: 16.5,
-        color: '#00C48F',
+        color: '#79828E',
     },
     tabTextActive: {
         color: 'white',
