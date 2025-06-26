@@ -52,22 +52,26 @@ export default function OTP({ }) {
         console.error('Failed to parse user:', error);
     }
 
-    const handleChange = (text: string, index: number) => {
+    const handleChange = async(text: string, index: number) => {
         setEmptyOtpError(false);
-
-        // Regular single-digit input
-        // if (text.length > 1) return;
-
+      
         const newOtp = [...otp];
         newOtp[index] = text;
         setOtp(newOtp);
-
+      
         // Move to the next input if available
         if (text && index < 5) {
-            setActiveIndex(index + 1);
-            inputRefs.current[index + 1]?.focus();
+          setActiveIndex(index + 1);
+          inputRefs.current[index + 1]?.focus();
         }
-    };
+      
+        // Check if all 6 digits are filled
+        const filledOtp = newOtp.join('');
+        if (filledOtp.length === 6) {
+          await handleOtpSubmit(newOtp)
+        }
+      };
+      
 
     const handlePaste = async () => {
         const clipboardText = await Clipboard.getStringAsync();
@@ -86,6 +90,7 @@ export default function OTP({ }) {
             inputRefs.current[index - 1]?.focus();
         }
     };
+      
 
     useEffect(() => {
         if (counter > 0) {
@@ -343,7 +348,7 @@ export default function OTP({ }) {
             </TouchableOpacity>
 
             <View style={reusableStyles.paddingContainer}>
-                <TouchableOpacity style={styles.button} onPress={() => handleOtpSubmit()}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: buttonClicked ? "#36EFBD" : "#00C48F" }]} onPress={() => handleOtpSubmit()} disabled={buttonClicked}>
                     <PrimaryFontBold style={styles.text}>
                         {buttonClicked ?
                             <Loading color='#fff' description={parsedUser && parsedUser.loadingText || " "} />
@@ -423,7 +428,7 @@ const styles = StyleSheet.create({
         marginLeft: 3
     },
     button: {
-        backgroundColor: '#00C48F',
+        // backgroundColor: '#00C48F',
         padding: 10,
         borderRadius: 9,
         alignItems: 'center',

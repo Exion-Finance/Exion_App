@@ -6,8 +6,9 @@ interface ButtonProps extends PressableProps  {
     route?: Href<string | object>;
     textOnButton: any,
     widthProp?: StyleProp<ViewStyle>;
+    disabled?: boolean;
 }
-export default function PrimaryButton({ route, textOnButton, widthProp,onPress }: ButtonProps) {
+export default function PrimaryButton({ route, textOnButton, widthProp,onPress, disabled }: ButtonProps) {
     const router = useRouter();
     const handlePress = async(event: GestureResponderEvent) => {
         if (onPress) {
@@ -18,7 +19,7 @@ export default function PrimaryButton({ route, textOnButton, widthProp,onPress }
         }
     };
     return (
-        <TouchableOpacity style={[styles.container, widthProp]} onPress={handlePress}>
+        <TouchableOpacity style={[styles.container, widthProp, { backgroundColor: disabled ? "#36EFBD" : "#00C48F" }]} onPress={handlePress} disabled={disabled}>
             <PrimaryFontBold style={styles.text}>{textOnButton}</PrimaryFontBold>
         </TouchableOpacity>
     );
@@ -26,7 +27,7 @@ export default function PrimaryButton({ route, textOnButton, widthProp,onPress }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#00C48F',
+        // backgroundColor: '#00C48F',
         padding: 10,
         borderRadius: 9,
         alignItems: 'center',

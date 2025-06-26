@@ -33,7 +33,7 @@ export default function TokenList({ response }: TokenListProps) {
     const route = useRouter()
     const handleTokenSelect = (id:number) => {
         // route.push('/fundingmethod')
-        route.push({ pathname: "/fundingmethod", params: { id} });
+        // route.push({ pathname: "/fundingmethod", params: { id} });
         console.log("Clicked")
     }
     const tokens = Object.keys(response.balance).map((key) => {

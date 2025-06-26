@@ -143,7 +143,10 @@ export default function Login() {
                             <PrimaryButton onPress={() => handleLogin()} textOnButton={buttonClicked ?
                                 <Loading color='#fff' description='Authenticating' />
                                 : "Login"
-                            } widthProp={reusableStyles.width100} />
+                            } 
+                            widthProp={reusableStyles.width100}
+                            disabled={buttonClicked}
+                            />
                         </View>
 
                         <PrimaryFontText style={{ fontSize: 18, justifyContent: 'center', display: 'flex' }}>
@@ -164,7 +167,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        backgroundColor: '#fff'
+        backgroundColor: '#f8f8f8'
     },
     formView: {
         height: 650,

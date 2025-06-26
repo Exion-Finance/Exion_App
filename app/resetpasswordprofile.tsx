@@ -88,7 +88,7 @@ export default function ResetPwdProfile() {
                 </View>
 
 
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: buttonClicked ? "#36EFBD" : "#00C48F" }]} disabled={buttonClicked} onPress={handleSubmit}>
                     <PrimaryFontBold style={styles.text}>
                         {buttonClicked ? <Loading color='#fff' description="Sending..." /> : "Send OTP"}
                     </PrimaryFontBold>
