@@ -10,9 +10,27 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "aab"
+      },
+      "ios": {
+        "buildType": "release"
+      },
+      "distribution": "store",
+      "env": {
+        "ENVIRONMENT": "production"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "track": "production"
+      },
+      "ios": {
+        "appleTeamId": "YOUR_TEAM_ID"
+      }
+    }
   }
 }
