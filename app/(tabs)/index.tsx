@@ -78,7 +78,7 @@ export default function TabOneScreen() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
-  const [sellingRate, setSellingRate] = useState<string | null>(null)
+  const [buyingRate, setBuyingRate] = useState<string | null>(null)
 
   const toggleVisibility = () => {
     setIsHidden((prev) => !prev);
@@ -200,7 +200,7 @@ export default function TabOneScreen() {
         const rates = await fetchExchangeRate(currencyCode)
         if (rates.data.success){
           // console.log(rates.data)
-          setSellingRate(rates.data.data.sellingRate)
+          setBuyingRate(rates.data.data.buyingRate)
           return;
         }
       }
@@ -463,7 +463,7 @@ export default function TabOneScreen() {
           </PrimaryFontBold>
 
           <PrimaryFontMedium style={styles.rate}>
-            {sellingRate ? `$1 ≈ ${sellingRate} KSh` : "Loading.."}
+            {buyingRate ? `$1 ≈ ${buyingRate} KSh` : "Loading.."}
           </PrimaryFontMedium>
         </View>
 

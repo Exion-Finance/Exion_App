@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated, Button } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
 import ContactsList from '@/components/Contacts';
 import reusableStyles from '@/constants/ReusableStyles';
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import NavBar from '@/components/NavBar';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
@@ -16,20 +17,73 @@ export default function SendMoney() {
     const [error, setError] = useState<boolean>(false);
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [showContacts, setShowContacts] = useState<boolean>(false);
+    const [nameVerified, setNameVerified] = useState<boolean>(false);
+    const [verifying, setVerifying] = useState<boolean>(false);
+    const [contactName, setContactName] = useState<string>("");
+    const [channel, setChannel] = useState<string>("");
     const [disableButton, setDisableButton] = useState<boolean>(false);
     const rotateAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(0)).current;
 
     const route = useRouter()
 
-    const handlePhoneNumberChange = (text: string) => {
-        setPhoneNumber(text);
-        setError(false)
+    // const handlePhoneNumberChange = (text: string) => {
+    //     setPhoneNumber(text);
+    //     setError(false)
+    // };
+
+
+    const handlePhoneNumberChange = async (text: string) => {
+        const cleaned = text.replace(/\s+/g, '');
+        setPhoneNumber(cleaned);
+        setError(false);
+        setNameVerified(false);
+
+        const trimmed = cleaned.trim();
+
+        if (
+            (trimmed.startsWith('07') && trimmed.length === 10) ||
+            (trimmed.startsWith('01') && trimmed.length === 10) ||
+            (trimmed.startsWith('2547') && trimmed.length === 12)
+        ) {
+            setVerifying(true);
+            const channel: string = 'Mpesa';
+            const result = await verifyAccount(channel, trimmed);
+            console.log(result.data);
+            if (result) {
+                setVerifying(false);
+                if (result.data.success && result.data.data.account_details.account_name) {
+                    setContactName(result.data.data.account_details.account_name);
+                    setChannel(result.data.data.account_details.channel_name);
+                    setNameVerified(true);
+                    return;
+                }
+            }
+            setVerifying(false);
+        } else if (trimmed.startsWith('+2547') && trimmed.length === 13) {
+            const channel: string = 'Mpesa';
+            const result = await verifyAccount(channel, trimmed.slice(1));
+            console.log(result.data);
+            if (result) {
+                setVerifying(false);
+                if (result.data.success && result.data.data.account_details.account_name) {
+                    setContactName(result.data.data.account_details.account_name);
+                    setChannel(result.data.data.account_details.channel_name);
+                    setNameVerified(true);
+                    return;
+                }
+            }
+            setVerifying(false);
+        }
     };
 
+
+
     const handleSubmit = async () => {
+        console.log("Clickeddd")
         // Trim any leading or trailing whitespace
         let cleanedNumber = phoneNumber.trim();
+        cleanedNumber = cleanedNumber.replace(/\s+/g, '');
 
         // Check if the input field is empty
         if (cleanedNumber === '') {
@@ -66,12 +120,6 @@ export default function SendMoney() {
                 source: 'sendmoney'
             }
         });
-
-
-
-        // const channel: string = "Mpesa"
-        // const result = await verifyAccount(channel, cleanedNumber)
-        // console.log(result.data)
     };
 
     const toggleContacts = () => {
@@ -113,12 +161,29 @@ export default function SendMoney() {
                         keyboardType='numeric'
                     />
 
-                    <TouchableOpacity style={styles.chooseContainer} onPress={toggleContacts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                        <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
-                        <Animated.View style={{ transform: [{ rotate }] }}>
-                            <Feather name="chevron-down" size={18} color="grey" style={{ marginTop: showContacts ? -2 : 3 }} />
-                        </Animated.View>
-                    </TouchableOpacity>
+                    {!nameVerified ?
+                        <TouchableOpacity style={[styles.chooseContainer, { opacity: nameVerified ? 0 : 1 }]} onPress={toggleContacts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                            <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
+                            <Animated.View style={{ transform: [{ rotate }] }}>
+                                <Feather name="chevron-down" size={18} color="grey" style={{ marginTop: showContacts ? -2 : 3 }} />
+                            </Animated.View>
+                        </TouchableOpacity>
+                        :
+                        <View style={[styles.verifiedNameContainer, { opacity: nameVerified ? 1 : 0 }]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                {/* <FontAwesome6 name="user" size={14} color="#473F3F" style={{ marginRight: 7 }} /> */}
+                                <PrimaryFontMedium style={{ color: '#473F3F', fontSize: 15.5 }}>
+                                    {contactName ? contactName : ""}
+                                </PrimaryFontMedium>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
+                                {/* <Feather name="info" size={14} color="grey" style={{ marginRight: 7 }} /> */}
+                                <PrimaryFontMedium style={{ color: 'grey', fontSize: 12 }}>
+                                    {channel ? channel : ""}
+                                </PrimaryFontMedium>
+                            </View>
+                        </View>}
 
                     <Animated.View
                         style={{
@@ -141,9 +206,10 @@ export default function SendMoney() {
                     </Animated.View>
                 </View>
 
-                <TouchableOpacity style={[styles.button, { opacity: showContacts ? 0 : 1 }]} onPress={handleSubmit}>
-                    <PrimaryFontBold style={styles.text}>Continue</PrimaryFontBold>
+                <TouchableOpacity style={[styles.button, { opacity: showContacts ? 0 : 1, backgroundColor: verifying ? "#36EFBD" : "#00C48F" }]} onPress={handleSubmit} disabled={verifying}>
+                    <PrimaryFontBold style={styles.text}>{verifying ? 'Verifying..' : 'Continue'}</PrimaryFontBold>
                 </TouchableOpacity>
+                {/* <Button title="Submit" onPress={handleSubmit} disabled={verifying} /> */}
             </View>
 
         </View>
@@ -158,7 +224,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8'
     },
     button: {
-        backgroundColor: '#00C48F',
+        // backgroundColor: '#00C48F',
         padding: 10,
         borderRadius: 9,
         alignItems: 'center',
@@ -183,6 +249,13 @@ const styles = StyleSheet.create({
     chooseContainer: {
         flexDirection: 'row',
         alignItems: "center",
+        marginTop: 20,
+        // borderWidth: 2
+        // fontSize: 20,
+    },
+    verifiedNameContainer: {
+        flexDirection: 'column',
+        alignItems: "flex-start",
         marginTop: 20,
         // borderWidth: 2
         // fontSize: 20,

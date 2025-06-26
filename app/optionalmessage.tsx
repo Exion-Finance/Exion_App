@@ -30,6 +30,7 @@ export default function OptionalMessage() {
     const [responseReceived, setResponseReceived] = useState<boolean>(false);
     const [transactionDescription, setTransactionDescription] = useState<string>("Please wait...");
     const [totalAmountSent, seTotalAmountSent] = useState<number>()
+    const [sending, setSending] = useState<boolean>(false);
 
     const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd } = useLocalSearchParams();
     const { isAuthenticated, handleFingerprintScan } = useFingerprintAuthentication();
@@ -56,7 +57,8 @@ export default function OptionalMessage() {
     }
     // console.log("tokenId", id as number)
 
-    const handleSend = async (sendToken?: string) => {
+    const handleSend = async () => {
+        setSending(true)
         const success = await handleFingerprintScan()
         if (success) {
             try {
@@ -90,6 +92,8 @@ export default function OptionalMessage() {
             bottomSheetRef.current?.close();
             Alert.alert("Oops😕", "Couldn't authenticate, please try again")
         }
+
+        setSending(false)
     };
 
     const handleButtonClick = () => {
@@ -162,6 +166,7 @@ export default function OptionalMessage() {
                             onPress={() => handleSend()}
                             textOnButton={`Send (${totalAmountSent ? Number(totalAmountSent).toFixed(2) : 0} Ksh)`}
                             widthProp={reusableStyles.width100}
+                            disabled = {sending}
                         />
                     ) : (
                         <PrimaryButton

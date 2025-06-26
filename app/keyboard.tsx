@@ -611,7 +611,7 @@ const CustomKeyboard = () => {
         </View>
 
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => handleButtonClick()} style={styles.button}>
+          <TouchableOpacity onPress={() => handleButtonClick()} style={[styles.button, { backgroundColor: send ? "#36EFBD" : "#00C48F" }]} disabled={send}>
             <PrimaryFontBold style={{ color: 'white', fontSize: 19 }}>{send ? (
               <Loading color='#fff' description='Verifying' />
             ) :

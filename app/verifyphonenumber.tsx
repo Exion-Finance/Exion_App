@@ -178,7 +178,7 @@ export default function VerifyPhone() {
                 </View>
 
 
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: buttonClicked ? "#36EFBD" : "#00C48F" }]} onPress={handleSubmit} disabled={buttonClicked}>
                     <PrimaryFontBold style={styles.text}>
                         {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
                     </PrimaryFontBold>
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8'
     },
     button: {
-        backgroundColor: '#00C48F',
+        // backgroundColor: '#00C48F',
         padding: 10,
         borderRadius: 9,
         alignItems: 'center',

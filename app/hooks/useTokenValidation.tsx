@@ -13,7 +13,7 @@ export function useTokenValidation() {
     useEffect(() => {
         let mounted = true;
         (async () => {
-            console.log('useTokenValidation called');
+            // console.log('useTokenValidation called');
             const stored = await SecureStore.getItemAsync(TOKEN_KEY );
             if (!stored) {
                 if (mounted){

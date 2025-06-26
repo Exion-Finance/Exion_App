@@ -50,26 +50,6 @@ export default function Profile() {
     return refreshToken;
   }
 
-  // const handleLogout = async () => {
-  //   try {
-  //     setLogout(true)
-  //     const refreshToken = await getRefreshToken()
-  //     console.log("token", refreshToken)
-  //     if (refreshToken) {
-  //       const response = await publicAPI.post(`/auth/logout`, { refreshToken });
-  //       console.log(response.data)
-  //       if (response.data.success) {
-  //         await onClearData!()
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  //   finally {
-  //     setLogout(false)
-  //   }
-  // }
-
   const handleLogout = async () => {
     try {
       setLogout(true)
@@ -148,7 +128,7 @@ export default function Profile() {
           {/* <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} /> */}
 
           <View style={[{ justifyContent: 'center', alignItems: 'center' }, reusableStyle.width100]}>
-            <TouchableOpacity onPress={() => handleLogout()} style={styles.button}>
+            <TouchableOpacity onPress={() => handleLogout()} style={[styles.button, { backgroundColor: logout ? "#36EFBD" : "#00C48F" }]} disabled={logout}>
               <PrimaryFontBold style={{ color: 'white', fontSize: 19 }}>{logout ? (
                 <Loading color='#fff' description='Logging out' />
               ) :
@@ -206,7 +186,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   button: {
-    backgroundColor: '#00C48F',
+    // backgroundColor: '#00C48F',
     padding: 10,
     borderRadius: 10,
     alignItems: 'center',
