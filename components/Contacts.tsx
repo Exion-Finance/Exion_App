@@ -28,25 +28,33 @@ export default function ContactsList({ from }: Props) {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [filteredSections, setFilteredSections] = useState<ContactSection[]>([]);
     const [contactClicked, setContactClicked] = useState<string | false>(false);
+    const [contactsLoaded, setContactsLoaded] = useState<boolean>(false);
     const route = useRouter()
 
     useEffect(() => {
         (async () => {
-            const { status } = await Contacts.requestPermissionsAsync();
-            if (status === 'granted') {
-                const { data } = await Contacts.getContactsAsync({
-                    fields: [Contacts.Fields.PhoneNumbers],
-                });
+            try {
+                const { status } = await Contacts.requestPermissionsAsync();
+                if (status === 'granted') {
+                    const { data } = await Contacts.getContactsAsync({
+                        fields: [Contacts.Fields.PhoneNumbers],
+                    });
 
-                if (data.length > 0) {
-                    const processedContacts = processContacts(data);
-                    setSections(processedContacts);
-                    setFilteredSections(processedContacts);
+                    if (data.length > 0) {
+                        const processedContacts = processContacts(data);
+                        setSections(processedContacts);
+                        setFilteredSections(processedContacts);
+                    } else {
+                        Alert.alert("Oops😕", 'No contacts found');
+                    }
                 } else {
-                    Alert.alert("Oops😕", 'No contacts found');
+                    Alert.alert("Oops😕", 'Permission denied');
                 }
-            } else {
-                Alert.alert("Oops😕", 'Permission denied');
+            } catch (err) {
+                console.log(err)
+                Alert.alert("Oops😕", 'Something went wrong');
+            } finally {
+                setContactsLoaded(true)
             }
         })();
     }, []);
@@ -199,7 +207,7 @@ export default function ContactsList({ from }: Props) {
         <View style={[styles.container, from === "contacts" ? reusableStyle.paddingContainer : reusableStyle.width100]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%" }]}>
-                    <Ionicons name="search" size={20} color="#DADADA" style={styles.searchIcon} />
+                    <Ionicons name="search" size={20} color="#CFCFCF" style={styles.searchIcon} />
                     <TextInput
                         style={[styles.input, { fontFamily: 'DMSansRegular' }]}
                         placeholder="Name or phone"
@@ -215,29 +223,34 @@ export default function ContactsList({ from }: Props) {
 
             <PrimaryFontMedium style={styles.chooseText}>Choose from your contacts</PrimaryFontMedium>
 
-            <SectionList
-                sections={filteredSections}
-                initialNumToRender={20}
-                maxToRenderPerBatch={10}
-                style={{ backgroundColor: 'white' }}
-                keyExtractor={(item, index) => item.name + index}
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={[styles.contactContainer, { backgroundColor: contactClicked === item.phoneNumber ? "#F8F8F8" : "transparent" }]} onPress={() => handleSelectContact(item)}>
-                        <View>
-                            <PrimaryFontText style={styles.name}>{item.name}</PrimaryFontText>
-                            <PrimaryFontText style={styles.phoneNumber}>{item.phoneNumber}</PrimaryFontText>
+            {contactsLoaded ?
+                <SectionList
+                    sections={filteredSections}
+                    initialNumToRender={20}
+                    maxToRenderPerBatch={10}
+                    style={{ backgroundColor: '#f8f8f8' }}
+                    keyExtractor={(item, index) => item.name + index}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity style={[styles.contactContainer, { backgroundColor: contactClicked === item.phoneNumber ? "#F0F0F0" : "transparent" }]} onPress={() => handleSelectContact(item)}>
+                            <View>
+                                <PrimaryFontText style={styles.name}>{item.name}</PrimaryFontText>
+                                <PrimaryFontText style={styles.phoneNumber}>{item.phoneNumber}</PrimaryFontText>
+                            </View>
+                            {contactClicked === item.phoneNumber && (
+                                <ActivityIndicator size="small" color="#00C48F" />
+                            )}
+                        </TouchableOpacity>
+                    )}
+                    renderSectionHeader={({ section: { title } }) => (
+                        <View style={styles.sectionHeader}>
+                            <PrimaryFontMedium style={styles.sectionHeaderText}>{title}</PrimaryFontMedium>
                         </View>
-                        {contactClicked === item.phoneNumber && (
-                            <ActivityIndicator size="small" color="#00C48F" />
-                        )}
-                    </TouchableOpacity>
-                )}
-                renderSectionHeader={({ section: { title } }) => (
-                    <View style={styles.sectionHeader}>
-                        <PrimaryFontMedium style={styles.sectionHeaderText}>{title}</PrimaryFontMedium>
-                    </View>
-                )}
-            />
+                    )}
+                />
+                :
+                <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: '#f8f8f8' }]}>
+                    <ActivityIndicator size="small" color='#00C48F' />
+                </View>}
         </View>
     );
 }
@@ -245,12 +258,12 @@ export default function ContactsList({ from }: Props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#f8f8f8',
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F3F5F9',
+        backgroundColor: '#EBEDF2',
         borderRadius: 10,
         paddingHorizontal: 10,
         paddingVertical: 6,
@@ -287,7 +300,7 @@ const styles = StyleSheet.create({
     },
     sectionHeader: {
         padding: 10,
-        backgroundColor: 'white'
+        backgroundColor: '#f8f8f8'
     },
     sectionHeaderText: {
         fontSize: 20,

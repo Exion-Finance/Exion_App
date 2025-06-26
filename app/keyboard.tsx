@@ -629,6 +629,7 @@ const CustomKeyboard = () => {
           snapPoints={['50%']}
           enablePanDownToClose={true}
           animatedIndex={animatedIndex1}
+          backgroundStyle={{ backgroundColor: '#f8f8f8' }}
         >
           <PrimaryFontBold
             style={[reusableStyle.paddingContainer,
