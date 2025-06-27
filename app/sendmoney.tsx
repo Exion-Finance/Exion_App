@@ -27,56 +27,60 @@ export default function SendMoney() {
 
     const route = useRouter()
 
-    // const handlePhoneNumberChange = (text: string) => {
-    //     setPhoneNumber(text);
-    //     setError(false)
-    // };
+    function normalizePhone(text: string): string | null {
+        // Remove all whitespace
+        const t = text.replace(/\s+/g, '').trim();
+
+        // Local 10-digit numbers: 07xxxxxxxx or 01xxxxxxxx
+        if (/^(07|01)\d{8}$/.test(t)) {
+            // Drop the leading "0", prepend "254"
+            return '254' + t.slice(1);  // e.g. "0712345678" → "254712345678"
+        }
+
+        // International with plus: +254XXXXXXXXX (9 digits after +254)
+        if (/^\+254\d{9}$/.test(t)) {
+            // Drop the "+"
+            return t.slice(1);          // "+254712345678" → "254712345678"
+        }
+
+        // Already in international format without plus: 254XXXXXXXXX
+        if (/^254\d{9}$/.test(t)) {
+            return t;                   // e.g. "254112259171"
+        }
+
+        return null;
+    }
 
 
     const handlePhoneNumberChange = async (text: string) => {
-        const cleaned = text.replace(/\s+/g, '');
-        setPhoneNumber(cleaned);
+        setPhoneNumber(text);
         setError(false);
         setNameVerified(false);
+        // setVerifying(false);
 
-        const trimmed = cleaned.trim();
+        const intlNumber = normalizePhone(text);
+        if (!intlNumber) {
+            return;
+        }
 
-        if (
-            (trimmed.startsWith('07') && trimmed.length === 10) ||
-            (trimmed.startsWith('01') && trimmed.length === 10) ||
-            (trimmed.startsWith('2547') && trimmed.length === 12)
-        ) {
-            setVerifying(true);
-            const channel: string = 'Mpesa';
-            const result = await verifyAccount(channel, trimmed);
-            console.log(result.data);
-            if (result) {
-                setVerifying(false);
-                if (result.data.success && result.data.data.account_details.account_name) {
-                    setContactName(result.data.data.account_details.account_name);
-                    setChannel(result.data.data.account_details.channel_name);
-                    setNameVerified(true);
-                    return;
-                }
+        setVerifying(true);
+        try {
+            const channel = 'Mpesa';
+            const result = await verifyAccount(channel, intlNumber);
+            // console.log(result.data);
+
+            if (result.data.success && result.data.data.account_details.account_name) {
+                setContactName(result.data.data.account_details.account_name);
+                setChannel(result.data.data.account_details.channel_name);
+                setNameVerified(true);
+                return;
             }
-            setVerifying(false);
-        } else if (trimmed.startsWith('+2547') && trimmed.length === 13) {
-            const channel: string = 'Mpesa';
-            const result = await verifyAccount(channel, trimmed.slice(1));
-            console.log(result.data);
-            if (result) {
-                setVerifying(false);
-                if (result.data.success && result.data.data.account_details.account_name) {
-                    setContactName(result.data.data.account_details.account_name);
-                    setChannel(result.data.data.account_details.channel_name);
-                    setNameVerified(true);
-                    return;
-                }
-            }
+        } catch (err) {
+            console.error('verifyAccount error:', err);
+        } finally {
             setVerifying(false);
         }
     };
-
 
 
     const handleSubmit = async () => {
@@ -106,8 +110,13 @@ export default function SendMoney() {
             return;
         }
 
-        // Replace "07" with "+254" if the number starts with "07"
+        // Replace "0" with "+254" if the number starts with "07"
         if (cleanedNumber.startsWith('07')) {
+            cleanedNumber = '254' + cleanedNumber.slice(1);
+        }
+
+        // Replace "0" with "+254" if the number starts with "01"
+        if (cleanedNumber.startsWith('01')) {
             cleanedNumber = '254' + cleanedNumber.slice(1);
         }
 
@@ -173,7 +182,7 @@ export default function SendMoney() {
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                                 {/* <FontAwesome6 name="user" size={14} color="#473F3F" style={{ marginRight: 7 }} /> */}
                                 <PrimaryFontMedium style={{ color: '#473F3F', fontSize: 15.5 }}>
-                                    {contactName ? contactName : ""}
+                                    {contactName ? contactName.toUpperCase() : ""}
                                 </PrimaryFontMedium>
                             </View>
 
