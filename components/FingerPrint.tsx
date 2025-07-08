@@ -9,12 +9,14 @@ export const useFingerprintAuthentication = () => {
     try {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       if (!hasHardware) {
-        return Alert.alert('Oops😕', 'Biometric authentication is not available on this device.');
+        // return Alert.alert('Oops😕', 'Biometric authentication is not available on this device.');
+        return "noHardware"
       }
 
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
       if (!isEnrolled) {
-        return Alert.alert('Oops😕', 'No fingerprints or biometrics are registered on this device.');
+        // return Alert.alert('Oops😕', 'No fingerprints or biometrics are registered on this device.');
+        return "notEnrolled"
       }
 
       const result = await LocalAuthentication.authenticateAsync({
@@ -30,7 +32,7 @@ export const useFingerprintAuthentication = () => {
       //   return;
       // }
       setIsAuthenticated(result.success);
-      return result.success;
+      if (result.success) return "success";
     } catch (error) {
       Alert.alert('Oops😕', 'Something went wrong. Try again.');
     }

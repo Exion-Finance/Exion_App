@@ -151,7 +151,7 @@ export default function OTP({ }) {
                 if (login && login.data) {
                     setButtonClicked(false)
                     Alert.alert("Success🎉", "Your account has been created successfully")
-                    setTimeout(() => route.push('/(tabs)'), 2000)
+                    setTimeout(() => route.replace('/(tabs)'), 2000)
                 }
             }
             setButtonClicked(false)
