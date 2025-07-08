@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import NavBar from '@/components/NavBar';
@@ -20,6 +20,7 @@ import LottieAnimation from '@/components/LottieAnimation';
 import reusableStyle from '@/constants/ReusableStyles'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
+import PinAuth from '@/components/PinAuth';
 
 export default function OptionalMessage() {
 
@@ -31,6 +32,8 @@ export default function OptionalMessage() {
     const [transactionDescription, setTransactionDescription] = useState<string>("Please wait...");
     const [totalAmountSent, seTotalAmountSent] = useState<number>()
     const [sending, setSending] = useState<boolean>(false);
+    const [hasPin, setHasPin] = useState<boolean>(false);
+    const [showPinAuth, setShowPinAuth] = useState<boolean>(false);
 
     const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd } = useLocalSearchParams();
     const { isAuthenticated, handleFingerprintScan } = useFingerprintAuthentication();
@@ -46,59 +49,76 @@ export default function OptionalMessage() {
 
     const id = typeof token === 'string' ? tokens[token.toUpperCase()]?.id : undefined;
 
-    const getParsedToken = async (TOKEN_KEY: string) => {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    // on mount, check if PIN exists in flag storage
+    useEffect(() => {
+        (async () => {
+            const flag = await SecureStore.getItemAsync('user_has_pin');
+            setHasPin(flag === 'true');
+        })();
+    }, []);
 
-        if (token) {
-            const parsedToken = JSON.parse(token);
-            return parsedToken.token;
+    const closePin = () => {
+        setShowPinAuth(false);
+        bottomSheetRef.current?.snapToIndex(0);
+    };
+
+    const sendCrypto = async () => {
+        try {
+            bottomSheetRef.current?.snapToIndex(0)
+            const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
+            const response = await SendMoneyV1({
+                chainId: 1,
+                tokenId: id as number,
+                recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
+                amount: Number(amountFloat)
+            });
+            // console.log("<---send money--->", response)
+
+            if (response.hash && !response.error) {
+                setResponseReceived(true);
+                bottomSheetRef.current?.snapToIndex(1)
+                setTransactionDescription("Transaction sent successfully🎉")
+            }
+            else if (response.error) {
+                console.log("errror in send<<-->>", response.error)
+                bottomSheetRef.current?.close();
+                Alert.alert("Oops😕", "Something went wrong, please try again");
+                return;
+            }
+        } catch (error) {
+            bottomSheetRef.current?.close();
+            Alert.alert("Oops😕", "An error occurred while sending money, please try again");
         }
-        return null;
     }
-    // console.log("tokenId", id as number)
 
     const handleSend = async () => {
-        setSending(true)
-        const success = await handleFingerprintScan()
-        if (success) {
-            try {
-                bottomSheetRef.current?.snapToIndex(0)
-                const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
-                const response = await SendMoneyV1({
-                    chainId: 1,
-                    tokenId: id as number,
-                    recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
-                    amount: Number(amountFloat)
-                });
-                // console.log("<---send money--->", response)
-
-                if (response.hash && !response.error) {
-                    setResponseReceived(true);
-                    bottomSheetRef.current?.snapToIndex(1)
-                    setTransactionDescription("Transaction sent successfully🎉")
-                }
-                else if (response.error) {
-                    console.log("errror in send<<-->>", response.error)
-                    bottomSheetRef.current?.close();
-                    Alert.alert("Oops😕", "Something went wrong, please try again");
-                    return;
-                }
-            } catch (error) {
+        try {
+            setSending(true)
+            const success = await handleFingerprintScan()
+            if (!success) {
                 bottomSheetRef.current?.close();
-                Alert.alert("Oops😕", "An error occurred while sending money, please try again");
+                Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+                return;
+            }
+            else if (success === "success") {
+                await sendCrypto()
+            }
+            else if (success === "noHardware" || success === "notEnrolled") {
+                setShowPinAuth(true)
+                return;
             }
         }
-        else {
-            bottomSheetRef.current?.close();
-            Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+        catch (error) {
+            console.log(error)
         }
-
-        setSending(false)
+        finally {
+            setSending(false)
+        }
     };
 
     const handleButtonClick = () => {
         bottomSheetRef.current?.close();
-        route.push("/(tabs)")
+        route.replace("/(tabs)")
     }
 
 
@@ -166,7 +186,7 @@ export default function OptionalMessage() {
                             onPress={() => handleSend()}
                             textOnButton={`Send (${totalAmountSent ? Number(totalAmountSent).toFixed(2) : 0} Ksh)`}
                             widthProp={reusableStyles.width100}
-                            disabled = {sending}
+                            disabled={sending}
                         />
                     ) : (
                         <PrimaryButton
@@ -217,6 +237,21 @@ export default function OptionalMessage() {
                 </BottomSheet>
 
             </View>
+
+
+            {showPinAuth && (
+                <Modal animationType="none">
+                    <PinAuth
+                        hasPin={hasPin}
+                        onClose={() => setShowPinAuth(false)}
+                        onSuccess={() => {
+                            closePin();
+                            sendCrypto();
+                        }}
+                    />
+                </Modal>
+            )}
+
         </GestureHandlerRootView>
     );
 }

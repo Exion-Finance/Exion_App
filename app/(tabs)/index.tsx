@@ -139,7 +139,7 @@ export default function TabOneScreen() {
     }
   }, [tokensBalance]);
 
-  function sliceSectionsToFirstNTransactions(sections: Section[], limit: number = 5): Section[] {
+  function sliceSectionsToFirstNTransactions(sections: Section[], limit: number = 3): Section[] {
     const result: Section[] = [];
     let count = 0;
 
@@ -164,7 +164,7 @@ export default function TabOneScreen() {
   useEffect(() => {
     if (mobile_transactions.length > 0) {
       // console.log("mobile_transactions from cache--->", mobile_transactions)
-      const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 5);
+      const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 3);
       setMobileTransactions(firstFive)
       setIsLoading(false)
     }
@@ -236,7 +236,7 @@ export default function TabOneScreen() {
         if (tx.data) {
           // console.log("mobile txdata fetch found<<..>>")
           const fullSections = makeSections(tx.data)
-          const firstFive = sliceSectionsToFirstNTransactions(fullSections, 5);
+          const firstFive = sliceSectionsToFirstNTransactions(fullSections, 3);
           setMobileTransactions(firstFive)
           dispatch(addMobileTransactions(fullSections))
           return;

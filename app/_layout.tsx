@@ -379,26 +379,6 @@ function AppInitializer() {
   const tokenValid = useTokenValidation();
   const [ready, setReady] = useState(false);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     console.log("Token valid inside useff---->", tokenValid)
-  //     if ((fontsLoaded || fontError) && tokenValid !== null) {
-  //       if (!tokenValid) {
-
-  //         router.replace('/landing');
-  //         // await SplashScreen.hideAsync();
-  //       } else {
-  //         setReady(true);
-  //       }
-  //       await SplashScreen.hideAsync();
-  //       router.push('/(tabs)');
-  //     }
-      
-  //   })();
-  // }, [fontsLoaded, fontError, tokenValid]);
-
-
-
   useEffect(() => {
     (async () => {
       // console.log("Token valid inside useff ---->", tokenValid);

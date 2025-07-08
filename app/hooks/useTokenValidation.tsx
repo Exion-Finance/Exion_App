@@ -14,7 +14,8 @@ export function useTokenValidation() {
         let mounted = true;
         (async () => {
             // console.log('useTokenValidation called');
-            const stored = await SecureStore.getItemAsync(TOKEN_KEY );
+            const stored = await SecureStore.getItemAsync(TOKEN_KEY);
+            // const stored = false
             if (!stored) {
                 if (mounted){
                     console.log('No token found');
