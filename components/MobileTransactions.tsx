@@ -189,9 +189,9 @@ const styles = StyleSheet.create({
         paddingRight: 30,
     },
     header: {
-        fontSize: 15,
+        fontSize: 14.5,
         marginTop: 13,
-        marginBottom: 15,
+        marginBottom: 17,
         color: '#79828E'
     },
     row: {

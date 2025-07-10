@@ -21,7 +21,7 @@ export default function MakePayments() {
       <ScrollView>
         <View style={{ flex: 1 }}>
           <View style={reusableStyles.paddingContainer}>
-            <PrimaryFontMedium style={{ fontSize: 20, marginBottom: 10 }}>What kind of payment are you making?</PrimaryFontMedium>
+            <PrimaryFontMedium style={{ fontSize: 20, marginBottom: 10 }}>What transaction are you making?</PrimaryFontMedium>
           </View>
 
           <MakePaymentOption

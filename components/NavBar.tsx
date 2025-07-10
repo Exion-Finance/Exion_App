@@ -13,13 +13,13 @@ const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
 export default function NavBar({ title, onBackPress }: NavBarProps) {
     return (
         <View style={styles.headerContainer}>
-            <Pressable onPress={onBackPress} style={styles.iconContainer}>
+            <Pressable onPress={onBackPress} style={styles.iconContainer} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                 {({ pressed }) => (
                   <MaterialIcons
                     name="arrow-back-ios-new"
                     size={20}
                     color={'#79828E'}
-                    style={{ marginLeft: 15, opacity: pressed ? 0.5 : 1 }}
+                    style={{ opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
               </Pressable>
@@ -40,6 +40,13 @@ const styles = StyleSheet.create({
     iconContainer: {
         position: 'absolute',
         left: 0,
+        width: 40,
+        height: 40,
+        // borderWidth: 1,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        display: 'flex',
+        marginLeft: 15,
     },
     title: {
         fontSize: 16,
