@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, View, TouchableOpacity } from 'react-native';
 import { useRouter, Href } from 'expo-router';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
 import { PrimaryFontText } from './PrimaryFontText';
@@ -31,7 +31,7 @@ export default function MakePaymentOption({
     };
 
     return (
-        <Pressable style={[styles.container, containerStyle]} onPress={handlePress}>
+        <TouchableOpacity style={[styles.container, containerStyle]} onPress={handlePress}>
             <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 30 }]}>
                 <TransactionTypeIcon containerStyle={{ borderColor: '#D9D9D9', borderWidth: 1, marginRight: 10, backgroundColor: 'white', height: 40, width: 40, borderRadius: 20 }} icon={icon}/>
                 <View>
@@ -39,7 +39,7 @@ export default function MakePaymentOption({
                     <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{description}</PrimaryFontText>
                 </View>
             </View>
-        </Pressable>
+        </TouchableOpacity>
     );
 }
 
