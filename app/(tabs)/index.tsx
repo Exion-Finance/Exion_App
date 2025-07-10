@@ -27,6 +27,7 @@ import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { MobileTransaction, Section } from '@/types/datatypes';
 import { getBalances, fetchMobileTransactions, fetchExchangeRate } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
+import * as SecureStore from 'expo-secure-store';
 import {
   updateBalance,
   selectUserBalance,
@@ -65,24 +66,24 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 
 export default function TabOneScreen() {
-  // const { publicAPI, authAPI } = useAxios();
   const route = useRouter()
   const { authState } = useAuth()
-  // const { api } = useAxios()
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [mobileTransactions, setMobileTransactions] = useState<Section[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
   const [buyingRate, setBuyingRate] = useState<string | null>(null)
 
-  const toggleVisibility = () => {
-    setIsHidden((prev) => !prev);
+  const toggleVisibility = async () => {
+    const newValue = !isHidden;
+    setIsHidden(newValue);
+    await SecureStore.setItemAsync('BalanceVisibility', newValue.toString());
   };
+  
 
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
@@ -164,8 +165,8 @@ export default function TabOneScreen() {
   useEffect(() => {
     if (mobile_transactions.length > 0) {
       // console.log("mobile_transactions from cache--->", mobile_transactions)
-      const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 3);
-      setMobileTransactions(firstFive)
+      const firstThree = sliceSectionsToFirstNTransactions(mobile_transactions, 3);
+      setMobileTransactions(firstThree)
       setIsLoading(false)
     }
   }, [])
@@ -179,6 +180,17 @@ export default function TabOneScreen() {
       };
       setTokens(cachedTokens);
     }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const stored = await SecureStore.getItemAsync('BalanceVisibility');
+      if (stored !== null) {
+        setIsHidden(stored === 'true');
+      } else {
+        setIsHidden(false);
+      }
+    })();
   }, []);
 
 
@@ -236,8 +248,8 @@ export default function TabOneScreen() {
         if (tx.data) {
           // console.log("mobile txdata fetch found<<..>>")
           const fullSections = makeSections(tx.data)
-          const firstFive = sliceSectionsToFirstNTransactions(fullSections, 3);
-          setMobileTransactions(firstFive)
+          const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
+          setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
           return;
         }
@@ -267,37 +279,73 @@ export default function TabOneScreen() {
     return new Date(year, month, day, hour, min, sec)
   }
 
+  // const makeSections = (txs: MobileTransaction[]): Section[] => {
+  //   const sorted = [...txs].sort(
+  //     (a, b) =>
+  //       parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
+  //   );
+
+  //   const today = new Date();
+  //   const yesterday = new Date(today);
+  //   yesterday.setDate(today.getDate() - 1);
+
+  //   const isSameDay = (d1: Date, d2: Date) =>
+  //     d1.getFullYear() === d2.getFullYear() &&
+  //     d1.getMonth() === d2.getMonth() &&
+  //     d1.getDate() === d2.getDate();
+
+  //   const groups: Record<string, MobileTransaction[]> = {};
+
+  //   for (const tx of sorted) {
+  //     const d = parseTxDate(tx.transactionDate);
+  //     const key = isSameDay(d, today)
+  //       ? 'Today'
+  //       : isSameDay(d, yesterday)
+  //         ? 'Yesterday'
+  //         : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+
+  //     (groups[key] ||= []).push(tx);
+  //   }
+
+  //   return Object.entries(groups).map(([title, data]) => ({ title, data }));
+  // };
+
   const makeSections = (txs: MobileTransaction[]): Section[] => {
     const sorted = [...txs].sort(
       (a, b) =>
         parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
     );
-
+  
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-
+  
     const isSameDay = (d1: Date, d2: Date) =>
       d1.getFullYear() === d2.getFullYear() &&
       d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate();
-
+  
     const groups: Record<string, MobileTransaction[]> = {};
-
+  
     for (const tx of sorted) {
       const d = parseTxDate(tx.transactionDate);
       const key = isSameDay(d, today)
         ? 'Today'
         : isSameDay(d, yesterday)
           ? 'Yesterday'
-          : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-
+          : d.toLocaleDateString('en-KE', {
+              weekday: 'short', // Mon
+              day: 'numeric',   // 8
+              month: 'short',   // Jul
+              year: 'numeric',  // 2025
+            });
+  
       (groups[key] ||= []).push(tx);
     }
-
+  
     return Object.entries(groups).map(([title, data]) => ({ title, data }));
   };
-
+  
 
   const refetchMobileTx = async () => {
     try {
