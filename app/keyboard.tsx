@@ -112,6 +112,23 @@ const CustomKeyboard = () => {
     }
 
   }
+
+  const formatNumber = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+    return new Intl.NumberFormat('en-KE').format(num);
+  };
+
+  const formatNumberToFixed = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+
+    return new Intl.NumberFormat('en-KE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+  
   const closePin = () => {
     setShowPinAuth(false);
     bottomSheetRef2.current?.snapToIndex(0);
@@ -621,7 +638,7 @@ const CustomKeyboard = () => {
           <TouchableOpacity style={styles.balanceView} onPress={() => { bottomSheetRef1.current?.expand(); setError(false) }}>
             <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 12 }}>BALANCE</PrimaryFontMedium>
             {activeToken.token ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-              <PrimaryFontBold style={{ color: '#FFFFFF', fontSize: 18 }}>Ksh {Number(activeToken.ksh).toFixed(2)} </PrimaryFontBold>
+              <PrimaryFontBold style={{ color: '#FFFFFF', fontSize: 18 }}>Ksh {formatNumberToFixed(Number(activeToken.ksh).toFixed(2))} </PrimaryFontBold>
               <Dropdown />
             </View> : <Loading color='#fff' description='' />}
             {activeToken.token ? <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 11 }}>≈ {activeToken.balance.toFixed(2)} {activeToken.token}</PrimaryFontMedium> : null}
@@ -633,7 +650,7 @@ const CustomKeyboard = () => {
 
         <View style={styles.inputValue}>
           <PrimaryFontBold style={styles.inputText}>
-            {inputValue ? inputValue : 0}
+            {inputValue ? formatNumber(inputValue) : 0}
             <PrimaryFontMedium style={{ color: '#F8F8F8', fontSize: 16 }}>
               {""}Ksh
             </PrimaryFontMedium>

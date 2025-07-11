@@ -3,7 +3,7 @@ import { View, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-nativ
 import reusableStyle from '@/constants/ReusableStyles';
 import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
-import { ResponseBalance } from '@/app/(tabs)'; 
+import { ResponseBalance } from '@/app/(tabs)';
 
 const logoSources: Record<string, any> = {
     USDT: require('@/assets/logos/tether.png'),
@@ -60,6 +60,16 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
 
     };
 
+    const formatNumberToFixed = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(num);
+    };
+
     return (
         <FlatList
             data={tokens}
@@ -83,7 +93,7 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
                             {item.balance.toFixed(3)} {item.tokenName.toUpperCase()}
                         </PrimaryFontMedium>
                         <PrimaryFontText style={styles.ksh}>
-                            {parseFloat(item.ksh).toFixed(2)} Ksh
+                            {formatNumberToFixed(parseFloat(item.ksh).toFixed(2))} Ksh
                         </PrimaryFontText>
                     </View>
                 </TouchableOpacity>
