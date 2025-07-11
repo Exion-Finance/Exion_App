@@ -132,11 +132,28 @@ export default function OptionalMessage() {
         calculateTotalSent()
     }, []);
 
+    const formatNumber = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+        return new Intl.NumberFormat('en-KE').format(num);
+    };
+
+    const formatNumberToFixed = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(num);
+    };
+      
+    // const digit: number = 10000.54;
     return (
         <GestureHandlerRootView>
             <View style={styles.container}>
                 <StatusBar style={'dark'} />
-                <NavBar title={`Sending ${amount} Ksh`} onBackPress={() => route.back()} />
+                <NavBar title={`Sending ${formatNumber(amount as string)} Ksh`} onBackPress={() => route.back()} />
 
                 <View style={reusableStyles.paddingContainer}>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 10 }]}>
@@ -161,7 +178,7 @@ export default function OptionalMessage() {
                         </View> */}
                         <View style={styles.row}>
                             <PrimaryFontMedium style={styles.description}>They receive</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.value}>{Number(amount).toFixed(2) || "---"} {`Ksh`}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{formatNumberToFixed(Number(amount).toFixed(2)) || "---"} {`Ksh`}</PrimaryFontMedium>
                         </View>
                     </View>
 
@@ -184,7 +201,7 @@ export default function OptionalMessage() {
                     {gasFees ? (
                         <PrimaryButton
                             onPress={() => handleSend()}
-                            textOnButton={`Send (${totalAmountSent ? Number(totalAmountSent).toFixed(2) : 0} Ksh)`}
+                            textOnButton={`Send (${totalAmountSent ? formatNumberToFixed(Number(totalAmountSent).toFixed(2)) : 0} Ksh)`}
                             widthProp={reusableStyles.width100}
                             disabled={sending}
                         />

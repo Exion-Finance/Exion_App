@@ -83,7 +83,7 @@ export default function TabOneScreen() {
     setIsHidden(newValue);
     await SecureStore.setItemAsync('BalanceVisibility', newValue.toString());
   };
-  
+
 
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
@@ -210,7 +210,7 @@ export default function TabOneScreen() {
       if (!isLoading) {
         const currencyCode: string = "USD"
         const rates = await fetchExchangeRate(currencyCode)
-        if (rates.data.success){
+        if (rates.data.success) {
           // console.log(rates.data)
           setBuyingRate(rates.data.data.buyingRate)
           return;
@@ -235,6 +235,18 @@ export default function TabOneScreen() {
   };
 
   const { greeting, image } = getGreetingAndImage();
+
+
+  const formatNumber = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+
+    return new Intl.NumberFormat('en-KE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+
 
 
   //Fetch Mobile Transactions
@@ -279,54 +291,24 @@ export default function TabOneScreen() {
     return new Date(year, month, day, hour, min, sec)
   }
 
-  // const makeSections = (txs: MobileTransaction[]): Section[] => {
-  //   const sorted = [...txs].sort(
-  //     (a, b) =>
-  //       parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
-  //   );
-
-  //   const today = new Date();
-  //   const yesterday = new Date(today);
-  //   yesterday.setDate(today.getDate() - 1);
-
-  //   const isSameDay = (d1: Date, d2: Date) =>
-  //     d1.getFullYear() === d2.getFullYear() &&
-  //     d1.getMonth() === d2.getMonth() &&
-  //     d1.getDate() === d2.getDate();
-
-  //   const groups: Record<string, MobileTransaction[]> = {};
-
-  //   for (const tx of sorted) {
-  //     const d = parseTxDate(tx.transactionDate);
-  //     const key = isSameDay(d, today)
-  //       ? 'Today'
-  //       : isSameDay(d, yesterday)
-  //         ? 'Yesterday'
-  //         : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-
-  //     (groups[key] ||= []).push(tx);
-  //   }
-
-  //   return Object.entries(groups).map(([title, data]) => ({ title, data }));
-  // };
 
   const makeSections = (txs: MobileTransaction[]): Section[] => {
     const sorted = [...txs].sort(
       (a, b) =>
         parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
     );
-  
+
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-  
+
     const isSameDay = (d1: Date, d2: Date) =>
       d1.getFullYear() === d2.getFullYear() &&
       d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate();
-  
+
     const groups: Record<string, MobileTransaction[]> = {};
-  
+
     for (const tx of sorted) {
       const d = parseTxDate(tx.transactionDate);
       const key = isSameDay(d, today)
@@ -334,18 +316,18 @@ export default function TabOneScreen() {
         : isSameDay(d, yesterday)
           ? 'Yesterday'
           : d.toLocaleDateString('en-KE', {
-              weekday: 'short', // Mon
-              day: 'numeric',   // 8
-              month: 'short',   // Jul
-              year: 'numeric',  // 2025
-            });
-  
+            weekday: 'short', // Mon
+            day: 'numeric',   // 8
+            month: 'short',   // Jul
+            year: 'numeric',  // 2025
+          });
+
       (groups[key] ||= []).push(tx);
     }
-  
+
     return Object.entries(groups).map(([title, data]) => ({ title, data }));
   };
-  
+
 
   const refetchMobileTx = async () => {
     try {
@@ -425,7 +407,7 @@ export default function TabOneScreen() {
                 <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'flex-start', flexDirection: 'row' }}>
                   {/* <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15, marginBottom: 5 }}>Ksh</PrimaryFontMedium> */}
                   <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginBottom: 15 }}>
-                    {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
+                    {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${formatNumber(user_balance.kes.toFixed(2)) || "---"}`}
                   </PrimaryFontMedium>
                 </View>
 
