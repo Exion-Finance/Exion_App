@@ -18,6 +18,7 @@ import * as Clipboard from 'expo-clipboard';
 import FavoriteAddressCard from '@/components/FavoriteAddressCard';
 import { authAPI } from './context/AxiosProvider';
 import Toast from 'react-native-toast-message';
+import LottieAnimation from '@/components/LottieAnimation';
 
 
 
@@ -52,7 +53,8 @@ export default function EnterWalletAddress() {
     const handlePaste = () => {
         if (clipboardAddress) {
             setWalletAddress(clipboardAddress);
-            setClipboardAddress(null); // hide banner after pasting
+            setClipboardAddress(null);
+            setError(false);
         }
     };
 
@@ -61,6 +63,8 @@ export default function EnterWalletAddress() {
         if (!userTransactions) return [];
         return Object.values(userTransactions).flat();
     }, [userTransactions]);
+
+    // console.log("allTxs", allTxs)
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
@@ -145,7 +149,7 @@ export default function EnterWalletAddress() {
 
 
 
-
+    // console.log("favorites", favorites)
 
 
 
@@ -212,6 +216,8 @@ export default function EnterWalletAddress() {
         }
     };
 
+    // console.log("walletAddress-->", walletAddress)
+
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />
@@ -231,7 +237,7 @@ export default function EnterWalletAddress() {
                         }}
                         onFocus={() => setIsWalletAddressFocused(true)}
                         onBlur={() => setIsWalletAddressFocused(false)}
-                        value={walletAddress}
+                        value={walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : walletAddress}
                     />
                     <FormErrorText error={error} errorDescription={errorDescription} />
 
@@ -246,26 +252,26 @@ export default function EnterWalletAddress() {
                                     <MaterialIcons name="content-paste" size={20} color="#fff" />
                                 </View>
                                 <View style={styles.pasteTextWrapper}>
-                                    <Text style={styles.pasteTitle}>Paste from clipboard</Text>
-                                    <Text style={styles.pasteAddress}>
+                                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
+                                    <PrimaryFontText style={styles.pasteAddress}>
                                         {`${clipboardAddress.slice(0, 6)}…${clipboardAddress.slice(-6)}`}
-                                    </Text>
+                                    </PrimaryFontText>
                                 </View>
                             </TouchableOpacity>
                         )}
 
                         <View style={styles.favoritesContainer}>
-                            {/* Empty state if no txs */}
-                            {displayFavorites.length === 0 ? (
+                            {displayFavorites.length !== 0 ? (
                                 <View style={styles.emptyFav}>
-                                    <MaterialIcons name="link" size={36} color="#888" />
-                                    <Text style={styles.emptyTitle}>Save wallet address</Text>
-                                    <Text style={styles.emptySubtitle}>
-                                        Save wallet addresses to make sending to external wallets faster
-                                    </Text>
+                                    {/* <MaterialIcons name="link" size={36} color="#888" /> */}
+                                    <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
+                                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
+                                    <PrimaryFontText style={styles.emptySubtitle}>
+                                        Save wallet addresses to make sending to external wallets faster and easier
+                                    </PrimaryFontText>
                                     <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
                                         <MaterialIcons name="add" size={20} color="#fff" />
-                                        <Text style={styles.addBtnText}>Add address</Text>
+                                        <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
                                     </TouchableOpacity>
                                 </View>
                             ) : (
@@ -282,14 +288,15 @@ export default function EnterWalletAddress() {
                             )}
 
 
-
-                            {/* Always show Add address button at bottom-right */}
-                            <View style={styles.addFavWrapper}>
-                                <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
-                                    <MaterialIcons name="add" size={20} color="#007AFF" />
-                                    <Text style={styles.addSmallText}>Add address</Text>
-                                </TouchableOpacity>
-                            </View>
+                            {displayFavorites.length === 0 ? (
+                                <View style={styles.addFavWrapper}>
+                                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
+                                        <MaterialIcons name="add" size={20} color="#007AFF" />
+                                        <PrimaryFontBold style={styles.addSmallText}>Add address</PrimaryFontBold>
+                                    </TouchableOpacity>
+                                </View>
+                            )
+                                : null}
 
                         </View>
                     </ScrollView>
@@ -299,9 +306,9 @@ export default function EnterWalletAddress() {
                 <View style={styles.stickyFooter}>
                     <View style={styles.warningRow}>
                         <MaterialIcons name="warning" size={20} color="#FFA500" />
-                        <Text style={styles.warningText}>
+                        <PrimaryFontText style={styles.warningText}>
                             To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
-                        </Text>
+                        </PrimaryFontText>
                     </View>
 
                     <TouchableOpacity style={styles.button} onPress={handleSubmit}>
@@ -398,7 +405,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: '#eef6ff',
         borderRadius: 6,
-        marginTop: 12,
+        marginTop: 0,
         padding: 10,
         alignItems: 'center',
     },
@@ -406,7 +413,7 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#007AFF',
+        backgroundColor: '#4781D9',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
@@ -428,14 +435,14 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
         borderRadius: 6,
         padding: 12,
-        marginBottom: 24,
+        marginTop: 20,
     },
     emptyFav: {
         alignItems: 'center',
-        paddingVertical: 24,
+        paddingBottom: 24,
     },
-    emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 8 },
-    emptySubtitle: { fontSize: 12, color: '#666', textAlign: 'center', marginVertical: 8 },
+    emptyTitle: { fontSize: 16.5, marginTop: 0 },
+    emptySubtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginVertical: 8 },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -494,20 +501,20 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     stickyFooter: {
-        paddingTop: 16,
+        paddingTop: 18,
         borderTopWidth: 1,
         borderColor: '#eee',
     },
     warningRow: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginBottom: 20,
+        alignItems: 'center',
+        marginBottom: 25,
         paddingHorizontal: 10
     },
     warningText: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 14,
+        fontSize: 13,
         color: '#333',
         lineHeight: 20,
     },
