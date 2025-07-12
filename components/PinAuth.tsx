@@ -35,8 +35,6 @@ export default function PinAuth({
   const [mode, setMode] = useState<Mode>('create');
   const [firstPin, setFirstPin] = useState<string>('');
   const [pin, setPin] = useState<string>('');
-  const pinRefs = useRef<Array<TouchableOpacity | null>>([]);
-
 
   // Hold a reference to the looping animation
   const loopAnim = useRef<Animated.CompositeAnimation | null>(null);

@@ -41,7 +41,8 @@ const CryptoScreen: React.FC = () => {
     //bottomSheetRef.current?.close();  // Close the BottomSheet after selection
 
     const handleEnterWalletAddress = () => {
-        bottomSheetRef.current?.expand()
+        // bottomSheetRef.current?.expand()
+        route.push('/enterwalletaddress')
     }
 
 
@@ -168,7 +169,7 @@ const CryptoScreen: React.FC = () => {
                         />
 
                         <TouchableOpacity onPress={handleEnterWalletAddress}>
-                            <PrimaryFontBold style={styles.scanText}>Enter wallet address instead</PrimaryFontBold>
+                            <PrimaryFontBold style={styles.scanText}>Enter wallet address</PrimaryFontBold>
                         </TouchableOpacity>
 
 

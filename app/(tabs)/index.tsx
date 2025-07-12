@@ -6,6 +6,7 @@ import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import userIcon from '@/assets/images/user.png'
 import morning from '@/assets/icons/morning.png'
 import noon from '@/assets/icons/noon.png'
@@ -90,7 +91,7 @@ export default function TabOneScreen() {
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  // console.log("user_balance from redux...>", user_balance)
+  // console.log("user_profile from redux...>", user_profile)
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetTxRef = useRef<BottomSheet>(null);
@@ -381,13 +382,16 @@ export default function TabOneScreen() {
                 <View>
                   <View style={styles.flexRow}>
                     <PrimaryFontText style={{ color: '#FEFEFE', fontSize: 15 }}>{greeting}{'  '}</PrimaryFontText>
-                    <Image source={image} style={{ height: 20, width: 20 }} />
+                    <Image source={image} style={{ height: 19, width: 19 }} />
                   </View>
-                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 18 }}>{user_profile?.userName || ""}</PrimaryFontBold>
+                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 17.5 }}>{user_profile?.userName || ""}</PrimaryFontBold>
                 </View>
               </View>
-              <View>
-                <Ionicons name="notifications" size={28} color="white" />
+              <View style={{ display: 'flex', alignItems: "center", justifyContent: 'center', flexDirection: 'row', marginTop: 5 }}>
+                <TouchableOpacity style={styles.qrButton} onPress={() => route.push('/sendcrypto')}>
+                  <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
+                </TouchableOpacity>
+                <Ionicons name="notifications" size={23} color="white" />
               </View>
             </View>
 
@@ -414,7 +418,7 @@ export default function TabOneScreen() {
               </View>
               <SecondaryButton
                 textOnButton="Tokens"
-                icon={<FontAwesome6 name="coins" size={17} color="#052330" />}
+                icon={<FontAwesome6 name="coins" size={15} color="#052330" />}
                 containerStyle={{ backgroundColor: 'white', marginTop: 15 }}
                 textStyle={{ fontSize: 16, color: "#052330" }}
                 onPress={() => bottomSheetRef.current?.expand()}
@@ -559,5 +563,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 20,
     marginBottom: 15
+  },
+  qrButton: {
+    marginRight: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
