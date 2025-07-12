@@ -98,11 +98,11 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                                 <PrimaryFontText style={{ fontSize: 19 }}>
                                     {item.username
                                         ? item.username.startsWith('0x')
-                                            ? `${item.username.slice(0, 5)} ...${item.username.slice(-4)}`
+                                            ? `${item.username.slice(0, 7)}...${item.username.slice(-4)}`
                                             : item.username
                                         : item.from
-                                            ? `${item.from.slice(0, 5)} ...${item.from.slice(-4)}`
-                                            : `${item.toAddress?.slice(0, 5)} ...${item.toAddress?.slice(-4)}`}
+                                            ? `${item.from.slice(0, 7)}...${item.from.slice(-4)}`
+                                            : `${item.toAddress?.slice(0, 7)}...${item.toAddress?.slice(-4)}`}
                                 </PrimaryFontText>
                             </View>
                             <PrimaryFontText style={{ fontSize: 13, color: '#79828E', marginTop: 5 }}>

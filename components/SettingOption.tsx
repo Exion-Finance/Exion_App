@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 0.7,
         borderBottomWidth: 0.7,
         borderColor: '#e0e0e0',
-        marginTop: -1.5
+        marginTop: -1
     },
     optionLeft: {
         flexDirection: 'row',

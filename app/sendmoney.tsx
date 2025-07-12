@@ -56,6 +56,7 @@ export default function SendMoney() {
         setPhoneNumber(text);
         setError(false);
         setNameVerified(false);
+        // setShowContacts(false);
         // setVerifying(false);
 
         const intlNumber = normalizePhone(text);
@@ -73,6 +74,8 @@ export default function SendMoney() {
                 setContactName(result.data.data.account_details.account_name);
                 setChannel(result.data.data.account_details.channel_name);
                 setNameVerified(true);
+                setShowContacts(false);
+                toggleContacts()
                 return;
             }
         } catch (err) {
@@ -84,7 +87,6 @@ export default function SendMoney() {
 
 
     const handleSubmit = async () => {
-        console.log("Clickeddd")
         // Trim any leading or trailing whitespace
         let cleanedNumber = phoneNumber.trim();
         cleanedNumber = cleanedNumber.replace(/\s+/g, '');
@@ -171,7 +173,7 @@ export default function SendMoney() {
                     />
 
                     {!nameVerified ?
-                        <TouchableOpacity style={[styles.chooseContainer, { opacity: nameVerified ? 0 : 1 }]} onPress={toggleContacts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <TouchableOpacity style={[styles.chooseContainer, { opacity: nameVerified ? 0 : 1 }]} onPress={toggleContacts} hitSlop={{ top: 15, bottom: 15 }}>
                             <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
                             <Animated.View style={{ transform: [{ rotate }] }}>
                                 <Feather name="chevron-down" size={18} color="grey" style={{ marginTop: showContacts ? -2 : 3 }} />

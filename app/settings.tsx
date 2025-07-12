@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        paddingTop: 90,
+        paddingTop: 50,
         paddingHorizontal: 17,
     },
     footer: {
