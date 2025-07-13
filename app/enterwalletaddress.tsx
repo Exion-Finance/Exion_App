@@ -277,7 +277,7 @@ export default function EnterWalletAddress() {
                         )}
 
                         <View style={styles.favoritesContainer}>
-                            {displayFavorites.length === 0 ? (
+                            {displayFavorites.length !== 0 ? (
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
                                     <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
                                     <Favourites />
@@ -286,7 +286,7 @@ export default function EnterWalletAddress() {
                             )
                                 : null}
 
-                            {displayFavorites.length !== 0 ? (
+                            {displayFavorites.length === 0 ? (
                                 <View style={styles.emptyFav}>
                                     {/* <MaterialIcons name="link" size={36} color="#888" /> */}
                                     <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
@@ -313,7 +313,7 @@ export default function EnterWalletAddress() {
                             )}
 
 
-                            {displayFavorites.length === 0 ? (
+                            {displayFavorites.length !== 0 ? (
                                 <View style={styles.addFavWrapper}>
                                     <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
                                         <MaterialIcons name="add" size={20} color="#007AFF" />
