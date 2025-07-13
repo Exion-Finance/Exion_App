@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Button, TextInput, Alert, Platform, ToastAndroid, StatusBar } from "react-native";
+import { StatusBar as StatBar } from 'expo-status-bar';
 import { CameraView, Camera } from "expo-camera";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from 'expo-clipboard';
@@ -121,6 +122,7 @@ const CryptoScreen: React.FC = () => {
 
     return (
         <GestureHandlerRootView>
+            <StatBar style={'dark'} />
             <View style={styles.container}>
                 {/* Top Navigation */}
                 <View style={styles.topNav}>
