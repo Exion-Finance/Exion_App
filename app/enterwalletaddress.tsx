@@ -59,6 +59,36 @@ export default function EnterWalletAddress() {
         }
     };
 
+    const handleWalletAddressSubmit = () => {
+        try {
+            if (!walletAddress) {
+                setError(true)
+                setErrorDescription('Wallet address cannot be empty')
+                return;
+            }
+            if (walletAddress.length < 30) {
+                setError(true)
+                setErrorDescription('Invalid wallet address')
+                return;
+            }
+            setButtonClicked(true)
+            console.log(walletAddress)
+            route.push({
+                pathname: '/keyboard',
+                params: {
+                    recipient_address: walletAddress,
+                    source: 'sendcrypto',
+                },
+            });
+        } catch (error) {
+            setError(true)
+            setErrorDescription("Something went wrong")
+            setButtonClicked(false)
+        } finally {
+            setButtonClicked(false)
+        }
+    }
+
     // flatten all txs:
     const allTxs = useMemo(() => {
         if (!userTransactions) return [];
@@ -69,33 +99,39 @@ export default function EnterWalletAddress() {
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
+        //Exion wallet address
+        const excludeAddress = '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b';
+
+        // Only keep “sent” TXs and skip the excluded address
         const sent = allTxs.filter(
-            (tx) => tx.transactionType.toLowerCase() === 'sent'
+            (tx) =>
+                tx.transactionType.toLowerCase() === 'sent' &&
+                tx.to !== excludeAddress
         );
-        // count occurrences
+
+        // Count occurrences and track lastDate
         const counts: Record<string, { count: number; lastDate: Date }> = {};
         sent.forEach((tx) => {
             const addr = tx.to;
-            // const date = new Date(tx.timeStamp); // or parseTxDate(tx.transactionDate)
             const date = new Date(Number(tx.timeStamp) * 1000);
 
             if (!counts[addr]) counts[addr] = { count: 0, lastDate: date };
             counts[addr].count++;
-            // keep latest
             if (date.getTime() > counts[addr].lastDate.getTime()) {
                 counts[addr].lastDate = date;
             }
         });
-        // sort by count desc
-        const sorted = Object.entries(counts)
+
+        // Sort by count desc, take top 3
+        return Object.entries(counts)
             .sort(([, a], [, b]) => b.count - a.count)
-            .slice(0, 3)
-            .map(([address, info]) => ({ address, ...info }));
-        return sorted;
+            .slice(0, 2)
+            .map(([address, info]) => ({
+                address,
+                count: info.count,
+                lastDate: info.lastDate,
+            }));
     }, [allTxs]);
-
-
-
 
 
 
@@ -154,7 +190,7 @@ export default function EnterWalletAddress() {
 
 
 
-    // 1) Fetch saved favorites from DB on mount
+    // Fetch saved favorites from DB on mount
     useEffect(() => {
         (async () => {
             try {
@@ -162,7 +198,7 @@ export default function EnterWalletAddress() {
                 // if (res.data.success && Array.isArray(res.data.data)) {
                 //     setDbFavorites(res.data.data);
                 // }
-                const fveee = [{ walletAddress: '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b', userName: 'George Valora' }]
+                const fveee = [{ walletAddress: '0xdacaa99a379ca7fba5fea41c27497d7b6d4ade3a', userName: 'George Pretium' }]
                 setDbFavorites(fveee);
             } catch (e) {
                 console.error('Failed to fetch favorites:', e);
@@ -170,7 +206,7 @@ export default function EnterWalletAddress() {
         })();
     }, []);
 
-    // 2) Merge computed+DB into displayFavorites
+    //Merge computed+DB into displayFavorites
     const displayFavorites = useMemo(() => {
         if (favorites.length > 0) {
             // Map computed favorites, overriding with DB info if present
@@ -194,29 +230,6 @@ export default function EnterWalletAddress() {
         return [];
     }, [favorites, dbFavorites]);
 
-
-
-
-    const handleSubmit = async () => {
-        try {
-            if (!walletAddress) {
-                setError(true)
-                setErrorDescription("Wallet address cannot be empty")
-                return;
-            }
-
-            setButtonClicked(true)
-
-
-        } catch (error: any) {
-            setError(true)
-            setErrorDescription("Something went wrong")
-            setButtonClicked(false)
-        } finally {
-            setButtonClicked(false)
-        }
-    };
-
     // console.log("walletAddress-->", walletAddress)
 
     return (
@@ -238,7 +251,9 @@ export default function EnterWalletAddress() {
                         }}
                         onFocus={() => setIsWalletAddressFocused(true)}
                         onBlur={() => setIsWalletAddressFocused(false)}
-                        value={walletAddress ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}` : walletAddress}
+                        value={walletAddress.startsWith("0x") && walletAddress.length > 30 ?
+                            `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
+                            : walletAddress}
                     />
                     <FormErrorText error={error} errorDescription={errorDescription} />
 
@@ -262,7 +277,7 @@ export default function EnterWalletAddress() {
                         )}
 
                         <View style={styles.favoritesContainer}>
-                            {displayFavorites.length !== 0 ? (
+                            {displayFavorites.length === 0 ? (
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
                                     <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
                                     <Favourites />
@@ -271,7 +286,7 @@ export default function EnterWalletAddress() {
                             )
                                 : null}
 
-                            {displayFavorites.length === 0 ? (
+                            {displayFavorites.length !== 0 ? (
                                 <View style={styles.emptyFav}>
                                     {/* <MaterialIcons name="link" size={36} color="#888" /> */}
                                     <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
@@ -298,11 +313,11 @@ export default function EnterWalletAddress() {
                             )}
 
 
-                            {displayFavorites.length !== 0 ? (
+                            {displayFavorites.length === 0 ? (
                                 <View style={styles.addFavWrapper}>
                                     <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
                                         <MaterialIcons name="add" size={20} color="#007AFF" />
-                                        <PrimaryFontBold style={styles.addSmallText}>Save address</PrimaryFontBold>
+                                        <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
                                     </TouchableOpacity>
                                 </View>
                             )
@@ -321,7 +336,7 @@ export default function EnterWalletAddress() {
                         </PrimaryFontText>
                     </View>
 
-                    <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                    <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
                         <PrimaryFontBold style={styles.text}>
                             {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
                         </PrimaryFontBold>
@@ -338,28 +353,33 @@ export default function EnterWalletAddress() {
                     <View style={styles.modalBackdrop}>
                         <View style={styles.modalContent}>
                             <PrimaryFontBold style={styles.modalTitle}>
-                                {modalMode === 'addAddress' ? 'Add Address' : 'Add Username'}
+                                {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
                             </PrimaryFontBold>
 
                             {/* Address input */}
+                            <PrimaryFontMedium style={styles.inputLabel}>Wallet Address</PrimaryFontMedium>
                             <TextInput
-                                style={[styles.modalInput, { backgroundColor: '#f0f0f0' }]}
-                                value={modalAddress}
+                                style={[styles.modalInput, { backgroundColor: modalAddress ? '#f0f0f0' : 'transparent' }]}
+                                value={modalAddress.startsWith("0x") ? `${modalAddress.slice(0, 12)}.…${modalAddress.slice(-6)}` : modalAddress}
                                 onChangeText={setModalAddress}
-                                placeholder="Wallet address"
-                                editable={modalMode === 'addAddress'} // disable when adding username
+                                placeholder="OxOdbe52...223fa"
+                                placeholderTextColor="#C3C2C2"
+                                editable={modalMode === 'addAddress'}
                             />
 
                             {/* Username input */}
+                            <PrimaryFontMedium style={styles.inputLabel}>Username</PrimaryFontMedium>
                             <TextInput
                                 style={styles.modalInput}
                                 value={modalUsername}
                                 onChangeText={setModalUsername}
-                                placeholder="Username"
+                                placeholder="E.g John Valora"
+                                placeholderTextColor="#C3C2C2"
+                                autoCapitalize='words'
                             />
 
                             <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone}>
-                                <Text style={styles.modalBtnText}>Done</Text>
+                                <PrimaryFontBold style={styles.modalBtnText}>Done</PrimaryFontBold>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -490,27 +510,35 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 18.5,
         fontWeight: '600',
-        marginBottom: 12,
+        marginBottom: 10,
     },
     modalInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
         borderRadius: 6,
         padding: 10,
         fontSize: 16,
-        marginBottom: 12,
+        marginBottom: 10,
+        color: '#000',
+        fontFamily: 'DMSansRegular',
+        borderColor: '#C3C3C3',
+        borderWidth: 1
+    },
+    inputLabel: {
+        fontSize: 13,
+        marginBottom: 5,
+        color: '#79828E',
     },
     modalBtn: {
         backgroundColor: '#007AFF',
-        padding: 12,
+        padding: 14,
         borderRadius: 6,
         alignItems: 'center',
+        marginVertical: 5
     },
     modalBtnText: {
         color: '#fff',
-        fontWeight: '600',
+        fontSize: 17
     },
     stickyFooter: {
         paddingTop: 18,

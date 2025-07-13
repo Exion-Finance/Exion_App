@@ -8,7 +8,7 @@ import { SecondaryFontText } from './SecondaryFontText';
 interface FavoriteAddressCardProps {
     address: string;
     lastDate: Date;
-    userName?: string;               // from DB if present
+    userName?: string;
     onAddUsername: (address: string) => void;
 }
 
@@ -102,6 +102,6 @@ const styles = StyleSheet.create({
     addRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
     addText: { fontSize: 13, color: 'grey' },
     right: { alignItems: 'flex-end' },
-    recentLabel: { fontSize: 10.5, color: '#888', marginBottom: 5 },
+    recentLabel: { fontSize: 10.5, color: '#888', marginBottom: 3 },
     dateText: { fontSize: 12.5, color: '#333' },
 });
