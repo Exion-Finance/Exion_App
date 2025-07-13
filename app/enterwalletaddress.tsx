@@ -19,6 +19,7 @@ import FavoriteAddressCard from '@/components/FavoriteAddressCard';
 import { authAPI } from './context/AxiosProvider';
 import Toast from 'react-native-toast-message';
 import LottieAnimation from '@/components/LottieAnimation';
+import Favourites from '@/assets/icons/Favourites';
 
 
 
@@ -161,7 +162,7 @@ export default function EnterWalletAddress() {
                 // if (res.data.success && Array.isArray(res.data.data)) {
                 //     setDbFavorites(res.data.data);
                 // }
-                const fveee = [{ walletAddress: '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b', userName: 'Donchuxx' }]
+                const fveee = [{ walletAddress: '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b', userName: 'George Valora' }]
                 setDbFavorites(fveee);
             } catch (e) {
                 console.error('Failed to fetch favorites:', e);
@@ -237,7 +238,7 @@ export default function EnterWalletAddress() {
                         }}
                         onFocus={() => setIsWalletAddressFocused(true)}
                         onBlur={() => setIsWalletAddressFocused(false)}
-                        value={walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : walletAddress}
+                        value={walletAddress ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}` : walletAddress}
                     />
                     <FormErrorText error={error} errorDescription={errorDescription} />
 
@@ -249,12 +250,12 @@ export default function EnterWalletAddress() {
                                 onPress={handlePaste}
                             >
                                 <View style={styles.pasteIcon}>
-                                    <MaterialIcons name="content-paste" size={20} color="#fff" />
+                                    <MaterialIcons name="content-paste" size={18} color="#fff" />
                                 </View>
                                 <View style={styles.pasteTextWrapper}>
                                     <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
                                     <PrimaryFontText style={styles.pasteAddress}>
-                                        {`${clipboardAddress.slice(0, 6)}…${clipboardAddress.slice(-6)}`}
+                                        {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
                                     </PrimaryFontText>
                                 </View>
                             </TouchableOpacity>
@@ -262,6 +263,15 @@ export default function EnterWalletAddress() {
 
                         <View style={styles.favoritesContainer}>
                             {displayFavorites.length !== 0 ? (
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
+                                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
+                                    <Favourites />
+                                </View>
+
+                            )
+                                : null}
+
+                            {displayFavorites.length === 0 ? (
                                 <View style={styles.emptyFav}>
                                     {/* <MaterialIcons name="link" size={36} color="#888" /> */}
                                     <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
@@ -288,11 +298,11 @@ export default function EnterWalletAddress() {
                             )}
 
 
-                            {displayFavorites.length === 0 ? (
+                            {displayFavorites.length !== 0 ? (
                                 <View style={styles.addFavWrapper}>
                                     <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
                                         <MaterialIcons name="add" size={20} color="#007AFF" />
-                                        <PrimaryFontBold style={styles.addSmallText}>Add address</PrimaryFontBold>
+                                        <PrimaryFontBold style={styles.addSmallText}>Save address</PrimaryFontBold>
                                     </TouchableOpacity>
                                 </View>
                             )
@@ -305,7 +315,7 @@ export default function EnterWalletAddress() {
 
                 <View style={styles.stickyFooter}>
                     <View style={styles.warningRow}>
-                        <MaterialIcons name="warning" size={20} color="#FFA500" />
+                        <MaterialIcons name="warning" size={18} color="#FFA500" />
                         <PrimaryFontText style={styles.warningText}>
                             To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
                         </PrimaryFontText>
@@ -327,9 +337,9 @@ export default function EnterWalletAddress() {
                 >
                     <View style={styles.modalBackdrop}>
                         <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>
+                            <PrimaryFontBold style={styles.modalTitle}>
                                 {modalMode === 'addAddress' ? 'Add Address' : 'Add Username'}
-                            </Text>
+                            </PrimaryFontBold>
 
                             {/* Address input */}
                             <TextInput
@@ -408,11 +418,13 @@ const styles = StyleSheet.create({
         marginTop: 0,
         padding: 10,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#eee',
     },
     pasteIcon: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
         backgroundColor: '#4781D9',
         alignItems: 'center',
         justifyContent: 'center',
@@ -422,20 +434,20 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     pasteTitle: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: '600',
-        color: '#007AFF',
-        marginBottom: 4,
+        color: 'grey',
+        marginBottom: 4.5,
     },
     pasteAddress: {
         fontSize: 13,
         color: '#333',
     }, favoritesContainer: {
-        borderWidth: 1,
+        borderWidth: 1.2,
         borderColor: '#eee',
         borderRadius: 6,
         padding: 12,
-        marginTop: 20,
+        marginTop: 10,
     },
     emptyFav: {
         alignItems: 'center',
@@ -515,7 +527,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 8,
         fontSize: 13,
-        color: '#333',
+        color: 'grey',
         lineHeight: 20,
     },
 });
