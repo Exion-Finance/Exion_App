@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, Text, StyleProp, ViewStyle, Button, PressableProps, GestureResponderEvent, TouchableOpacity } from "react-native";
+import { StyleSheet, StyleProp, ViewStyle, PressableProps, GestureResponderEvent, TouchableOpacity } from "react-native";
 import { useRouter, Href } from 'expo-router';
 import { PrimaryFontBold } from "./PrimaryFontBold";
 
