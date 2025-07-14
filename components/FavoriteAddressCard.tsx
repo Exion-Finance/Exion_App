@@ -4,12 +4,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { PrimaryFontMedium } from "./PrimaryFontMedium";
 import { PrimaryFontText } from "./PrimaryFontText";
 import { SecondaryFontText } from './SecondaryFontText';
+// import Feather from '@expo/vector-icons/Feather';
 
 interface FavoriteAddressCardProps {
     address: string;
-    lastDate: Date;
+    lastDate: Date | null;
     userName?: string;
     onAddUsername: (address: string) => void;
+    onSelect: () => void;
 }
 
 export default function FavoriteAddressCard({
@@ -17,6 +19,7 @@ export default function FavoriteAddressCard({
     lastDate,
     userName,
     onAddUsername,
+    onSelect
 }: FavoriteAddressCardProps) {
     // Formatting date for display
     const isToday = (d: Date) => {
@@ -30,20 +33,22 @@ export default function FavoriteAddressCard({
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const isYesterday =
-        lastDate.getFullYear() === yesterday.getFullYear() &&
-        lastDate.getMonth() === yesterday.getMonth() &&
-        lastDate.getDate() === yesterday.getDate();
+        lastDate?.getFullYear() === yesterday.getFullYear() &&
+        lastDate?.getMonth() === yesterday.getMonth() &&
+        lastDate?.getDate() === yesterday.getDate();
 
-    const displayDate = isToday(lastDate)
-        ? 'Today'
-        : isYesterday
-            ? 'Yesterday'
-            : lastDate.toLocaleDateString('en-KE', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-            });
+    const displayDate = lastDate == null ?
+        'No transactions' :
+        isToday(lastDate)
+            ? 'Today'
+            : isYesterday
+                ? 'Yesterday'
+                : lastDate?.toLocaleDateString('en-KE', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                });
 
     // Clip address
     const clipped = address.startsWith("0x") ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
@@ -51,7 +56,7 @@ export default function FavoriteAddressCard({
     const initials = userName ? userName.slice(0, 2) : address.slice(0, 2);
 
     return (
-        <View style={styles.card}>
+        <TouchableOpacity onPress={onSelect} style={styles.card}>
             <View style={styles.left}>
                 <View style={styles.initialsCircle}>
                     <SecondaryFontText style={styles.initialsText}>{initials}</SecondaryFontText>
@@ -64,6 +69,7 @@ export default function FavoriteAddressCard({
                             <PrimaryFontMedium style={styles.addText}>
                                 {userName ? clipped : 'Add username'}
                             </PrimaryFontMedium>
+                            {/* {userName ? <Feather name="edit-3" size={8} color="grey" style={{marginLeft: 1, marginTop: 1}}/> : null} */}
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -72,7 +78,7 @@ export default function FavoriteAddressCard({
                 <PrimaryFontText style={styles.recentLabel}>Most recent</PrimaryFontText>
                 <PrimaryFontMedium style={styles.dateText}>{displayDate}</PrimaryFontMedium>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
 

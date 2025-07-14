@@ -58,7 +58,7 @@ const CustomKeyboard = () => {
     balance: 0,
     ksh: 0
   });
-  const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address } = useLocalSearchParams();
+  const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address, savedUsername } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [selectedTokenId, setSelectedTokenId] = useState<number>(0);
   const [jwtTokens, setJwtToken] = useState<string>("")
@@ -128,7 +128,7 @@ const CustomKeyboard = () => {
       maximumFractionDigits: 2,
     }).format(num);
   };
-  
+
   const closePin = () => {
     setShowPinAuth(false);
     bottomSheetRef2.current?.snapToIndex(0);
@@ -397,6 +397,7 @@ const CustomKeyboard = () => {
             conversionToUsd,
             token: activeToken.token,
             recipient_address,
+            savedUsername,
             gasFees: txFees.totalFee.gasFeeinKes,
             serviceFees: txFees.totalFee.serviceFeeinKes
           }

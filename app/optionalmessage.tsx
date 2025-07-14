@@ -35,8 +35,8 @@ export default function OptionalMessage() {
     const [hasPin, setHasPin] = useState<boolean>(false);
     const [showPinAuth, setShowPinAuth] = useState<boolean>(false);
 
-    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd } = useLocalSearchParams();
-    const { isAuthenticated, handleFingerprintScan } = useFingerprintAuthentication();
+    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd, savedUsername } = useLocalSearchParams();
+    const { handleFingerprintScan } = useFingerprintAuthentication();
 
     const bottomSheetRef = useRef<BottomSheet>(null);
     const animatedIndex = useSharedValue(-1);
@@ -66,6 +66,12 @@ export default function OptionalMessage() {
         try {
             bottomSheetRef.current?.snapToIndex(0)
             const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
+
+            console.log("recipient", phoneNumber ? phoneNumber as string : recipient_address as string)
+            console.log("amountFloat", amountFloat)
+            console.log("token id", id as number)
+            // console.log("recipient_address", recipient_address)
+
             const response = await SendMoneyV1({
                 chainId: 1,
                 tokenId: id as number,
@@ -163,7 +169,7 @@ export default function OptionalMessage() {
                         <View>
                             <PrimaryFontMedium style={{ fontSize: 19 }}>{name.length < 15 ? name : `${recipient_address.slice(0, 8)}...${recipient_address.slice(-8)}`}
                             </PrimaryFontMedium>
-                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber}</PrimaryFontText>
+                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber ? phoneNumber : savedUsername}</PrimaryFontText>
                         </View>
                     </View>
 

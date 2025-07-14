@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Text, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
@@ -31,12 +31,15 @@ export default function EnterWalletAddress() {
     const [isWalletFocused, setIsWalletAddressFocused] = useState<boolean>(false);
     const [clipboardAddress, setClipboardAddress] = useState<string | null>(null);
     const [dbFavorites, setDbFavorites] = useState<
-        { walletAddress: string; userName: string }[]
+        { walletAddress: string; userName: string; id: string }[]
     >([]);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [modalMode, setModalMode] = useState<'addUsername' | 'addAddress'>('addUsername');
-    const [modalAddress, setModalAddress] = useState('');
-    const [modalUsername, setModalUsername] = useState('');
+    const [modalAddress, setModalAddress] = useState<string>('');
+    const [modalUsername, setModalUsername] = useState<string>('');
+    const [modalId, setModalId] = useState<string>('');
+    const [doneButtonClicked, setDoneButtonClicked] = useState<boolean>(false);
+    const [deleteButtonClicked, setDeleteButtonClicked] = useState<boolean>(false);
 
     const route = useRouter()
     let userTransactions = useSelector(selectTransactions)
@@ -59,6 +62,23 @@ export default function EnterWalletAddress() {
         }
     };
 
+    const handleFavoriteSelect = (address: string, userName?: string) => {
+        try {
+            // console.log("Selected address:", address);
+            // console.log("Selected userName:", userName ?? "Not saved");
+            route.push({
+                pathname: '/keyboard',
+                params: {
+                    recipient_address: address,
+                    source: 'sendcrypto',
+                    savedUsername: userName ?? "Not saved"
+                },
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const handleWalletAddressSubmit = () => {
         try {
             if (!walletAddress) {
@@ -72,12 +92,13 @@ export default function EnterWalletAddress() {
                 return;
             }
             setButtonClicked(true)
-            console.log(walletAddress)
+            // console.log(walletAddress)
             route.push({
                 pathname: '/keyboard',
                 params: {
                     recipient_address: walletAddress,
                     source: 'sendcrypto',
+                    savedUsername: "Wallet Address"
                 },
             });
         } catch (error) {
@@ -106,7 +127,9 @@ export default function EnterWalletAddress() {
         const sent = allTxs.filter(
             (tx) =>
                 tx.transactionType.toLowerCase() === 'sent' &&
-                tx.to !== excludeAddress
+                tx.to !== excludeAddress &&
+                tx.to.startsWith('0x') &&
+                tx.to.length >= 20
         );
 
         // Count occurrences and track lastDate
@@ -141,7 +164,9 @@ export default function EnterWalletAddress() {
         setModalAddress(address);
         // Pre-fill if DB has name
         const existing = dbFavorites.find((d) => d.walletAddress === address);
+        // console.log("existing from dbFavorites", dbFavorites)
         setModalUsername(existing?.userName || '');
+        setModalId(existing?.id || '')
         setModalVisible(true);
     };
 
@@ -153,26 +178,45 @@ export default function EnterWalletAddress() {
         setModalVisible(true);
     };
 
-    // Handle Done press in modal
-    const handleModalDone = async () => {
-        if (!modalAddress || !modalUsername) {
-            setModalVisible(false);
-            Toast.show({ type: 'error', text1: 'Both fields are required' });
-            return;
-        }
+    const handleEditWalletUsername = async () => {
         try {
-            const res = await authAPI.post('/user/favorites', {
-                walletAddress: modalAddress,
-                userName: modalUsername,
+            setDoneButtonClicked(true)
+            const res = await authAPI.put(`/user/favorite-addresses/${modalId}`, {
+                address: modalAddress,
+                name: modalUsername,
             });
+            // console.log("edit wallet res", res.data)
             if (res.data.success) {
-                Toast.show({ type: 'success', text1: 'Saved!' });
-                // Update local dbFavorites array
-                setDbFavorites((prev) => {
-                    // remove any existing for this address
-                    const filtered = prev.filter((d) => d.walletAddress !== modalAddress);
-                    return [{ walletAddress: modalAddress, userName: modalUsername }, ...filtered];
-                });
+                await handleFetchFavourites()
+                Toast.show({ type: 'success', text1: 'Saved successfully🎉' });
+                setModalVisible(false);
+            } else {
+                setModalVisible(false);
+                throw new Error(res.data.message);
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setDoneButtonClicked(false)
+        }
+    }
+
+    const handleSaveNewAddress = async () => {
+        try {
+            setDoneButtonClicked(true)
+            console.log("save new addy modalAddress", modalAddress)
+            console.log("save new addy modalUsername", modalUsername)
+            const address = modalAddress.trim();
+            const name = modalUsername.trim();
+
+            const res = await authAPI.post('/user/favorite-addresses', {
+                address,
+                name,
+            });
+            // console.log("save new wallet res", res.data)
+            if (res.data.success) {
+                await handleFetchFavourites();
+                Toast.show({ type: 'success', text1: 'Saved successfully🎉' });
                 setModalVisible(false);
             } else {
                 setModalVisible(false);
@@ -180,26 +224,101 @@ export default function EnterWalletAddress() {
             }
         } catch (e: any) {
             setModalVisible(false);
-            Toast.show({ type: 'error', text1: e.message || 'Failed to save' });
+            Toast.show({ type: 'error', text1: 'Failed to save address' });
+        }
+        finally {
+            setDoneButtonClicked(false)
+        }
+    }
+
+
+    const handleFetchFavourites = async () => {
+        try {
+            const res = await authAPI.get('/user/favorite-addresses');
+            // console.log("<--Fetch favorite addresses function-->", res.data);
+
+            if (res.data.success && Array.isArray(res.data.data)) {
+                const mapped = res.data.data
+                    .filter((item: any) => item.id && item.id !== "")
+                    .map((item: any) => ({
+                        walletAddress: item.address,
+                        userName: item.name,
+                        id: item.id,
+                    }));
+
+                setDbFavorites(mapped);
+            }
+        } catch (e) {
+            console.error('Failed to fetch favorites:', e);
         }
     };
 
 
+    // Handle Done press in modal
+    const handleModalDone = async () => {
+        if (!modalAddress || !modalUsername) {
+            setModalVisible(false);
+            return;
+        }
+        if (modalUsername && modalAddress) {
+            const match = displayFavorites.find((fav) => fav.address === modalAddress);
 
-    // console.log("favorites", favorites)
+            if (match?.userName === modalUsername) {
+                console.log("They are the same");
+                setModalVisible(false);
+                return;
+            }
 
+            if (match?.userName && match.userName !== modalUsername) {
+                console.log("Username edited");
+                await handleEditWalletUsername()
+                return;
+            }
 
+            if (!match?.userName && modalUsername) {
+                console.log("Saving new address");
+                await handleSaveNewAddress();
+                return;
+            }
+        }
+        try {
+            setDoneButtonClicked(true)
+            const res = await authAPI.post('/user/favorite-addresses', {
+                address: modalAddress,
+                name: modalUsername,
+            });
+            // console.log("save wallet res", res.data)
+            if (res.data.success) {
+                await handleFetchFavourites()
+                Toast.show({ type: 'success', text1: 'Saved successfully🎉' });
+                setModalVisible(false);
+            } else {
+                setModalVisible(false);
+                throw new Error(res.data.message);
+            }
+        } catch (e: any) {
+            setModalVisible(false);
+            Toast.show({ type: 'error', text1: 'Failed to save address' });
+        }
+        finally {
+            setDoneButtonClicked(false)
+        }
+    };
 
     // Fetch saved favorites from DB on mount
     useEffect(() => {
         (async () => {
             try {
-                // const res = await authAPI.get('/user/favorites');
-                // if (res.data.success && Array.isArray(res.data.data)) {
-                //     setDbFavorites(res.data.data);
-                // }
-                const fveee = [{ walletAddress: '0xdacaa99a379ca7fba5fea41c27497d7b6d4ade3a', userName: 'George Pretium' }]
-                setDbFavorites(fveee);
+                const res = await authAPI.get('/user/favorite-addresses');
+                // console.log("Fetch favorite addresses", res.data)
+                if (res.data.success && Array.isArray(res.data.data)) {
+                    const mapped = res.data.data.map((item: any) => ({
+                        walletAddress: item.address,
+                        userName: item.name,
+                        id: item.id
+                    }));
+                    setDbFavorites(mapped);
+                }
             } catch (e) {
                 console.error('Failed to fetch favorites:', e);
             }
@@ -208,29 +327,68 @@ export default function EnterWalletAddress() {
 
     //Merge computed+DB into displayFavorites
     const displayFavorites = useMemo(() => {
-        if (favorites.length > 0) {
-            // Map computed favorites, overriding with DB info if present
-            return favorites.map((fav) => {
-                const db = dbFavorites.find((d) => d.walletAddress === fav.address);
-                return {
-                    address: fav.address,
-                    lastDate: fav.lastDate,
-                    userName: db?.userName,
-                };
-            });
-        } else if (dbFavorites.length > 0) {
-            // No computed ones, but DB has entries: show up to 3
-            return dbFavorites.slice(0, 3).map((d) => ({
+
+        // Map computed favorites (from tx history), overriding with DB info
+        const computed = favorites.map((fav) => {
+            const db = dbFavorites.find((d) => d.walletAddress === fav.address);
+            return {
+                address: fav.address,
+                lastDate: fav.lastDate,
+                userName: db?.userName,
+                id: db?.id,
+            };
+        });
+
+        // Find any DB‑only entries not in computed
+        const computedAddrs = new Set(computed.map((c) => c.address));
+        const extras = dbFavorites
+            .filter((d) => !computedAddrs.has(d.walletAddress))
+            .map((d) => ({
                 address: d.walletAddress,
-                lastDate: new Date(),       // no tx date → show “Today”
+                lastDate: null,
                 userName: d.userName,
+                id: d.id,
             }));
-        }
-        // neither: empty array
-        return [];
+
+        // Combine and return
+        return [...computed, ...extras];
     }, [favorites, dbFavorites]);
 
-    // console.log("walletAddress-->", walletAddress)
+
+    // console.log("displayFavorites-->", displayFavorites)
+    // console.log("dbFavorites-->", dbFavorites)
+
+
+    const handleDeleteFavorite = async () => {
+        try {
+            setDeleteButtonClicked(true)
+            // console.log("modalAddress-->", modalAddress)
+            // console.log("modalUsername-->", modalUsername)
+            // console.log("modalId-->", modalId)
+            const address = modalAddress.trim();
+            const name = modalUsername.trim();
+
+            const res = await authAPI.delete(`/user/favorite-addresses/${modalId}`);
+            // console.log("delete wallet res", res.data)
+            if (res.data.success) {
+                setDbFavorites(prev =>
+                    prev.filter(item => item.id !== modalId)
+                );
+                Toast.show({ type: 'success', text1: 'Wallet address deleted' });
+                setModalVisible(false);
+
+            } else {
+                setModalVisible(false);
+                throw new Error(res.data.message);
+            }
+        } catch (e: any) {
+            setModalVisible(false);
+            Toast.show({ type: 'error', text1: 'Failed to delete address' });
+        }
+        finally {
+            setDeleteButtonClicked(false)
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -292,7 +450,7 @@ export default function EnterWalletAddress() {
                                     <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
                                     <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
                                     <PrimaryFontText style={styles.emptySubtitle}>
-                                        Save wallet addresses to make sending to external wallets faster and easier
+                                        Save wallet addresses to make sending to external wallets simpler and faster
                                     </PrimaryFontText>
                                     <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
                                         <MaterialIcons name="add" size={20} color="#fff" />
@@ -301,13 +459,14 @@ export default function EnterWalletAddress() {
                                 </View>
                             ) : (
                                 // Map your favorites
-                                displayFavorites.map((fav) => (
+                                displayFavorites.slice(0, 3).map((fav) => (
                                     <FavoriteAddressCard
                                         key={fav.address}
                                         address={fav.address}
                                         lastDate={fav.lastDate}
                                         userName={fav.userName}
                                         onAddUsername={(address) => openUsernameModal(address)}
+                                        onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
                                     />
                                 ))
                             )}
@@ -352,15 +511,22 @@ export default function EnterWalletAddress() {
                 >
                     <View style={styles.modalBackdrop}>
                         <View style={styles.modalContent}>
-                            <PrimaryFontBold style={styles.modalTitle}>
-                                {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
-                            </PrimaryFontBold>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <PrimaryFontBold style={styles.modalTitle}>
+                                    {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
+                                </PrimaryFontBold>
+
+                                {modalMode === 'addAddress' ? null :
+                                    <TouchableOpacity onPress={handleDeleteFavorite} style={styles.deleteIcon}>
+                                        {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="grey" />}
+                                    </TouchableOpacity>}
+                            </View>
 
                             {/* Address input */}
                             <PrimaryFontMedium style={styles.inputLabel}>Wallet Address</PrimaryFontMedium>
                             <TextInput
                                 style={[styles.modalInput, { backgroundColor: modalAddress ? '#f0f0f0' : 'transparent' }]}
-                                value={modalAddress.startsWith("0x") ? `${modalAddress.slice(0, 12)}.…${modalAddress.slice(-6)}` : modalAddress}
+                                value={modalAddress}
                                 onChangeText={setModalAddress}
                                 placeholder="OxOdbe52...223fa"
                                 placeholderTextColor="#C3C2C2"
@@ -378,8 +544,8 @@ export default function EnterWalletAddress() {
                                 autoCapitalize='words'
                             />
 
-                            <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone}>
-                                <PrimaryFontBold style={styles.modalBtnText}>Done</PrimaryFontBold>
+                            <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone} disabled={doneButtonClicked}>
+                                <PrimaryFontBold style={styles.modalBtnText}>{doneButtonClicked ? <Loading color='#fff' description='' /> : "Done"}</PrimaryFontBold>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -422,7 +588,7 @@ const styles = StyleSheet.create({
         fontFamily: 'DMSansMedium'
     },
     label: {
-        fontSize: 20,
+        fontSize: 19,
         marginBottom: 15,
         color: '#052330',
     },
@@ -548,7 +714,7 @@ const styles = StyleSheet.create({
     warningRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 25,
+        marginBottom: 20,
         paddingHorizontal: 10
     },
     warningText: {
@@ -558,4 +724,15 @@ const styles = StyleSheet.create({
         color: 'grey',
         lineHeight: 20,
     },
+    deleteIcon: {
+        backgroundColor: '#f8f8f8',
+        borderColor: '#ccc',
+        borderRadius: 18,
+        borderWidth: 1,
+        width: 36,
+        height: 36,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
 });

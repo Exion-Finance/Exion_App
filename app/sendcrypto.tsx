@@ -174,37 +174,6 @@ const CryptoScreen: React.FC = () => {
                             <PrimaryFontBold style={styles.scanText}>Enter wallet address</PrimaryFontBold>
                         </TouchableOpacity>
 
-
-                        <BottomSheet
-                            ref={bottomSheetRef}
-                            index={-1}
-                            snapPoints={snapPoints}
-                            enablePanDownToClose={true}
-                        >
-                            <View>
-                                <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "100%", height: "40%", marginTop: -5 }} />
-                                <SecondaryFontText
-                                    style={[reusableStyle.paddingContainer,
-                                    { fontSize: 22, marginTop: -25, marginBottom: 30, textAlign: 'center' }]}
-                                >
-                                    Wallet Address
-                                </SecondaryFontText>
-
-                                <View style={reusableStyle.paddingContainer}>
-                                    <InputField
-                                        label="Enter the wallet address"
-                                        placeholder="0x1234f..."
-                                        onInputChange={handleWalletAddressChange}
-                                        error={error}
-                                        errorDescription={errorDescription}
-                                    />
-                                    <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
-                                        <PrimaryFontBold style={styles.text}>Continue</PrimaryFontBold>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </BottomSheet>
-
                     </View>
 
                 )}
@@ -304,20 +273,6 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         paddingHorizontal: 25,
         borderRadius: 10,
-    },
-    button: {
-        backgroundColor: '#00C48F',
-        padding: 10,
-        borderRadius: 10,
-        alignItems: 'center',
-        paddingVertical: 18,
-        width: '100%',
-        marginTop: 25
-    },
-    text: {
-        color: '#fff',
-        fontSize: 19,
-        fontFamily: 'DMSansMedium'
     }
 });
 
