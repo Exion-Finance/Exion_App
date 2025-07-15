@@ -70,8 +70,8 @@ export default function TokenList({ response }: TokenListProps) {
                         <PrimaryFontText style={styles.fullName}>{item.fullName}</PrimaryFontText>
                     </View>
                     <View style={styles.balanceContainer}>
-                        <PrimaryFontMedium style={styles.balance}>{(item.balance).toFixed(3)} {item.tokenName.toUpperCase()}</PrimaryFontMedium>
-                        <PrimaryFontText style={styles.ksh}>{formatNumberToFixed(parseFloat(item.ksh).toFixed(2))} Ksh</PrimaryFontText>
+                        <PrimaryFontMedium style={styles.balance}>{formatNumberToFixed(parseFloat(item.ksh).toFixed(2))} Ksh</PrimaryFontMedium>
+                        <PrimaryFontText style={styles.ksh}> {(item.balance).toFixed(3)} {item.tokenName.toUpperCase()}</PrimaryFontText>
                     </View>
                 </TouchableOpacity>
             )}
@@ -108,11 +108,12 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     balance: {
-        fontSize: 16,
+        fontSize: 17,
+        color: '#333'
     },
     ksh: {
-        fontSize: 15,
-        color: '#555',
-        marginTop: 6
+        fontSize: 13,
+        color: '#777',
+        marginTop: 5
     },
 });
