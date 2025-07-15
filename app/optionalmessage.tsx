@@ -21,10 +21,12 @@ import reusableStyle from '@/constants/ReusableStyles'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
 import PinAuth from '@/components/PinAuth';
+import { selectUserProfile } from './state/slices';
+import { useSelector } from 'react-redux';
 
 export default function OptionalMessage() {
 
-    const { authState } = useAuth()
+    const user_profile = useSelector(selectUserProfile)
 
     const route = useRouter()
     const [message, setMessage] = useState<string>('');
@@ -52,8 +54,9 @@ export default function OptionalMessage() {
     // on mount, check if PIN exists in flag storage
     useEffect(() => {
         (async () => {
-            const flag = await SecureStore.getItemAsync('user_has_pin');
-            setHasPin(flag === 'true');
+            if (user_profile) {
+                setHasPin(user_profile.pin);
+            }
         })();
     }, []);
 
@@ -153,7 +156,7 @@ export default function OptionalMessage() {
             maximumFractionDigits: 2,
         }).format(num);
     };
-      
+
     // const digit: number = 10000.54;
     return (
         <GestureHandlerRootView>

@@ -28,10 +28,9 @@ import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import { useAuth } from "./context/AuthContext";
 import Loading from "@/components/Loading";
-import { selectTokenBalances, setTokenBalance } from './state/slices';
+import { selectTokenBalances, setTokenBalance, selectUserProfile } from './state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 import PinAuth from '@/components/PinAuth';
-import * as SecureStore from 'expo-secure-store';
 
 
 
@@ -48,6 +47,8 @@ type TokenType = {
 const CustomKeyboard = () => {
   const dispatch = useDispatch()
   const token_balance = useSelector(selectTokenBalances)
+  const user_profile = useSelector(selectUserProfile)
+  // console.log("user_profile from redux...>", user_profile)
 
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState(false);
@@ -137,10 +138,12 @@ const CustomKeyboard = () => {
   // on mount, check if PIN exists in flag storage
   useEffect(() => {
     (async () => {
-      const flag = await SecureStore.getItemAsync('user_has_pin');
-      setHasPin(flag === 'true');
+      if(user_profile){
+        setHasPin(user_profile.pin);
+      }
     })();
   }, []);
+  // console.log("hasPin", hasPin)
 
   const handleSendMoney = async () => {
     console.log("Send Moneyy.....")

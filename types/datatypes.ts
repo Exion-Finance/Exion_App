@@ -29,6 +29,7 @@ export interface UserProfile {
   role: string;
   userName: string;
   wallet: WalletAddress;
+  pin: boolean;
 }
 
 
