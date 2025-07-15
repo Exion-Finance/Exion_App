@@ -1,22 +1,22 @@
 import { Stack } from 'expo-router';
 import { StyleSheet, Image, View } from 'react-native';
 import spaceImage from '@/assets/images/space.png'
-import { SecondaryFontText } from "@/components/SecondaryFontText";
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
+import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { StatusBar } from 'expo-status-bar';
 
-export default function NotFoundScreen() {
+export default function Notifications() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!', headerShown: true, headerTitleStyle: {
+      <Stack.Screen options={{ title: 'Notifications', headerShown: true, headerTitleStyle: {
       fontFamily: 'DMSansMedium',
       fontSize: 19,
     } }} />
       <View style={styles.container}>
         <StatusBar style='dark'/>
-        <Image source={spaceImage} style={{ height: 180, width: 180, marginTop: -60 }} />
-        <SecondaryFontText style={styles.title}>This screen doesn't exist.</SecondaryFontText>
-        <PrimaryFontMedium style={styles.linkText}>Looks like you lost your way</PrimaryFontMedium>
+        <Image source={spaceImage} style={{ height: 180, width: 180, marginTop: -100 }} />
+        <PrimaryFontBold style={styles.title}>Nothing here🌵</PrimaryFontBold>
+        <PrimaryFontMedium style={styles.linkText}>You have no new notifications</PrimaryFontMedium>
       </View>
     </>
   );
@@ -31,14 +31,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8'
   },
   title: {
-    fontSize: 25,
-    color: 'black',
+    fontSize: 24,
+    color: '#111',
     marginTop: 26,
     textAlign: 'center'
   },
   linkText: {
-    fontSize: 16,
-    marginTop: 15,
+    fontSize: 15,
+    marginTop: 10,
     color: 'grey',
   },
 });
