@@ -51,7 +51,7 @@ export default function FavoriteAddressCard({
                 });
 
     // Clip address
-    const clipped = address.startsWith("0x") ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
+    const clipped = address.startsWith("0x") ? `${address.slice(0, 6)}…${address.slice(-3)}` : address;
     // Initials
     const initials = userName ? userName.slice(0, 2) : address.slice(0, 2);
 

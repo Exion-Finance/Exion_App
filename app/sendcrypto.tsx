@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Button, TextInput, Alert, Platform, ToastAndroid, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Button, Dimensions, Alert, Platform, ToastAndroid, StatusBar } from "react-native";
 import { StatusBar as StatBar } from 'expo-status-bar';
 import { CameraView, Camera } from "expo-camera";
 import QRCode from "react-native-qrcode-svg";
@@ -9,19 +9,20 @@ import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import BottomSheet from '@gorhom/bottom-sheet';
-import reusableStyle from '@/constants/ReusableStyles'
+import { BlurView } from 'expo-blur';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import InputField from '@/components/InputPaymentDetails';
 import { SecondaryFontText } from '@/components/SecondaryFontText';
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store"
-import { TOKEN_KEY } from './context/AuthContext';
-import LottieAnimation from '@/components/LottieAnimation';
-import { SendMoneyV1 } from "./Apiconfig/api";
 import { selectUserProfile } from './state/slices';
 import { useSelector } from 'react-redux';
 
 const statusBarHeight = StatusBar.currentHeight || 0;
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const SCAN_WINDOW_SIZE = SCREEN_W * 0.75;
+
+const HEADER_HEIGHT = statusBarHeight - 30
+const SCAN_AREA_HEIGHT = SCREEN_H - HEADER_HEIGHT;
 
 const CryptoScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<"myCode" | "scan">("scan");
@@ -35,6 +36,8 @@ const CryptoScreen: React.FC = () => {
 
     const route = useRouter()
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const windowX = (SCREEN_W - SCAN_WINDOW_SIZE) / 2;
+    const windowY = HEADER_HEIGHT + (SCAN_AREA_HEIGHT - SCAN_WINDOW_SIZE) / 3;
 
     const snapPoints = useMemo(() => ['72%'], []);
     const user_profile = useSelector(selectUserProfile)
@@ -150,7 +153,7 @@ const CryptoScreen: React.FC = () => {
 
                 {activeTab === "myCode" ? (
                     <View style={styles.myCodeContainer}>
-                        <QRCode value={walletAddress} size={225} />
+                        <QRCode value={walletAddress} size={215} />
                         <PrimaryFontBold style={styles.username}>{userName}</PrimaryFontBold>
                         <PrimaryFontMedium style={styles.walletAddress}>{walletAddress}</PrimaryFontMedium>
                         <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
@@ -170,10 +173,62 @@ const CryptoScreen: React.FC = () => {
                             style={StyleSheet.absoluteFillObject}
                         />
 
-                        <TouchableOpacity onPress={handleEnterWalletAddress}>
-                            <PrimaryFontBold style={styles.scanText}>Enter wallet address</PrimaryFontBold>
-                        </TouchableOpacity>
+                        <BlurView intensity={80}
+                            style={[styles.blur, {
+                                top: HEADER_HEIGHT,
+                                left: 0,
+                                right: 0,
+                                height: windowY - HEADER_HEIGHT
+                            }]}
+                        />
+                        {/* Bottom blur */}
+                        <BlurView intensity={80}
+                            style={[styles.blur, {
+                                top: windowY + SCAN_WINDOW_SIZE,
+                                left: 0,
+                                right: 0,
+                                bottom: 0
+                            }]}
+                        />
+                        {/* Left blur */}
+                        <BlurView intensity={80}
+                            style={[styles.blur, {
+                                top: windowY,
+                                left: 0,
+                                width: windowX,
+                                height: SCAN_WINDOW_SIZE
+                            }]}
+                        />
+                        {/* Right blur */}
+                        <BlurView intensity={80}
+                            style={[styles.blur, {
+                                top: windowY,
+                                left: windowX + SCAN_WINDOW_SIZE,
+                                right: 0,
+                                height: SCAN_WINDOW_SIZE
+                            }]}
+                        />
 
+                        {/* Clear window border */}
+                        <View
+                            pointerEvents="none"
+                            style={[
+                                styles.scanWindow,
+                                {
+                                    width: SCAN_WINDOW_SIZE,
+                                    height: SCAN_WINDOW_SIZE,
+                                    top: windowY,
+                                    left: windowX,
+                                },
+                            ]}
+                        />
+
+                        {/* <TouchableOpacity onPress={handleEnterWalletAddress}>
+                            <PrimaryFontBold style={styles.scanText}>Enter wallet address</PrimaryFontBold>
+                        </TouchableOpacity> */}
+                        <View style={styles.scanButton}>
+                            <PrimaryFontBold style={styles.scanQrText}>Scan QR code</PrimaryFontBold>
+                        </View>
                     </View>
 
                 )}
@@ -191,9 +246,10 @@ const styles = StyleSheet.create({
     topNav: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 16,
+        padding: 15,
         backgroundColor: "transparent",
-        marginTop: statusBarHeight + 10
+        marginTop: statusBarHeight + 5,
+        // borderWidth: 1
     },
     closeIcon: {
         fontSize: 20,
@@ -232,10 +288,11 @@ const styles = StyleSheet.create({
     },
     username: {
         fontSize: 20,
-        marginVertical: 20,
+        marginBottom: 10,
+        marginTop: 25
     },
     walletAddress: {
-        fontSize: 20,
+        fontSize: 19,
         marginBottom: 15,
         textAlign: "center",
         color: 'gray'
@@ -273,6 +330,29 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         paddingHorizontal: 25,
         borderRadius: 10,
+    },
+    blur: {
+        position: 'absolute',
+        backgroundColor: 'transparent',
+    },
+    scanWindow: {
+        position: 'absolute',
+        borderWidth: 2,
+        borderColor: '#fff',
+        borderRadius: 8,
+    },
+    scanButton: {
+        position: 'absolute',
+        bottom: 40,
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 10,
+    },
+    scanQrText: {
+      color: '#fff',
+      fontSize: 16,
     }
 });
 

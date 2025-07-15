@@ -409,11 +409,14 @@ export default function TabOneScreen() {
                   <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 17.5 }}>{user_profile?.userName || ""}</PrimaryFontBold>
                 </View>
               </View>
-              <View style={{ display: 'flex', alignItems: "center", justifyContent: 'center', flexDirection: 'row', marginTop: 5 }}>
+              <View style={{ display: 'flex', alignItems: "center", justifyContent: 'center', flexDirection: 'row' }}>
                 <TouchableOpacity style={styles.qrButton} onPress={() => route.push('/sendcrypto')}>
                   <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
                 </TouchableOpacity>
-                <Ionicons name="notifications" size={23} color="white" />
+                <TouchableOpacity style={styles.notificationButton}>
+                  <Ionicons name="notifications" size={23} color="white" />
+                </TouchableOpacity>
+
               </View>
             </View>
 
@@ -439,7 +442,7 @@ export default function TabOneScreen() {
 
               </View>
               <SecondaryButton
-                textOnButton="Tokens"
+                textOnButton="Wallet"
                 icon={<FontAwesome6 name="coins" size={15} color="#052330" />}
                 containerStyle={{ backgroundColor: 'white', marginTop: 15 }}
                 textStyle={{ fontSize: 16, color: "#052330" }}
@@ -587,8 +590,18 @@ const styles = StyleSheet.create({
     marginBottom: 15
   },
   qrButton: {
-    marginRight: 15,
+    // marginRight: 15,
     alignItems: 'center',
     justifyContent: 'center',
+    width: 50,
+    height: 50,
+    // backgroundColor: '#00C48F',
+  },
+  notificationButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 50,
+    height: 50,
+    // backgroundColor: '#00C48F',
   }
 });
