@@ -73,15 +73,12 @@ export interface Transactions {
   recipient: string;
 }
 
-// toAddress:string;
-//           fromAddress: string;
-//           amount:string;
-//           tokenSymbol:string;
-//           userid:string;
-//           network:string;
-//           username?:string;
-//           time: Date,
-//           date?:string
+export interface FavoriteAddress {
+  walletAddress: string;
+  userName: string;
+  id: string;
+}
+
 export interface Transaction {
   value: string;
   amount?: string;

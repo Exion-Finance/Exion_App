@@ -29,6 +29,7 @@ import { MobileTransaction, Section } from '@/types/datatypes';
 import { getBalances, fetchMobileTransactions, fetchExchangeRate } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
 import * as SecureStore from 'expo-secure-store';
+import { authAPI } from '../context/AxiosProvider';
 import {
   updateBalance,
   selectUserBalance,
@@ -36,7 +37,8 @@ import {
   addMobileTransactions,
   setTokenBalance,
   selectTokenBalances,
-  selectUserProfile
+  selectUserProfile,
+  setFavorites
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -353,6 +355,26 @@ export default function TabOneScreen() {
       setIsLoading(false)
     }
   }
+
+  // Fetch saved favorites from DB on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await authAPI.get('/user/favorite-addresses');
+        // console.log("Fetch favorite addresses", res.data)
+        if (res.data.success && Array.isArray(res.data.data)) {
+          const mapped = res.data.data.map((item: any) => ({
+            walletAddress: item.address,
+            userName: item.name,
+            id: item.id
+          }));
+          dispatch(setFavorites(mapped));
+        }
+      } catch (e) {
+        console.error('Failed to fetch favorites:', e);
+      }
+    })();
+  }, []);
 
   const handleMobileTransactionsRefresh = useCallback(async () => {
     setRefreshing(true)

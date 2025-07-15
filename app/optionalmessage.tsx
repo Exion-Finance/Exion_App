@@ -103,7 +103,7 @@ export default function OptionalMessage() {
             const success = await handleFingerprintScan()
             if (!success) {
                 bottomSheetRef.current?.close();
-                Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+                // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
                 return;
             }
             else if (success === "success") {
@@ -164,7 +164,7 @@ export default function OptionalMessage() {
                 <View style={reusableStyles.paddingContainer}>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 10 }]}>
                         <View style={styles.initialContainer}>
-                            <PrimaryFontBold style={{ fontSize: 23 }}>{userInitial}</PrimaryFontBold>
+                            <SecondaryFontText style={{ fontSize: 23 }}>{userInitial}</SecondaryFontText>
                         </View>
                         <View>
                             <PrimaryFontMedium style={{ fontSize: 19 }}>{name.length < 15 ? name : `${recipient_address.slice(0, 8)}...${recipient_address.slice(-8)}`}
@@ -175,7 +175,7 @@ export default function OptionalMessage() {
 
                     <View style={styles.ratesContainer}>
                         <View style={styles.row}>
-                            <PrimaryFontMedium style={styles.description}>Transaction cost</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.description}>Transaction fees</PrimaryFontMedium>
                             <PrimaryFontMedium style={styles.value}>{Number(gasFees).toFixed(2) || "---"} {`Ksh`}</PrimaryFontMedium>
                         </View>
                         {/* <View style={styles.row}>
