@@ -123,7 +123,6 @@ export const favoritesSlice = createSlice({
   reducers: {
     // Replace the entire list
     setFavorites(state, action: PayloadAction<FavoriteAddress[]>) {
-      console.log("Action.payload in redux", action.payload)
       state.addresses = action.payload;
     },
     // Add one favorite
