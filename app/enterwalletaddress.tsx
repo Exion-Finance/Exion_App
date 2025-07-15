@@ -12,7 +12,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { MaterialIcons } from '@expo/vector-icons';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { StatusBar } from 'expo-status-bar';
-import { selectTransactions } from './state/slices';
+import { selectTransactions, selectFavorites, setFavorites, removeFavorite } from './state/slices';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import FavoriteAddressCard from '@/components/FavoriteAddressCard';
@@ -30,9 +30,6 @@ export default function EnterWalletAddress() {
     const [buttonClicked, setButtonClicked] = useState<boolean>(false);
     const [isWalletFocused, setIsWalletAddressFocused] = useState<boolean>(false);
     const [clipboardAddress, setClipboardAddress] = useState<string | null>(null);
-    const [dbFavorites, setDbFavorites] = useState<
-        { walletAddress: string; userName: string; id: string }[]
-    >([]);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [modalMode, setModalMode] = useState<'addUsername' | 'addAddress'>('addUsername');
     const [modalAddress, setModalAddress] = useState<string>('');
@@ -42,8 +39,11 @@ export default function EnterWalletAddress() {
     const [deleteButtonClicked, setDeleteButtonClicked] = useState<boolean>(false);
 
     const route = useRouter()
+    const dispatch = useDispatch();
+
     let userTransactions = useSelector(selectTransactions)
-    // console.log("Ochain tx in wallet", userTx)
+    let db_favorites = useSelector(selectFavorites)
+    // console.log("<---db_favorites tx in wallet-->", db_favorites)
 
     useEffect(() => {
         (async () => {
@@ -163,8 +163,7 @@ export default function EnterWalletAddress() {
         setModalMode('addUsername');
         setModalAddress(address);
         // Pre-fill if DB has name
-        const existing = dbFavorites.find((d) => d.walletAddress === address);
-        // console.log("existing from dbFavorites", dbFavorites)
+        const existing = db_favorites.find((d) => d.walletAddress === address);
         setModalUsername(existing?.userName || '');
         setModalId(existing?.id || '')
         setModalVisible(true);
@@ -246,7 +245,7 @@ export default function EnterWalletAddress() {
                         id: item.id,
                     }));
 
-                setDbFavorites(mapped);
+                dispatch(setFavorites(mapped));
             }
         } catch (e) {
             console.error('Failed to fetch favorites:', e);
@@ -317,7 +316,7 @@ export default function EnterWalletAddress() {
                         userName: item.name,
                         id: item.id
                     }));
-                    setDbFavorites(mapped);
+                    dispatch(setFavorites(mapped));
                 }
             } catch (e) {
                 console.error('Failed to fetch favorites:', e);
@@ -330,7 +329,7 @@ export default function EnterWalletAddress() {
 
         // Map computed favorites (from tx history), overriding with DB info
         const computed = favorites.map((fav) => {
-            const db = dbFavorites.find((d) => d.walletAddress === fav.address);
+            const db = db_favorites.find((d) => d.walletAddress === fav.address);
             return {
                 address: fav.address,
                 lastDate: fav.lastDate,
@@ -341,7 +340,7 @@ export default function EnterWalletAddress() {
 
         // Find any DB‑only entries not in computed
         const computedAddrs = new Set(computed.map((c) => c.address));
-        const extras = dbFavorites
+        const extras = db_favorites
             .filter((d) => !computedAddrs.has(d.walletAddress))
             .map((d) => ({
                 address: d.walletAddress,
@@ -352,11 +351,7 @@ export default function EnterWalletAddress() {
 
         // Combine and return
         return [...computed, ...extras];
-    }, [favorites, dbFavorites]);
-
-
-    // console.log("displayFavorites-->", displayFavorites)
-    // console.log("dbFavorites-->", dbFavorites)
+    }, [favorites, db_favorites]);
 
 
     const handleDeleteFavorite = async () => {
@@ -371,9 +366,7 @@ export default function EnterWalletAddress() {
             const res = await authAPI.delete(`/user/favorite-addresses/${modalId}`);
             // console.log("delete wallet res", res.data)
             if (res.data.success) {
-                setDbFavorites(prev =>
-                    prev.filter(item => item.id !== modalId)
-                );
+                dispatch(removeFavorite(modalId));
                 Toast.show({ type: 'success', text1: 'Wallet address deleted' });
                 setModalVisible(false);
 

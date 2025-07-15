@@ -419,7 +419,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
@@ -448,7 +448,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
@@ -476,7 +476,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
