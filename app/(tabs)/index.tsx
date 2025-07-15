@@ -413,7 +413,7 @@ export default function TabOneScreen() {
                 <TouchableOpacity style={styles.qrButton} onPress={() => route.push('/sendcrypto')}>
                   <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.notificationButton}>
+                <TouchableOpacity style={styles.notificationButton} onPress={() => route.push('/notifications')}>
                   <Ionicons name="notifications" size={23} color="white" />
                 </TouchableOpacity>
 
@@ -590,17 +590,16 @@ const styles = StyleSheet.create({
     marginBottom: 15
   },
   qrButton: {
-    // marginRight: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 50,
+    width: 45,
     height: 50,
     // backgroundColor: '#00C48F',
   },
   notificationButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 50,
+    width: 45,
     height: 50,
     // backgroundColor: '#00C48F',
   }
