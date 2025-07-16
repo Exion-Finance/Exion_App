@@ -511,7 +511,7 @@ export default function EnterWalletAddress() {
 
                                 {modalMode === 'addAddress' ? null :
                                     <TouchableOpacity onPress={handleDeleteFavorite} style={styles.deleteIcon}>
-                                        {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="grey" />}
+                                        {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="red" />}
                                     </TouchableOpacity>}
                             </View>
 

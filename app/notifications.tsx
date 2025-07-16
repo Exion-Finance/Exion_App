@@ -14,7 +14,7 @@ export default function Notifications() {
     } }} />
       <View style={styles.container}>
         <StatusBar style='dark'/>
-        <Image source={spaceImage} style={{ height: 180, width: 180, marginTop: -100 }} />
+        <Image source={spaceImage} style={{ height: 140, width: 140, marginTop: -100 }} />
         <PrimaryFontBold style={styles.title}>Nothing here🌵</PrimaryFontBold>
         <PrimaryFontMedium style={styles.linkText}>You have no new notifications</PrimaryFontMedium>
       </View>
