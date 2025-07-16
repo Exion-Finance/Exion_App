@@ -16,7 +16,7 @@ export default function ProfileOption({ icon, description, onPress }: ProfileOpt
                 {icon}
                 <PrimaryFontMedium style={styles.optionText}>{description}</PrimaryFontMedium>
             </View>
-            <Feather name="chevron-right" size={20} color="#79828E" />
+            <Feather name="chevron-right" size={18} color="#444" />
         </TouchableOpacity>
     )
 };
@@ -26,9 +26,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 25,
-        paddingHorizontal: 16,
-        borderTopWidth: 0.7,
+        paddingVertical: 18,
+        paddingHorizontal: 12,
+        // borderTopWidth: 0.7,
         borderBottomWidth: 0.7,
         borderColor: '#e0e0e0',
         marginTop: -1
@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     optionText: {
-        marginLeft: 12,
-        fontSize: 18,
-        color: '#79828E',
+        marginLeft: 10,
+        fontSize: 16,
+        color: '#444',
     },
 });
