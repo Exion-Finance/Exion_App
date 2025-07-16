@@ -21,10 +21,12 @@ import reusableStyle from '@/constants/ReusableStyles'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
 import PinAuth from '@/components/PinAuth';
+import { selectUserProfile } from './state/slices';
+import { useSelector } from 'react-redux';
 
 export default function OptionalMessage() {
 
-    const { authState } = useAuth()
+    const user_profile = useSelector(selectUserProfile)
 
     const route = useRouter()
     const [message, setMessage] = useState<string>('');
@@ -35,8 +37,8 @@ export default function OptionalMessage() {
     const [hasPin, setHasPin] = useState<boolean>(false);
     const [showPinAuth, setShowPinAuth] = useState<boolean>(false);
 
-    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd } = useLocalSearchParams();
-    const { isAuthenticated, handleFingerprintScan } = useFingerprintAuthentication();
+    const { name, phoneNumber, amount, token, recipient_address, gasFees, serviceFees, conversionToUsd, savedUsername } = useLocalSearchParams();
+    const { handleFingerprintScan } = useFingerprintAuthentication();
 
     const bottomSheetRef = useRef<BottomSheet>(null);
     const animatedIndex = useSharedValue(-1);
@@ -52,8 +54,9 @@ export default function OptionalMessage() {
     // on mount, check if PIN exists in flag storage
     useEffect(() => {
         (async () => {
-            const flag = await SecureStore.getItemAsync('user_has_pin');
-            setHasPin(flag === 'true');
+            if (user_profile) {
+                setHasPin(user_profile.pin);
+            }
         })();
     }, []);
 
@@ -66,6 +69,12 @@ export default function OptionalMessage() {
         try {
             bottomSheetRef.current?.snapToIndex(0)
             const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
+
+            console.log("recipient", phoneNumber ? phoneNumber as string : recipient_address as string)
+            console.log("amountFloat", amountFloat)
+            console.log("token id", id as number)
+            // console.log("recipient_address", recipient_address)
+
             const response = await SendMoneyV1({
                 chainId: 1,
                 tokenId: id as number,
@@ -97,7 +106,7 @@ export default function OptionalMessage() {
             const success = await handleFingerprintScan()
             if (!success) {
                 bottomSheetRef.current?.close();
-                Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+                // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
                 return;
             }
             else if (success === "success") {
@@ -132,27 +141,44 @@ export default function OptionalMessage() {
         calculateTotalSent()
     }, []);
 
+    const formatNumber = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+        return new Intl.NumberFormat('en-KE').format(num);
+    };
+
+    const formatNumberToFixed = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(num);
+    };
+
+    // const digit: number = 10000.54;
     return (
         <GestureHandlerRootView>
             <View style={styles.container}>
                 <StatusBar style={'dark'} />
-                <NavBar title={`Sending ${amount} Ksh`} onBackPress={() => route.back()} />
+                <NavBar title={`Sending ${formatNumber(amount as string)} Ksh`} onBackPress={() => route.back()} />
 
                 <View style={reusableStyles.paddingContainer}>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 10 }]}>
                         <View style={styles.initialContainer}>
-                            <PrimaryFontBold style={{ fontSize: 23 }}>{userInitial}</PrimaryFontBold>
+                            <SecondaryFontText style={{ fontSize: 23 }}>{userInitial}</SecondaryFontText>
                         </View>
                         <View>
                             <PrimaryFontMedium style={{ fontSize: 19 }}>{name.length < 15 ? name : `${recipient_address.slice(0, 8)}...${recipient_address.slice(-8)}`}
                             </PrimaryFontMedium>
-                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber}</PrimaryFontText>
+                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber ? phoneNumber : savedUsername}</PrimaryFontText>
                         </View>
                     </View>
 
                     <View style={styles.ratesContainer}>
                         <View style={styles.row}>
-                            <PrimaryFontMedium style={styles.description}>Transaction cost</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.description}>Transaction fees</PrimaryFontMedium>
                             <PrimaryFontMedium style={styles.value}>{Number(gasFees).toFixed(2) || "---"} {`Ksh`}</PrimaryFontMedium>
                         </View>
                         {/* <View style={styles.row}>
@@ -161,7 +187,7 @@ export default function OptionalMessage() {
                         </View> */}
                         <View style={styles.row}>
                             <PrimaryFontMedium style={styles.description}>They receive</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.value}>{Number(amount).toFixed(2) || "---"} {`Ksh`}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{formatNumberToFixed(Number(amount).toFixed(2)) || "---"} {`Ksh`}</PrimaryFontMedium>
                         </View>
                     </View>
 
@@ -184,7 +210,7 @@ export default function OptionalMessage() {
                     {gasFees ? (
                         <PrimaryButton
                             onPress={() => handleSend()}
-                            textOnButton={`Send (${totalAmountSent ? Number(totalAmountSent).toFixed(2) : 0} Ksh)`}
+                            textOnButton={`Send (${totalAmountSent ? formatNumberToFixed(Number(totalAmountSent).toFixed(2)) : 0} Ksh)`}
                             widthProp={reusableStyles.width100}
                             disabled={sending}
                         />

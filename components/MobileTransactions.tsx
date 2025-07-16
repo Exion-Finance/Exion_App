@@ -141,6 +141,16 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
         return { username, transactionType };
     };
 
+    const formatNumber = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(num);
+    };
+
 
     return (
         <SectionList
@@ -170,7 +180,7 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                         </View>
 
                         <View style={styles.amountBlock}>
-                            <PrimaryFontMedium style={styles.amount}>Ksh {item.transactionAmount.toFixed(2)}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.amount}>Ksh {formatNumber(item.transactionAmount.toFixed(2))}</PrimaryFontMedium>
                             <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
                         </View>
                     </TouchableOpacity>
@@ -189,9 +199,9 @@ const styles = StyleSheet.create({
         paddingRight: 30,
     },
     header: {
-        fontSize: 15,
+        fontSize: 14.5,
         marginTop: 13,
-        marginBottom: 15,
+        marginBottom: 17,
         color: '#79828E'
     },
     row: {

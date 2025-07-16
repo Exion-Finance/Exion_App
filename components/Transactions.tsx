@@ -67,6 +67,16 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         )
     }
 
+    const formatNumber = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+      
+        return new Intl.NumberFormat('en-KE', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(num);
+      };
+
     return (
         <SectionList
             sections={sections}
@@ -88,11 +98,11 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                                 <PrimaryFontText style={{ fontSize: 19 }}>
                                     {item.username
                                         ? item.username.startsWith('0x')
-                                            ? `${item.username.slice(0, 5)} ...${item.username.slice(-4)}`
+                                            ? `${item.username.slice(0, 7)}...${item.username.slice(-4)}`
                                             : item.username
                                         : item.from
-                                            ? `${item.from.slice(0, 5)} ...${item.from.slice(-4)}`
-                                            : `${item.toAddress?.slice(0, 5)} ...${item.toAddress?.slice(-4)}`}
+                                            ? `${item.from.slice(0, 7)}...${item.from.slice(-4)}`
+                                            : `${item.toAddress?.slice(0, 7)}...${item.toAddress?.slice(-4)}`}
                                 </PrimaryFontText>
                             </View>
                             <PrimaryFontText style={{ fontSize: 13, color: '#79828E', marginTop: 5 }}>
@@ -102,7 +112,7 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                     </View>
                     <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
                         <PrimaryFontMedium style={{ fontSize: 17, marginTop: 2, color: item.transactionType === "Received" ? "#5EAF5E" : "#343131" }}>
-                            {item.transactionType === "Received" ? "+" : "-"} {"Ksh"}{`${!isNaN(Number(item.kes)) ? Number(item.kes).toFixed(2) : '0.00'}`}
+                            {item.transactionType === "Received" ? "+" : "-"} {"Ksh"}{`${!isNaN(Number(item.kes)) ? formatNumber(Number(item.kes).toFixed(2)) : '0.00'}`}
                         </PrimaryFontMedium>
 
                         <PrimaryFontMedium style={{ fontSize: 12, marginTop: 4, color: item.transactionType === "Received" ? "#6B6B6B" : "#474545" }}>

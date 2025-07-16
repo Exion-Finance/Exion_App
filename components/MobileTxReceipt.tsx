@@ -223,6 +223,12 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
         );
     }
 
+    const formatNumber = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+        return new Intl.NumberFormat('en-KE').format(num);
+    };
+
 
     return (
         <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} animatedIndex={animatedIndex} enablePanDownToClose={true} backgroundStyle={{ backgroundColor: '#f8f8f8' }}>
@@ -246,7 +252,7 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
                     <View style={styles.status}>
                         <MaterialIcons name="check-circle" size={47} color="#00C48F" />
-                        <PrimaryFontBold style={styles.amount}>Ksh {transaction.transactionAmount.toFixed(0)}</PrimaryFontBold>
+                        <PrimaryFontBold style={styles.amount}>Ksh {formatNumber(transaction.transactionAmount.toFixed(0))}</PrimaryFontBold>
                         <PrimaryFontMedium style={styles.complete}>COMPLETED</PrimaryFontMedium>
                     </View>
 

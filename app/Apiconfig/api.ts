@@ -223,7 +223,7 @@ export const calculateFee = async ({ recipient, amount, tokenId, chainId = 1 }: 
 };
 
 export const verifyAccount = async (channel: string, account_number: string): Promise<AxiosResponse> => {
-    console.log("VErifying contact", channel, account_number)
+    // console.log("VErifying contact", channel, account_number)
     return await authAPI.post(`/payments/verify-account`, { channel, account_number });
 };
 

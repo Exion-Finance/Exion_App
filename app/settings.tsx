@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, ImageBackground, StatusBar as RNStatusBar, Plat
 import { StatusBar } from 'expo-status-bar';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
 import SettingOption from '@/components/SettingOption';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { SecondaryFontText } from "@/components/SecondaryFontText";
@@ -27,9 +29,9 @@ const SettingsScreen: React.FC = () => {
                 </ImageBackground>
 
                 <View style={styles.optionsWrapper}>
-                    <PrimaryFontMedium style={{ marginBottom: 20, fontSize: 16, color: '#504646' }}>Security</PrimaryFontMedium>
+                    <PrimaryFontMedium style={{ marginBottom: 10, fontSize: 15, color: '#888' }}>Policies</PrimaryFontMedium>
                     <SettingOption
-                        icon={<Feather name="lock" size={20} color="#79828E" />}
+                        icon={<Feather name="lock" size={18} color="#444" />}
                         description="Privacy Policy"
                         onPress={() => {
                             router.push({
@@ -41,7 +43,7 @@ const SettingsScreen: React.FC = () => {
                         }}
                     />
                     <SettingOption
-                        icon={<Feather name="file-text" size={20} color="#79828E" />}
+                        icon={<Feather name="file-text" size={18} color="#444" />}
                         description="Terms and Conditions"
                         onPress={() => {
                             router.push({
@@ -50,6 +52,30 @@ const SettingsScreen: React.FC = () => {
                                     uri: 'https://exion.finance/terms-of-use'
                                 }
                             });
+                        }}
+                    />
+
+                    <PrimaryFontMedium style={{ marginBottom: 10, marginTop: 25, fontSize: 15, color: '#888' }}>About</PrimaryFontMedium>
+                    <SettingOption
+                        icon={<Feather name="mail" size={18} color="#444" />}
+                        description="Contact Us"
+                        onPress={() => {
+                            Linking.openURL('mailto:info@exion.finance');
+                        }}
+                    />
+                    <SettingOption
+                        icon={<AntDesign name="addusergroup" size={19} color="#444" />}
+                        description="Join Community"
+                        onPress={() => {
+                            Linking.openURL('https://t.me/+VIhzzPAgcFlhYTk0');
+                        }}
+                    />
+
+                    <SettingOption
+                        icon={<Feather name="tool" size={18} color="#444" />}
+                        description="Report Issue"
+                        onPress={() => {
+                            Linking.openURL('https://t.me/+VIhzzPAgcFlhYTk0');
                         }}
                     />
                 </View>
@@ -82,7 +108,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        paddingTop: 90,
+        paddingTop: 50,
         paddingHorizontal: 17,
     },
     footer: {

@@ -28,10 +28,9 @@ import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import { useAuth } from "./context/AuthContext";
 import Loading from "@/components/Loading";
-import { selectTokenBalances, setTokenBalance } from './state/slices';
+import { selectTokenBalances, setTokenBalance, selectUserProfile } from './state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 import PinAuth from '@/components/PinAuth';
-import * as SecureStore from 'expo-secure-store';
 
 
 
@@ -48,6 +47,8 @@ type TokenType = {
 const CustomKeyboard = () => {
   const dispatch = useDispatch()
   const token_balance = useSelector(selectTokenBalances)
+  const user_profile = useSelector(selectUserProfile)
+  // console.log("user_profile from redux...>", user_profile)
 
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState(false);
@@ -58,7 +59,7 @@ const CustomKeyboard = () => {
     balance: 0,
     ksh: 0
   });
-  const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address } = useLocalSearchParams();
+  const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address, savedUsername } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [selectedTokenId, setSelectedTokenId] = useState<number>(0);
   const [jwtTokens, setJwtToken] = useState<string>("")
@@ -112,6 +113,23 @@ const CustomKeyboard = () => {
     }
 
   }
+
+  const formatNumber = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+    return new Intl.NumberFormat('en-KE').format(num);
+  };
+
+  const formatNumberToFixed = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+
+    return new Intl.NumberFormat('en-KE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+
   const closePin = () => {
     setShowPinAuth(false);
     bottomSheetRef2.current?.snapToIndex(0);
@@ -120,10 +138,12 @@ const CustomKeyboard = () => {
   // on mount, check if PIN exists in flag storage
   useEffect(() => {
     (async () => {
-      const flag = await SecureStore.getItemAsync('user_has_pin');
-      setHasPin(flag === 'true');
+      if(user_profile){
+        setHasPin(user_profile.pin);
+      }
     })();
   }, []);
+  // console.log("hasPin", hasPin)
 
   const handleSendMoney = async () => {
     console.log("Send Moneyy.....")
@@ -380,6 +400,7 @@ const CustomKeyboard = () => {
             conversionToUsd,
             token: activeToken.token,
             recipient_address,
+            savedUsername,
             gasFees: txFees.totalFee.gasFeeinKes,
             serviceFees: txFees.totalFee.serviceFeeinKes
           }
@@ -401,7 +422,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
@@ -430,7 +451,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
@@ -458,7 +479,7 @@ const CustomKeyboard = () => {
         const success = await handleFingerprintScan()
         if (!success) {
           bottomSheetRef2.current?.close();
-          Alert.alert("Oops😕", "Couldn't authenticate, please try again")
+          // Alert.alert("Oops😕", "Couldn't authenticate, please try again")
           return;
         }
         else if (success === "success") {
@@ -621,7 +642,7 @@ const CustomKeyboard = () => {
           <TouchableOpacity style={styles.balanceView} onPress={() => { bottomSheetRef1.current?.expand(); setError(false) }}>
             <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 12 }}>BALANCE</PrimaryFontMedium>
             {activeToken.token ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-              <PrimaryFontBold style={{ color: '#FFFFFF', fontSize: 18 }}>Ksh {Number(activeToken.ksh).toFixed(2)} </PrimaryFontBold>
+              <PrimaryFontBold style={{ color: '#FFFFFF', fontSize: 18 }}>Ksh {formatNumberToFixed(Number(activeToken.ksh).toFixed(2))} </PrimaryFontBold>
               <Dropdown />
             </View> : <Loading color='#fff' description='' />}
             {activeToken.token ? <PrimaryFontMedium style={{ color: '#FFFFFF6D', fontSize: 11 }}>≈ {activeToken.balance.toFixed(2)} {activeToken.token}</PrimaryFontMedium> : null}
@@ -633,7 +654,7 @@ const CustomKeyboard = () => {
 
         <View style={styles.inputValue}>
           <PrimaryFontBold style={styles.inputText}>
-            {inputValue ? inputValue : 0}
+            {inputValue ? formatNumber(inputValue) : 0}
             <PrimaryFontMedium style={{ color: '#F8F8F8', fontSize: 16 }}>
               {""}Ksh
             </PrimaryFontMedium>

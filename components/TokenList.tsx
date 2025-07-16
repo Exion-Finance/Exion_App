@@ -4,7 +4,7 @@ import reusableStyle from '@/constants/ReusableStyles'
 import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { useRouter } from 'expo-router';
-import { BalanceData,ResponseBalance } from '@/app/(tabs)';
+import { BalanceData, ResponseBalance } from '@/app/(tabs)';
 
 //Logo sources for each token
 const logoSources: Record<string, any> = {
@@ -31,7 +31,7 @@ interface TokenListProps {
 
 export default function TokenList({ response }: TokenListProps) {
     const route = useRouter()
-    const handleTokenSelect = (id:number) => {
+    const handleTokenSelect = (id: number) => {
         // route.push('/fundingmethod')
         // route.push({ pathname: "/fundingmethod", params: { id} });
         console.log("Clicked")
@@ -40,27 +40,38 @@ export default function TokenList({ response }: TokenListProps) {
         const tokenKey = key as keyof typeof response.balance;
         return {
             tokenName: key,
-            fullName: key == 'USDT' ? 'Tether USD' : key == 'cUSD' ? 'Celo Dollar' : key == 'cKes' ? 'Celo Kenyan Shilling' : key == 'usdc' ? 'USDC': 'Other Name',
+            fullName: key == 'USDT' ? 'Tether USD' : key == 'cUSD' ? 'Celo Dollar' : key == 'cKes' ? 'Celo Kenyan Shilling' : key == 'usdc' ? 'USDC' : 'Other Name',
             balance: response.balance[tokenKey].token,
             ksh: response.balance[tokenKey].kes,
             logo: logoSources[tokenKey],
             id: tokenId[tokenKey],
         };
     });
+
+    const formatNumberToFixed = (value: string | number) => {
+        const num = Number(value);
+        if (isNaN(num)) return value;
+
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(num);
+    };
+
     return (
         <FlatList
             data={tokens}
             keyExtractor={(item) => item.tokenName}
             renderItem={({ item }) => (
-                <TouchableOpacity style={[styles.container, reusableStyle.paddingContainer]} onPress={()=>handleTokenSelect(item.id)}>
+                <TouchableOpacity style={[styles.container, reusableStyle.paddingContainer]} onPress={() => handleTokenSelect(item.id)}>
                     <Image source={item.logo} style={styles.logo} />
                     <View style={styles.textContainer}>
                         <PrimaryFontMedium style={styles.tokenName}>{item.tokenName.toUpperCase()}</PrimaryFontMedium>
                         <PrimaryFontText style={styles.fullName}>{item.fullName}</PrimaryFontText>
                     </View>
                     <View style={styles.balanceContainer}>
-                        <PrimaryFontMedium style={styles.balance}>{(item.balance).toFixed(3)} {item.tokenName.toUpperCase()}</PrimaryFontMedium>
-                        <PrimaryFontText style={styles.ksh}>{parseFloat(item.ksh).toFixed(2)} Ksh</PrimaryFontText>
+                        <PrimaryFontMedium style={styles.balance}>{formatNumberToFixed(parseFloat(item.ksh).toFixed(2))} Ksh</PrimaryFontMedium>
+                        <PrimaryFontText style={styles.ksh}> {(item.balance).toFixed(3)} {item.tokenName.toUpperCase()}</PrimaryFontText>
                     </View>
                 </TouchableOpacity>
             )}
@@ -97,11 +108,12 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     balance: {
-        fontSize: 16,
+        fontSize: 17,
+        color: '#333'
     },
     ksh: {
-        fontSize: 15,
-        color: '#555',
-        marginTop: 6
+        fontSize: 13,
+        color: '#777',
+        marginTop: 5
     },
 });

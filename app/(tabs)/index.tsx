@@ -6,6 +6,7 @@ import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import userIcon from '@/assets/images/user.png'
 import morning from '@/assets/icons/morning.png'
 import noon from '@/assets/icons/noon.png'
@@ -27,6 +28,8 @@ import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { MobileTransaction, Section } from '@/types/datatypes';
 import { getBalances, fetchMobileTransactions, fetchExchangeRate } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
+import * as SecureStore from 'expo-secure-store';
+import { authAPI } from '../context/AxiosProvider';
 import {
   updateBalance,
   selectUserBalance,
@@ -34,7 +37,8 @@ import {
   addMobileTransactions,
   setTokenBalance,
   selectTokenBalances,
-  selectUserProfile
+  selectUserProfile,
+  setFavorites
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -65,31 +69,31 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 
 export default function TabOneScreen() {
-  // const { publicAPI, authAPI } = useAxios();
   const route = useRouter()
   const { authState } = useAuth()
-  // const { api } = useAxios()
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [mobileTransactions, setMobileTransactions] = useState<Section[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
   const [buyingRate, setBuyingRate] = useState<string | null>(null)
 
-  const toggleVisibility = () => {
-    setIsHidden((prev) => !prev);
+  const toggleVisibility = async () => {
+    const newValue = !isHidden;
+    setIsHidden(newValue);
+    await SecureStore.setItemAsync('BalanceVisibility', newValue.toString());
   };
+
 
   const dispatch = useDispatch();
   const user_balance = useSelector(selectUserBalance)
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  // console.log("user_balance from redux...>", user_balance)
+  // console.log("user_profile from redux...>", user_profile)
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetTxRef = useRef<BottomSheet>(null);
@@ -164,8 +168,8 @@ export default function TabOneScreen() {
   useEffect(() => {
     if (mobile_transactions.length > 0) {
       // console.log("mobile_transactions from cache--->", mobile_transactions)
-      const firstFive = sliceSectionsToFirstNTransactions(mobile_transactions, 3);
-      setMobileTransactions(firstFive)
+      const firstThree = sliceSectionsToFirstNTransactions(mobile_transactions, 3);
+      setMobileTransactions(firstThree)
       setIsLoading(false)
     }
   }, [])
@@ -179,6 +183,17 @@ export default function TabOneScreen() {
       };
       setTokens(cachedTokens);
     }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const stored = await SecureStore.getItemAsync('BalanceVisibility');
+      if (stored !== null) {
+        setIsHidden(stored === 'true');
+      } else {
+        setIsHidden(false);
+      }
+    })();
   }, []);
 
 
@@ -198,7 +213,7 @@ export default function TabOneScreen() {
       if (!isLoading) {
         const currencyCode: string = "USD"
         const rates = await fetchExchangeRate(currencyCode)
-        if (rates.data.success){
+        if (rates.data.success) {
           // console.log(rates.data)
           setBuyingRate(rates.data.data.buyingRate)
           return;
@@ -225,6 +240,18 @@ export default function TabOneScreen() {
   const { greeting, image } = getGreetingAndImage();
 
 
+  const formatNumber = (value: string | number) => {
+    const num = Number(value);
+    if (isNaN(num)) return value;
+
+    return new Intl.NumberFormat('en-KE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+
+
+
   //Fetch Mobile Transactions
   useEffect(() => {
     const loadTx = async () => {
@@ -236,8 +263,8 @@ export default function TabOneScreen() {
         if (tx.data) {
           // console.log("mobile txdata fetch found<<..>>")
           const fullSections = makeSections(tx.data)
-          const firstFive = sliceSectionsToFirstNTransactions(fullSections, 3);
-          setMobileTransactions(firstFive)
+          const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
+          setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
           return;
         }
@@ -267,6 +294,7 @@ export default function TabOneScreen() {
     return new Date(year, month, day, hour, min, sec)
   }
 
+
   const makeSections = (txs: MobileTransaction[]): Section[] => {
     const sorted = [...txs].sort(
       (a, b) =>
@@ -290,7 +318,12 @@ export default function TabOneScreen() {
         ? 'Today'
         : isSameDay(d, yesterday)
           ? 'Yesterday'
-          : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+          : d.toLocaleDateString('en-KE', {
+            weekday: 'short', // Mon
+            day: 'numeric',   // 8
+            month: 'short',   // Jul
+            year: 'numeric',  // 2025
+          });
 
       (groups[key] ||= []).push(tx);
     }
@@ -323,6 +356,26 @@ export default function TabOneScreen() {
     }
   }
 
+  // Fetch saved favorites from DB on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await authAPI.get('/user/favorite-addresses');
+        // console.log("Fetch favorite addresses", res.data)
+        if (res.data.success && Array.isArray(res.data.data)) {
+          const mapped = res.data.data.map((item: any) => ({
+            walletAddress: item.address,
+            userName: item.name,
+            id: item.id
+          }));
+          dispatch(setFavorites(mapped));
+        }
+      } catch (e) {
+        console.error('Failed to fetch favorites:', e);
+      }
+    })();
+  }, []);
+
   const handleMobileTransactionsRefresh = useCallback(async () => {
     setRefreshing(true)
     await Promise.all([
@@ -351,13 +404,19 @@ export default function TabOneScreen() {
                 <View>
                   <View style={styles.flexRow}>
                     <PrimaryFontText style={{ color: '#FEFEFE', fontSize: 15 }}>{greeting}{'  '}</PrimaryFontText>
-                    <Image source={image} style={{ height: 20, width: 20 }} />
+                    <Image source={image} style={{ height: 19, width: 19 }} />
                   </View>
-                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 18 }}>{user_profile?.userName || ""}</PrimaryFontBold>
+                  <PrimaryFontBold style={{ color: '#FEFEFE', fontSize: 17.5 }}>{user_profile?.userName || ""}</PrimaryFontBold>
                 </View>
               </View>
-              <View>
-                <Ionicons name="notifications" size={28} color="white" />
+              <View style={{ display: 'flex', alignItems: "center", justifyContent: 'center', flexDirection: 'row' }}>
+                <TouchableOpacity style={styles.qrButton} onPress={() => route.push('/sendcrypto')}>
+                  <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.notificationButton} onPress={() => route.push('/notifications')}>
+                  <Ionicons name="notifications" size={23} color="white" />
+                </TouchableOpacity>
+
               </View>
             </View>
 
@@ -377,14 +436,14 @@ export default function TabOneScreen() {
                 <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'flex-start', flexDirection: 'row' }}>
                   {/* <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15, marginBottom: 5 }}>Ksh</PrimaryFontMedium> */}
                   <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 35, marginBottom: 15 }}>
-                    {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${user_balance.kes.toFixed(2) || "---"}`}
+                    {isHidden ? "\u2022\u2022\u2022\u2022\u2022" : `${formatNumber(user_balance.kes.toFixed(2)) || "---"}`}
                   </PrimaryFontMedium>
                 </View>
 
               </View>
               <SecondaryButton
-                textOnButton="Tokens"
-                icon={<FontAwesome6 name="coins" size={17} color="#052330" />}
+                textOnButton="Wallet"
+                icon={<FontAwesome6 name="coins" size={15} color="#052330" />}
                 containerStyle={{ backgroundColor: 'white', marginTop: 15 }}
                 textStyle={{ fontSize: 16, color: "#052330" }}
                 onPress={() => bottomSheetRef.current?.expand()}
@@ -529,5 +588,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 20,
     marginBottom: 15
+  },
+  qrButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 45,
+    height: 50,
+    // backgroundColor: '#00C48F',
+  },
+  notificationButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 45,
+    height: 50,
+    // backgroundColor: '#00C48F',
   }
 });

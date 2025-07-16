@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
-import { TransactionData, Section, MobileTransaction, UserProfile, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
+import { TransactionData, Section, FavoriteAddress, UserProfile, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
 
 
 type TotalAmounts = {
@@ -13,6 +13,10 @@ interface BalanceState {
 
 interface UserState {
   profile: UserProfile | null;
+}
+
+interface FavoritesState {
+  addresses: FavoriteAddress[];
 }
 
 
@@ -31,6 +35,10 @@ const initialTokenState: BalanceState = {
 const initialProfileState: UserState = {
   profile: null,
 };
+const initialFavoritesState: FavoritesState = {
+  addresses: [],
+};
+
 
 export const balanceSlice = createSlice({
   name: "userBalance",
@@ -108,13 +116,39 @@ const userSlice = createSlice({
   },
 });
 
+//Favorite wallet addresses slice
+export const favoritesSlice = createSlice({
+  name: "favorites",
+  initialState: initialFavoritesState,
+  reducers: {
+    // Replace the entire list
+    setFavorites(state, action: PayloadAction<FavoriteAddress[]>) {
+      state.addresses = action.payload;
+    },
+    // Add one favorite
+    addFavorite(state, action: PayloadAction<FavoriteAddress>) {
+      // avoid duplicates
+      state.addresses = state.addresses.filter(
+        (f) => f.id !== action.payload.id
+      );
+      state.addresses.unshift(action.payload);
+    },
+    // Remove by id
+    removeFavorite(state, action: PayloadAction<string>) {
+      state.addresses = state.addresses.filter(
+        (f) => f.id !== action.payload
+      );
+    },
+  },
+});
+
 
 export const { updateBalance } = balanceSlice.actions;
 export const { addTransaction } = transactionSlice.actions;
 export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransactions } = mobileTransactionSlice.actions;
 export const { setTokenBalance, clearTokenBalance } = tokenBalanceSlice.actions;
 export const { setUserProfile, clearUserProfile } = userSlice.actions;
-
+export const { setFavorites, addFavorite, removeFavorite } = favoritesSlice.actions;
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
 export const selectTransactions = (state: { transactions: { value: TransactionData } }) => state.transactions.value
@@ -122,6 +156,9 @@ export const selectUserProfile = (state: { user: UserState }) => state.user.prof
 export const selectTokenBalances = (state: { tokenBalances: BalanceState; }): TokenBalanceData | null => {
   return state.tokenBalances.data ? state.tokenBalances.data.balance : null;
 };
+export const selectFavorites = (state: {
+  favorites: FavoritesState;
+}) => state.favorites.addresses;
 
 const rawMobileTx = (state: { mobileTransactions: Section[] }) => state.mobileTransactions
 
@@ -143,5 +180,6 @@ const rootReducer = {
   mobileTransactions: mobileTransactionSlice.reducer,
   tokenBalances: tokenBalanceSlice.reducer,
   user: userSlice.reducer,
+  favorites: favoritesSlice.reducer,
 }
 export default rootReducer;
