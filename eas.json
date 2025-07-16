@@ -12,10 +12,7 @@
     },
     "production": {
       "android": {
-        "buildType": "aab"
-      },
-      "ios": {
-        "buildType": "release"
+        "buildType": "app-bundle"
       },
       "distribution": "store",
       "env": {
@@ -27,9 +24,6 @@
     "production": {
       "android": {
         "track": "production"
-      },
-      "ios": {
-        "appleTeamId": "YOUR_TEAM_ID"
       }
     }
   }
