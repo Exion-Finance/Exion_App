@@ -184,13 +184,13 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                         </View>
                     </View>
                     <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <PrimaryFontMedium style={{ fontSize: 17, marginTop: 2, color: item.transactionType === "Received" ? "#5EAF5E" : "#343131" }}>
+                        <PrimaryFontMedium style={{ fontSize: 16, color: item.transactionType === "Received" ? "#5EAF5E" : "#343131" }}>
                             {item.transactionType === "Received" ? "+" : "-"} {"Ksh"}{`${!isNaN(Number(item.kes)) ? formatNumber(Number(item.kes).toFixed(2)) : '0.00'}`}
                         </PrimaryFontMedium>
 
-                        <PrimaryFontMedium style={{ fontSize: 12, marginTop: 4, color: item.transactionType === "Received" ? "#6B6B6B" : "#474545" }}>
+                        <PrimaryFontText style={{ fontSize: 11, marginTop: 4, color: item.transactionType === "Received" ? "#6B6B6B" : "#474545" }}>
                             {item.tokenSymbol.toUpperCase()} {(item.value ? (Number(item.value) / 10 ** parseInt(item.tokenDecimal)).toFixed(2) : (Number(item.amount)).toFixed(2))}
-                        </PrimaryFontMedium>
+                        </PrimaryFontText>
                     </View>
                 </View>
             )}
