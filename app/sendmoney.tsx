@@ -56,7 +56,8 @@ export default function SendMoney() {
         setPhoneNumber(text);
         setError(false);
         setNameVerified(false);
-        // setShowContacts(false);
+        setShowContacts(false);
+        toggleContacts(true)
         // setVerifying(false);
 
         const intlNumber = normalizePhone(text);
@@ -75,7 +76,7 @@ export default function SendMoney() {
                 setChannel(result.data.data.account_details.channel_name);
                 setNameVerified(true);
                 setShowContacts(false);
-                toggleContacts()
+                toggleContacts(true)
                 return;
             }
         } catch (err) {
@@ -133,8 +134,11 @@ export default function SendMoney() {
         });
     };
 
-    const toggleContacts = () => {
-        const toValue = showContacts ? 0 : 1;
+    const toggleContacts = (state?: boolean) => {
+        const showContactsState = state ? state : showContacts
+        // console.log("state", showContactsState)
+        // const toValue = showContacts ? 0 : 1;
+        const toValue = state ? 0 : showContacts ? 0 : 1;
 
         Animated.timing(rotateAnim, {
             toValue,
@@ -148,7 +152,7 @@ export default function SendMoney() {
             useNativeDriver: true,
         }).start();
 
-        setShowContacts(!showContacts);
+        setShowContacts(state ? !state : !showContacts);
     };
 
     const rotate = rotateAnim.interpolate({
@@ -173,7 +177,7 @@ export default function SendMoney() {
                     />
 
                     {!nameVerified ?
-                        <TouchableOpacity style={[styles.chooseContainer, { opacity: nameVerified ? 0 : 1 }]} onPress={toggleContacts} hitSlop={{ top: 15, bottom: 15 }}>
+                        <TouchableOpacity style={[styles.chooseContainer, { opacity: nameVerified ? 0 : 1 }]} onPress={() => toggleContacts()} hitSlop={{ top: 15, bottom: 15 }}>
                             <PrimaryFontMedium style={styles.chooseText}>Choose from contacts</PrimaryFontMedium>
                             <Animated.View style={{ transform: [{ rotate }] }}>
                                 <Feather name="chevron-down" size={18} color="grey" style={{ marginTop: showContacts ? -2 : 3 }} />
@@ -182,14 +186,12 @@ export default function SendMoney() {
                         :
                         <View style={[styles.verifiedNameContainer, { opacity: nameVerified ? 1 : 0 }]}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                                {/* <FontAwesome6 name="user" size={14} color="#473F3F" style={{ marginRight: 7 }} /> */}
                                 <PrimaryFontMedium style={{ color: '#473F3F', fontSize: 15.5 }}>
                                     {contactName ? contactName.toUpperCase() : ""}
                                 </PrimaryFontMedium>
                             </View>
 
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-                                {/* <Feather name="info" size={14} color="grey" style={{ marginRight: 7 }} /> */}
                                 <PrimaryFontMedium style={{ color: 'grey', fontSize: 12 }}>
                                     {channel ? channel : ""}
                                 </PrimaryFontMedium>
