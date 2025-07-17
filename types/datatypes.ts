@@ -95,7 +95,7 @@ export interface Transaction {
   hash: string;
   input: string;
   logIndex: string;
-  nonce: string;
+  // nonce: string;
   timeStamp: string;
   to: string;
   toAddress?: string;

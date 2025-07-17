@@ -15,7 +15,7 @@ import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { Transactions as Trans, MobileTransaction, Section, Transaction, OnchainSection, TransactionData } from '@/types/datatypes';
 import { fetchMobileTransactions, transactionHistory } from '../Apiconfig/api';
 import { userTransactions } from '../hooks/query/userTransactions';
-import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions, selectFavorites } from '../state/slices';
+import { selectTransactions, setOnchainTx, addMobileTransactions, selectMobileTransactions, selectFavorites } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
 
 
@@ -33,22 +33,23 @@ export default function Transactions() {
     let userTx = useSelector(selectTransactions)
     let mobileTx = useSelector(selectMobileTransactions)
     let db_favorites = useSelector(selectFavorites)
-    console.log("<---db_favorites tx in wallet-->", db_favorites)
+    // console.log("<---db_favorites tx in wallet-->", db_favorites)
 
     const bottomSheetTxRef = useRef<BottomSheet>(null);
     const animatedTxIndex = useSharedValue(-1);
 
-    const { data } = userTransactions();
+    // const { data } = userTransactions();
 
     const fetchOnchainTx = async () => {
         try {
             console.log("Fetching onchain tx...")
             const onchainTx: TransactionData = await transactionHistory()
-            console.log("Onchain tx", onchainTx)
+            // console.log("Onchain tx", onchainTx)
             if(onchainTx){
                 const flattenedTransactions: Transaction[] = Object.values(onchainTx.data).flat();
                 setOnchainTransactions(flattenedTransactions)
-                console.log("flattenedTransactions-->", flattenedTransactions)
+                dispatch(setOnchainTx(flattenedTransactions))
+                // console.log("flattenedTransactions-->", flattenedTransactions)
             }
         } catch (error) {
             console.log(error)
@@ -59,11 +60,11 @@ export default function Transactions() {
         fetchOnchainTx()
     }, [])
 
-    useEffect(() => {
-        if (data) {
-            dispatch(addTransaction(data))
-        }
-    }, [data])
+    // useEffect(() => {
+    //     if (data) {
+    //         dispatch(addTransaction(data))
+    //     }
+    // }, [data])
 
     useEffect(() => {
         if (mobileTx.length > 0) {

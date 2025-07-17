@@ -44,6 +44,7 @@ export default function EnterWalletAddress() {
     let userTransactions = useSelector(selectTransactions)
     let db_favorites = useSelector(selectFavorites)
     // console.log("<---db_favorites tx in wallet-->", db_favorites)
+    // console.log("user onchain Transactions straight", userTransactions)
 
     useEffect(() => {
         (async () => {
@@ -113,10 +114,11 @@ export default function EnterWalletAddress() {
     // flatten all txs:
     const allTxs = useMemo(() => {
         if (!userTransactions) return [];
-        return Object.values(userTransactions).flat();
+        return userTransactions
     }, [userTransactions]);
 
-    // console.log("allTxs", allTxs)
+    // console.log("allTxs after .flat", allTxs)
+    
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
@@ -126,7 +128,7 @@ export default function EnterWalletAddress() {
         // Only keep “sent” TXs and skip the excluded address
         const sent = allTxs.filter(
             (tx) =>
-                tx.transactionType.toLowerCase() === 'sent' &&
+                tx.transactionType === 'Sent' &&
                 tx.to !== excludeAddress &&
                 tx.to.startsWith('0x') &&
                 tx.to.length >= 20
@@ -156,7 +158,7 @@ export default function EnterWalletAddress() {
             }));
     }, [allTxs]);
 
-
+    // console.log("Favorites memo", favorites)
 
     // Open username modal for an existing favorite
     const openUsernameModal = (address: string) => {

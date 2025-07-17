@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
-import { TransactionData, Section, FavoriteAddress, UserProfile, ResponseBalance, TokenBalanceData  } from "@/types/datatypes";
+import { Transaction, Section, FavoriteAddress, UserProfile, ResponseBalance, TokenBalanceData, OnchainSection } from "@/types/datatypes";
 
 
 type TotalAmounts = {
@@ -19,6 +19,9 @@ interface FavoritesState {
   addresses: FavoriteAddress[];
 }
 
+interface OnchainState {
+  data: Transaction[];
+}
 
 
 const initialState = {
@@ -27,7 +30,10 @@ const initialState = {
     kes: 0,
   } as TotalAmounts,
 };
-const initialTransactionState: TransactionData = {};
+
+const initialTransactionState: OnchainState = {
+  data: [],
+};
 const initialMobileTransactionState: Section[] = [];
 const initialTokenState: BalanceState = {
   data: null,
@@ -52,18 +58,22 @@ export const balanceSlice = createSlice({
   }
 
 })
-//transaction slice
+//Onchain transaction slice
 const transactionSlice = createSlice({
   name: 'transactions',
   initialState: initialTransactionState,
   reducers: {
-    // Example of an action that could add a transaction for a specific date
-    addTransaction(state, action: PayloadAction<TransactionData>) {
-      state.value = {
-        ...state.value,
-        ...action.payload,
-      };
-
+    // Replace the full list
+    setOnchainTx(state, action: PayloadAction<Transaction[]>) {
+      state.data = action.payload;
+    },
+    // Optionally add one at a time
+    addTransaction(state, action: PayloadAction<Transaction>) {
+      state.data.push(action.payload);
+    },
+    // clear all
+    clearOnchainTx(state) {
+      state.data = [];
     },
   },
 });
@@ -144,14 +154,14 @@ export const favoritesSlice = createSlice({
 
 
 export const { updateBalance } = balanceSlice.actions;
-export const { addTransaction } = transactionSlice.actions;
+export const { addTransaction, setOnchainTx } = transactionSlice.actions;
 export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransactions } = mobileTransactionSlice.actions;
 export const { setTokenBalance, clearTokenBalance } = tokenBalanceSlice.actions;
 export const { setUserProfile, clearUserProfile } = userSlice.actions;
 export const { setFavorites, addFavorite, removeFavorite } = favoritesSlice.actions;
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
-export const selectTransactions = (state: { transactions: { value: TransactionData } }) => state.transactions.value
+export const selectTransactions = (state: { transactions: OnchainState }) => state.transactions.data;
 export const selectUserProfile = (state: { user: UserState }) => state.user.profile;
 export const selectTokenBalances = (state: { tokenBalances: BalanceState; }): TokenBalanceData | null => {
   return state.tokenBalances.data ? state.tokenBalances.data.balance : null;
