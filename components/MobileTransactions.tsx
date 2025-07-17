@@ -180,8 +180,8 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                         </View>
 
                         <View style={styles.amountBlock}>
-                            <PrimaryFontMedium style={styles.amount}>Ksh {formatNumber(item.transactionAmount.toFixed(2))}</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.amount}>- Ksh{formatNumber(item.transactionAmount.toFixed(2))}</PrimaryFontMedium>
+                            <PrimaryFontText style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontText>
                         </View>
                     </TouchableOpacity>
                 )
@@ -222,14 +222,14 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end'
     },
     amount: {
-        fontSize: 17.5,
-        color: '#5EAF5E',
-        marginTop: 0
+        fontSize: 16,
+        color: '#343131',
+        // marginTop: 0
     },
     time: {
         fontSize: 11,
         color: '#6B6B6B',
-        marginTop: 5,
+        marginTop: 3,
     },
     flexRow: {
         flexDirection: 'row',

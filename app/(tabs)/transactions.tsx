@@ -202,7 +202,7 @@ export default function Transactions() {
             </View>
 
 
-            {activeTab == 'wallet' && transactions ?
+            {activeTab == 'wallet' && onchainTransactions ?
                 <View style={{ width: '100%', flex: 1 }}>
                     <GroupedTransactions
                         transactions={onchainTransactions}
