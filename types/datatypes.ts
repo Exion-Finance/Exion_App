@@ -110,6 +110,11 @@ export interface Transaction {
   kes: number
 };
 
+export interface OnchainSection {
+  title: string;
+  data: Transaction[];
+}
+
 export type TransactionData = {
   [date: string]: Transaction[];
 };

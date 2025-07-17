@@ -12,11 +12,10 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
-import { Transactions as Trans, MobileTransaction, Section } from '@/types/datatypes';
-import { fetchMobileTransactions } from '../Apiconfig/api';
-import { useAuth } from "../context/AuthContext";
+import { Transactions as Trans, MobileTransaction, Section, Transaction, OnchainSection, TransactionData } from '@/types/datatypes';
+import { fetchMobileTransactions, transactionHistory } from '../Apiconfig/api';
 import { userTransactions } from '../hooks/query/userTransactions';
-import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions } from '../state/slices';
+import { selectTransactions, addTransaction, addMobileTransactions, selectMobileTransactions, selectFavorites } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
 
 
@@ -25,6 +24,7 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 export default function Transactions() {
 
     const [transactions, setTransactions] = useState(useSelector(selectTransactions))
+    const [onchainTransactions, setOnchainTransactions] = useState<Transaction[]>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
@@ -32,11 +32,32 @@ export default function Transactions() {
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
     let mobileTx = useSelector(selectMobileTransactions)
+    let db_favorites = useSelector(selectFavorites)
+    console.log("<---db_favorites tx in wallet-->", db_favorites)
 
     const bottomSheetTxRef = useRef<BottomSheet>(null);
     const animatedTxIndex = useSharedValue(-1);
 
     const { data } = userTransactions();
+
+    const fetchOnchainTx = async () => {
+        try {
+            console.log("Fetching onchain tx...")
+            const onchainTx: TransactionData = await transactionHistory()
+            console.log("Onchain tx", onchainTx)
+            if(onchainTx){
+                const flattenedTransactions: Transaction[] = Object.values(onchainTx.data).flat();
+                setOnchainTransactions(flattenedTransactions)
+                console.log("flattenedTransactions-->", flattenedTransactions)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        fetchOnchainTx()
+    }, [])
 
     useEffect(() => {
         if (data) {
@@ -184,7 +205,7 @@ export default function Transactions() {
             {activeTab == 'wallet' && transactions ?
                 <View style={{ width: '100%', flex: 1 }}>
                     <GroupedTransactions
-                        transactions={transactions}
+                        transactions={onchainTransactions}
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
                     />
