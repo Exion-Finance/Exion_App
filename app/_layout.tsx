@@ -4,10 +4,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/lib/integration/react';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { store, persistor } from './state/store';
-import queryClient from './context/queryProvider';
 import { useTokenValidation } from './hooks/useTokenValidation';
 import { useRouter, Stack } from 'expo-router';
 import { useAuth} from "./context/AuthContext";
@@ -19,11 +17,9 @@ export default function AppLayout() {
   return (
     <Provider store={store}>
       <PersistGate loading={<ActivityIndicator size="small" />} persistor={persistor}>
-        <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <AppInitializer />
           </AuthProvider>
-        </QueryClientProvider>
       </PersistGate>
     </Provider>
   );
