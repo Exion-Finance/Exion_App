@@ -16,7 +16,7 @@ import { Transaction, TransactionData, OnchainSection } from '@/types/datatypes'
 
 
 interface Props {
-    transactions?: Transaction[];
+    transactions?: Transaction[] | null;
     refreshing: boolean;
     onRefresh: () => void;
 }
