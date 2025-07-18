@@ -25,8 +25,8 @@ import TokenList from '@/components/TokenList';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
-import { MobileTransaction, Section } from '@/types/datatypes';
-import { getBalances, fetchMobileTransactions, fetchExchangeRate } from '../Apiconfig/api';
+import { MobileTransaction, Section, Transaction, TransactionData } from '@/types/datatypes';
+import { getBalances, fetchMobileTransactions, fetchExchangeRate, transactionHistory } from '../Apiconfig/api';
 import { useAuth } from "../context/AuthContext";
 import * as SecureStore from 'expo-secure-store';
 import { authAPI } from '../context/AxiosProvider';
@@ -38,7 +38,8 @@ import {
   setTokenBalance,
   selectTokenBalances,
   selectUserProfile,
-  setFavorites
+  setFavorites,
+  setOnchainTx
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -261,7 +262,7 @@ export default function TabOneScreen() {
         const tx = await fetchMobileTransactions(pageSize)
 
         if (tx.data) {
-          // console.log("mobile txdata fetch found<<..>>")
+          console.log("Mobile transactions received")
           const fullSections = makeSections(tx.data)
           const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
           setMobileTransactions(firstThree)
@@ -363,6 +364,7 @@ export default function TabOneScreen() {
         const res = await authAPI.get('/user/favorite-addresses');
         // console.log("Fetch favorite addresses", res.data)
         if (res.data.success && Array.isArray(res.data.data)) {
+          console.log("Favorites received")
           const mapped = res.data.data.map((item: any) => ({
             walletAddress: item.address,
             userName: item.name,
@@ -375,6 +377,26 @@ export default function TabOneScreen() {
       }
     })();
   }, []);
+
+  // Fetch onchain transactions from DB on mount
+  const fetchOnchainTx = async () => {
+    try {
+      console.log("Fetching onchain tx from index...")
+      const onchainTx: TransactionData = await transactionHistory()
+      if (onchainTx) {
+        console.log("Onchain transactions received")
+        const flattenedTransactions: Transaction[] = Object.values(onchainTx.data).flat();
+        dispatch(setOnchainTx(flattenedTransactions))
+        // console.log("flattenedTransactions-->", flattenedTransactions)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchOnchainTx()
+  }, [])
 
   const handleMobileTransactionsRefresh = useCallback(async () => {
     setRefreshing(true)
@@ -424,7 +446,7 @@ export default function TabOneScreen() {
               <View>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <PrimaryFontMedium style={{ color: '#ffffff', fontSize: 15.5 }}>Balance (Ksh)</PrimaryFontMedium>
-                  <TouchableOpacity onPress={toggleVisibility} style={{ marginLeft: 7 }}>
+                  <TouchableOpacity onPress={toggleVisibility} style={{ marginLeft: 7 }} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                     <MaterialIcons
                       name={isHidden ? "visibility" : "visibility-off"}
                       size={20}
@@ -473,7 +495,7 @@ export default function TabOneScreen() {
 
       <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: '#f8f8f8' }]}>
         <PrimaryFontMedium style={{ fontSize: 25 }}>Recent activity</PrimaryFontMedium>
-        <TouchableOpacity onPress={() => route.push('/transactions')}>
+        <TouchableOpacity onPress={() => route.push('/transactions')} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
           <PrimaryFontMedium style={{ fontSize: 18, color: '#00C48F' }}>See all</PrimaryFontMedium>
         </TouchableOpacity>
       </View>

@@ -14,7 +14,6 @@ import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { Transactions as Trans, MobileTransaction, Section, Transaction, OnchainSection, TransactionData } from '@/types/datatypes';
 import { fetchMobileTransactions, transactionHistory } from '../Apiconfig/api';
-import { userTransactions } from '../hooks/query/userTransactions';
 import { selectTransactions, setOnchainTx, addMobileTransactions, selectMobileTransactions, selectFavorites } from '../state/slices';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -23,48 +22,53 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 
 export default function Transactions() {
 
-    const [transactions, setTransactions] = useState(useSelector(selectTransactions))
-    const [onchainTransactions, setOnchainTransactions] = useState<Transaction[]>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
+    const [onChainReceived, setonChainReceived] = useState<boolean>(false)
     const [activeTab, setActiveTab] = useState<'wallet' | 'mobile'>('mobile')
     const [isMobileTxLoading, setIsMobileTxLoading] = useState<boolean>(true)
     const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
     const dispatch = useDispatch();
     let userTx = useSelector(selectTransactions)
     let mobileTx = useSelector(selectMobileTransactions)
-    let db_favorites = useSelector(selectFavorites)
-    // console.log("<---db_favorites tx in wallet-->", db_favorites)
+    // let db_favorites = useSelector(selectFavorites)
+    // console.log("<---userTx onchain in wallet-->", userTx)
 
     const bottomSheetTxRef = useRef<BottomSheet>(null);
     const animatedTxIndex = useSharedValue(-1);
 
-    // const { data } = userTransactions();
-
     const fetchOnchainTx = async () => {
         try {
-            console.log("Fetching onchain tx...")
+            console.log("Refetching onchain tx...")
             const onchainTx: TransactionData = await transactionHistory()
             // console.log("Onchain tx", onchainTx)
-            if(onchainTx){
+            if (onchainTx) {
                 const flattenedTransactions: Transaction[] = Object.values(onchainTx.data).flat();
-                setOnchainTransactions(flattenedTransactions)
                 dispatch(setOnchainTx(flattenedTransactions))
-                // console.log("flattenedTransactions-->", flattenedTransactions)
+                console.log("Refetched")
             }
         } catch (error) {
             console.log(error)
         }
     }
 
-    useEffect(() => {
-        fetchOnchainTx()
+    const handleRefresh = useCallback(async () => {
+        setRefreshing(true)
+        await Promise.all([
+            fetchOnchainTx()
+        ]);
+        setRefreshing(false)
     }, [])
 
     // useEffect(() => {
-    //     if (data) {
-    //         dispatch(addTransaction(data))
-    //     }
-    // }, [data])
+    //     fetchOnchainTx()
+    // }, [])
+
+    useEffect(() => {
+        if (userTx) {
+            setonChainReceived(true)
+            // console.log("Onchain received from redux")
+        }
+    }, [userTx])
 
     useEffect(() => {
         if (mobileTx.length > 0) {
@@ -80,12 +84,6 @@ export default function Transactions() {
         }, 1000)
     }, [])
 
-    const handleRefresh = useCallback(async () => {
-        setRefreshing(true)
-        setTransactions(userTx)
-        setRefreshing(false)
-    }, [])
-
     //Helpers to parse & group mobile transactions by date
     const parseTxDate = (s: string): Date => {
         const year = +s.slice(0, 4)
@@ -98,33 +96,48 @@ export default function Transactions() {
     }
 
     const makeSections = (txs: MobileTransaction[]): Section[] => {
-        const sorted = [...txs].sort((a, b) =>
-            parseTxDate(b.transactionDate).getTime() -
-            parseTxDate(a.transactionDate).getTime()
-        )
-        const today = new Date()
+        const sorted = [...txs].sort(
+            (a, b) =>
+                parseTxDate(b.transactionDate).getTime() - parseTxDate(a.transactionDate).getTime()
+        );
+
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
         const isSameDay = (d1: Date, d2: Date) =>
             d1.getFullYear() === d2.getFullYear() &&
             d1.getMonth() === d2.getMonth() &&
-            d1.getDate() === d2.getDate()
+            d1.getDate() === d2.getDate();
 
-        const groups: Record<string, MobileTransaction[]> = {}
+        const groups: Record<string, MobileTransaction[]> = {};
+
         for (const tx of sorted) {
-            const d = parseTxDate(tx.transactionDate)
+            const d = parseTxDate(tx.transactionDate);
             const key = isSameDay(d, today)
                 ? 'Today'
-                : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-                ; (groups[key] ||= []).push(tx)
+                : isSameDay(d, yesterday)
+                    ? 'Yesterday'
+                    : d.toLocaleDateString('en-KE', {
+                        weekday: 'short', // Mon
+                        day: 'numeric',   // 8
+                        month: 'short',   // Jul
+                        year: 'numeric',  // 2025
+                    });
+
+            (groups[key] ||= []).push(tx);
         }
 
-        return Object.entries(groups).map(([title, data]) => ({ title, data }))
-    }
+        return Object.entries(groups).map(([title, data]) => ({ title, data }));
+    };
 
     const refetchMobileTx = async () => {
         try {
+            console.log("Refetching..")
             const pageSize: number = 500;
             const tx = await fetchMobileTransactions(pageSize)
             if (tx.data) {
+                console.log("Received..")
                 const fullSections = makeSections(tx.data)
                 dispatch(addMobileTransactions(fullSections))
             }
@@ -203,10 +216,10 @@ export default function Transactions() {
             </View>
 
 
-            {activeTab == 'wallet' && onchainTransactions ?
+            {activeTab == 'wallet' && onChainReceived ?
                 <View style={{ width: '100%', flex: 1 }}>
                     <GroupedTransactions
-                        transactions={onchainTransactions}
+                        transactions={userTx}
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
                     />
@@ -256,18 +269,20 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         marginTop: 5,
         marginBottom: 10,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: '#EBEDF2',
         borderRadius: 12,
         overflow: 'hidden',
+        // padding: 10
     },
     tabButton: {
         flex: 1,
-        paddingVertical: 15,
+        paddingVertical: 14,
         backgroundColor: '#EBEDF2',
         alignItems: 'center',
     },
     tabButtonActive: {
         backgroundColor: '#00C48F',
+        borderRadius: 12,
     },
     tabText: {
         fontSize: 16.5,

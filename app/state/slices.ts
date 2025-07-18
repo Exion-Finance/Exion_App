@@ -20,7 +20,7 @@ interface FavoritesState {
 }
 
 interface OnchainState {
-  data: Transaction[];
+  data: Transaction[] | null;
 }
 
 
@@ -32,7 +32,7 @@ const initialState = {
 };
 
 const initialTransactionState: OnchainState = {
-  data: [],
+  data: null,
 };
 const initialMobileTransactionState: Section[] = [];
 const initialTokenState: BalanceState = {
@@ -69,11 +69,15 @@ const transactionSlice = createSlice({
     },
     // Optionally add one at a time
     addTransaction(state, action: PayloadAction<Transaction>) {
-      state.data.push(action.payload);
+      if (!state.data) {
+        state.data = [action.payload];
+      } else {
+        state.data.push(action.payload);
+      }
     },
     // clear all
     clearOnchainTx(state) {
-      state.data = [];
+      state.data = null;
     },
   },
 });
@@ -161,7 +165,10 @@ export const { setUserProfile, clearUserProfile } = userSlice.actions;
 export const { setFavorites, addFavorite, removeFavorite } = favoritesSlice.actions;
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
-export const selectTransactions = (state: { transactions: OnchainState }) => state.transactions.data;
+// export const selectTransactions = (state: { transactions: OnchainState }) => state.transactions.data;
+export const selectTransactions = (state: {
+  transactions: OnchainState;
+}): Transaction[] | null => state.transactions.data;
 export const selectUserProfile = (state: { user: UserState }) => state.user.profile;
 export const selectTokenBalances = (state: { tokenBalances: BalanceState; }): TokenBalanceData | null => {
   return state.tokenBalances.data ? state.tokenBalances.data.balance : null;
