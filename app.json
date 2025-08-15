@@ -18,14 +18,13 @@
         "usesNonExemptEncryption": false
       }
     },
-    "android": {
-      "versionCode": 4,
+    "android": {      
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#fff"
       },
       "permissions": ["READ_CONTACTS"],
-      "package": "com.ExionPay.Exion"
+      "package": "com.exion.app"
     },
     "web": {
       "bundler": "metro",
