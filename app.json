@@ -24,7 +24,7 @@
         "backgroundColor": "#fff"
       },
       "permissions": ["READ_CONTACTS"],
-      "package": "com.exion.app"
+      "package": "com.exion.finance"
     },
     "web": {
       "bundler": "metro",
