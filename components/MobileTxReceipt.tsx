@@ -8,12 +8,8 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { PrimaryFontText } from './PrimaryFontText';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
 import { PrimaryFontBold } from './PrimaryFontBold';
-// import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Print from 'expo-print';
-import * as FileSystem from 'expo-file-system';
-// import * as StorageAccessFramework from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
 
 interface BottomSheetComponentProps {
     sheetRef: React.RefObject<BottomSheet>;
@@ -46,11 +42,6 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
         const m = d.getMinutes().toString().padStart(2, '0');
         return `${h}:${m}${ampm}`;
     };
-
-
-
-
-
 
 
     // Format the transaction details into an HTML string
@@ -191,26 +182,9 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
     }, [transaction]);
 
     // 2) Generate PDF and save to local "Download" folder
-    const handleDownload = useCallback(async () => {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission required', 'We need media-library access to save your receipt.');
-            return;
-        }
-
-        try {
-            const html = generateHTML();
-            const { uri } = await Print.printToFileAsync({ html });
-            const fileName = `ExionReceipt_${Date.now()}.pdf`;
-            const destPath = FileSystem.documentDirectory + fileName;
-
-            // Copy from cache to document directory
-            await FileSystem.copyAsync({ from: uri, to: destPath });
-            Alert.alert('Downloaded', `Saved as ${fileName}`);
-        } catch (e: any) {
-            Alert.alert('Error', 'Could not save PDF: ' + e.message);
-        }
-    }, [transaction]);
+    const handleDownload = () => {
+        Alert.alert('Failed 😕', "Couldn't download, try again later")
+    }
 
 
     if (!transaction) {
@@ -300,7 +274,7 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
                         <PrimaryFontBold style={[styles.buttonText, styles.shareText]}>Share</PrimaryFontBold>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={() => handleDownload()}>
+                    <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleDownload}>
                         <Feather name="download" size={16} color="#FFFFFF" style={styles.icon} />
                         <PrimaryFontBold style={[styles.buttonText, styles.downloadText]}>Download</PrimaryFontBold>
                     </TouchableOpacity>
