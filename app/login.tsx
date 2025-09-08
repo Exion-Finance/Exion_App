@@ -51,7 +51,7 @@ export default function Login() {
             const res = await onLogin!(email, password);
             if (res && res.data.accesstoken) {
                 setButtonClicked(false)
-                route.push('/(tabs)');
+                route.replace('/(tabs)');
             } else if (!res.data) {
                 setButtonClicked(false)
                 if (res.message === "Invalid credentials") {
@@ -81,14 +81,13 @@ export default function Login() {
     const title = 'Welcome Back!'
     const description = 'Please enter your phone number and password to continue'
     return (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
                 <NavBar title='Login' onBackPress={() => route.push('/landing')} />
                 <FormDescription title={title} description={description} />
                 <ImageBackground style={styles.background} source={loginBackground}>
 
                     <View style={styles.formView}>
-                        <View style={styles.formContainer}>
 
                             <PrimaryFontMedium style={styles.label}>Email</PrimaryFontMedium>
                             <TextInput
@@ -147,9 +146,8 @@ export default function Login() {
                             widthProp={reusableStyles.width100}
                             disabled={buttonClicked}
                             />
-                        </View>
 
-                        <PrimaryFontText style={{ fontSize: 18, justifyContent: 'center', display: 'flex' }}>
+                        <PrimaryFontText style={{ fontSize: 18, justifyContent: 'center', display: 'flex', marginTop: 30 }}>
                             Don't have an account?{' '}
                             <Text style={{ fontSize: 18, color: '#008662', fontFamily: 'DMSansRegular' }} onPress={() => route.push('/signup')}>Sign Up</Text>
                         </PrimaryFontText>
@@ -170,28 +168,23 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8'
     },
     formView: {
-        height: 650,
+        padding: 18,
         width: '100%',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         paddingBottom: 50,
     },
     background: {
-        height: '100%',
+        flex: 1,  
         resizeMode: 'cover',
         width: '100%',
-        marginTop: -60
-    },
-    formContainer: {
-        height: '60%',
-        padding: 18,
-        width: '100%',
-        paddingTop: 95
     },
     label: {
+        width: '100%',
         fontSize: 16,
         marginBottom: 8,
         color: '#79828E',
+        textAlign: 'left'
     },
     passwordContainer: {
         flexDirection: 'row',
@@ -208,6 +201,7 @@ const styles = StyleSheet.create({
         fontFamily: 'DMSansRegular'
     },
     input: {
+        width: '100%',
         height: 57,
         borderRadius: 5,
         paddingHorizontal: 15,

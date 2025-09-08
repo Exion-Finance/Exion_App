@@ -19,16 +19,14 @@ export function FormDescription({title, description}: FormDescriptionProps) {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 20,
         zIndex: 1
     },
     title: {
         fontSize: 28,
-        marginBottom: 5,
+        marginBottom: 6,
     },
     description:{
         fontSize: 18,
-        marginTop: 8,
         paddingRight: 8
     }
 })

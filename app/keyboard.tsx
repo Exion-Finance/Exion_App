@@ -12,11 +12,11 @@ import TransactionTypeIcon from '@/components/TransactionTypeIcon';
 import { useSharedValue } from 'react-native-reanimated';
 import LottieAnimation from '@/components/LottieAnimation';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useRouter, useLocalSearchParams, Href } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Dropdown from '@/assets/icons/Dropdown';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import TokenListPayment, { Token } from '@/components/MakePaymentTokenList';
 import reusableStyle from '@/constants/ReusableStyles'
 import { getBalances } from './Apiconfig/api';
@@ -75,6 +75,14 @@ const CustomKeyboard = () => {
   const [showPinAuth, setShowPinAuth] = useState<boolean>(false);
   const [hasPin, setHasPin] = useState<boolean>(false);
 
+  const initialSnapPoints = ['CONTENT_HEIGHT'];
+
+  const {
+    animatedHandleHeight,
+    animatedSnapPoints,
+    animatedContentHeight,
+    handleContentLayout,
+  } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
 
   let textOnButton
   if (source === 'contacts' || source === "sendcrypto") {
@@ -661,7 +669,7 @@ const CustomKeyboard = () => {
           </PrimaryFontBold>
         </View>
 
-        <View>
+        <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
           <View style={styles.row}>
             {['1', '2', '3'].map((num) => (
               <KeyButton key={num} label={num} onPress={() => handlePress(num)} />
@@ -702,10 +710,17 @@ const CustomKeyboard = () => {
         <BottomSheet
           ref={bottomSheetRef1}
           index={-1}
-          snapPoints={['50%']}
+          // snapPoints={['50%']}
+          snapPoints={animatedSnapPoints}
+          handleHeight={animatedHandleHeight}
+          contentHeight={animatedContentHeight}
           enablePanDownToClose={true}
           animatedIndex={animatedIndex1}
           backgroundStyle={{ backgroundColor: '#f8f8f8' }}
+        >
+          <BottomSheetView
+          style={{ paddingBottom: 18 }}
+          onLayout={handleContentLayout}
         >
           <PrimaryFontBold
             style={[reusableStyle.paddingContainer,
@@ -715,6 +730,7 @@ const CustomKeyboard = () => {
           </PrimaryFontBold>
 
           <TokenListPayment response={tokens} onSelectToken={handleTokenSelect} />
+          </BottomSheetView>
         </BottomSheet>
 
 
@@ -724,6 +740,7 @@ const CustomKeyboard = () => {
           ref={bottomSheetRef2}
           index={-1}
           snapPoints={['40%', '60%']}
+          
           enablePanDownToClose={true}
           animatedIndex={animatedIndex2}
         >
@@ -857,7 +874,7 @@ const styles = StyleSheet.create({
     // marginBottom: 2,
     marginTop: 10,
     paddingHorizontal: 10,
-    width: '100%',
+    width: '90%',
     // borderWidth: 1,
     // borderColor: 'grey'
   },
@@ -867,14 +884,16 @@ const styles = StyleSheet.create({
     marginBottom: 23,
     marginTop: 20,
     paddingHorizontal: 18,
-    width: '100%'
+    width: '100%',
   },
   keyButton: {
     width: '30%',
-    height: 80,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: background,
+    // borderColor: 'white',
+    // borderWidth: 1,
   },
   keyText: {
     fontSize: 26,
@@ -887,7 +906,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 18,
     width: '60%',
-    marginTop: 20,
+    marginTop: 5,
+    marginBottom: 10,
     // opacity: 0
   },
   text: {

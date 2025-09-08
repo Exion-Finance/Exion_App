@@ -83,17 +83,6 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
     };
 
 
-
-
-
-
-
-
-
-
-
-    
-
     function isSameDay(a: Date, b: Date) {
         return (
             a.getFullYear() === b.getFullYear() &&
@@ -107,21 +96,18 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         const yesterday = new Date(now);
         yesterday.setDate(now.getDate() - 1);
 
-        // 1) filter out exclude address
-        const EXCLUDE = "0xabdee117d9236cba1477fa48ec1a2d3f1a53561b";
-        // console.log("The damn txsssss--->>>", txs)
-        const filtered = txs.filter((tx) => tx.to !== EXCLUDE);
+        // 1) filter if needed
+        const filtered = txs;
 
-        // 2) sort descending by timestamp
+        // 2) sort descending by date
         filtered.sort(
-            (a, b) =>
-                Number(b.timeStamp) * 1000 - Number(a.timeStamp) * 1000
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
         // 3) group
         const buckets: Record<string, Transaction[]> = {};
         filtered.forEach((tx) => {
-            const date = new Date(Number(tx.timeStamp) * 1000);
+            const date = new Date(tx.date);
             let key: string;
 
             if (isSameDay(date, now)) {
@@ -137,15 +123,15 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                 });
             }
 
-            ; (buckets[key] ||= []).push(tx);
+            (buckets[key] ||= []).push(tx);
         });
 
-        // 4) build sections array
         return Object.entries(buckets).map(([title, data]) => ({
             title,
             data,
         }));
     }
+
 
     return (
         <SectionList
@@ -155,45 +141,53 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
-            renderItem={({ item }) => (
-                <View style={[reusableStyles.rowJustifyBetween, styles.transactionItem, { alignItems: 'flex-start' }]}>
-                    <View style={styles.flexRow}>
-                        {item.transactionType === "Received" ? (
-                            <TransactionTypeIcon containerStyle={{ backgroundColor: '#DDFFF1' }} icon={<Feather name="arrow-down" size={14} color="#1E8A5E" />} />
-                        ) : (
-                            <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
-                        )}
-                        <View style={{ marginLeft: 10 }}>
-                            <View style={styles.flexRow}>
-                                <PrimaryFontText style={{ fontSize: 19 }}>
-                                    {item.transactionType === "Received"
-                                        ? item.from.startsWith('0x')
-                                            ? `${item.from.slice(0, 7)}...${item.from.slice(-4)}`
-                                            : item.from
-                                        : item.transactionType === "Sent"
-                                            ? item.to.startsWith('0x')
-                                                ? `${item.to.slice(0, 7)}...${item.to.slice(-4)}`
-                                                : item.to
-                                            : null}
 
+            renderItem={({ item }) => {
+                const formatNameOrAddress = (nameOrAddress: string) => {
+                    if (!nameOrAddress) return "";
+                    return nameOrAddress.length > 30
+                        ? `${nameOrAddress.slice(0, 7)}...${nameOrAddress.slice(-4)}`
+                        : nameOrAddress;
+                };
+
+                const displayName =
+                    item.transactionType === "Received"
+                        ? formatNameOrAddress(item.fromUsername || item.from)
+                        : formatNameOrAddress(item.toUsername || item.to);
+
+                return (
+                    <View style={[reusableStyles.rowJustifyBetween, styles.transactionItem, { alignItems: 'flex-start' }]}>
+                        <View style={styles.flexRow}>
+                            {item.transactionType === "Received" ? (
+                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#DDFFF1' }} icon={<Feather name="arrow-down" size={14} color="#1E8A5E" />} />
+                            ) : (
+                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
+                            )}
+                            <View style={{ marginLeft: 10 }}>
+                                <View style={styles.flexRow}>
+                                    <PrimaryFontText style={{ fontSize: 19 }}>
+                                        {displayName}
+                                    </PrimaryFontText>
+                                </View>
+                                <PrimaryFontText style={{ fontSize: 13, color: '#79828E', marginTop: 5 }}>
+                                    {item.transactionType}
                                 </PrimaryFontText>
                             </View>
-                            <PrimaryFontText style={{ fontSize: 13, color: '#79828E', marginTop: 5 }}>
-                                {item.transactionType === "Received" ? "Received" : "Sent"}
+                        </View>
+                        <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <PrimaryFontMedium style={{ fontSize: 16, color: item.transactionType === "Received" ? "#5EAF5E" : "#343131" }}>
+                                {item.transactionType === "Received" ? "+" : "-"} Ksh
+                                {`${!isNaN(Number(item.kes)) ? formatNumber(Number(item.kes).toFixed(2)) : '0.00'}`}
+                            </PrimaryFontMedium>
+
+                            <PrimaryFontText style={{ fontSize: 11, marginTop: 4, color: item.transactionType === "Received" ? "#6B6B6B" : "#474545" }}>
+                                {item.asset.toUpperCase()} {Number(item.value).toFixed(2)}
                             </PrimaryFontText>
                         </View>
                     </View>
-                    <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <PrimaryFontMedium style={{ fontSize: 16, color: item.transactionType === "Received" ? "#5EAF5E" : "#343131" }}>
-                            {item.transactionType === "Received" ? "+" : "-"} {"Ksh"}{`${!isNaN(Number(item.kes)) ? formatNumber(Number(item.kes).toFixed(2)) : '0.00'}`}
-                        </PrimaryFontMedium>
+                );
+            }}
 
-                        <PrimaryFontText style={{ fontSize: 11, marginTop: 4, color: item.transactionType === "Received" ? "#6B6B6B" : "#474545" }}>
-                            {item.tokenSymbol.toUpperCase()} {(item.value ? (Number(item.value) / 10 ** parseInt(item.tokenDecimal)).toFixed(2) : (Number(item.amount)).toFixed(2))}
-                        </PrimaryFontText>
-                    </View>
-                </View>
-            )}
             renderSectionHeader={({ section: { title } }) => (
                 <View style={styles.sectionHeader}>
                     <PrimaryFontText style={styles.sectionHeaderText}>{title}</PrimaryFontText>

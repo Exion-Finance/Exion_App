@@ -10,14 +10,16 @@ export default function LandingPage() {
 
     return (
         <View style={styles.container}>
-            <Image source={landingBackground} alt='landing' style={styles.image} />
-            <View style={[reusableStyles.screenPaddingContainer, { marginTop: -40 }]}>
-                <SecondaryFontText style={styles.title}>Crypto Payments</SecondaryFontText>
-                <SecondaryFontText style={styles.title}>made Easy</SecondaryFontText>
-                <PrimaryFontText style={styles.introductionText}>Make payments for your day to day utilities directly from your wallet</PrimaryFontText>
-            </View>
-            <View style={[reusableStyles.alignJustifyCenter, { marginTop: -10 }]}>
-                <PrimaryButton route='/login' textOnButton='Get started'/>
+            <Image source={landingBackground} alt='landing' style={[styles.image, { zIndex: 1 }]} />
+            <View style={styles.bottomContainer}>
+                <View style={[reusableStyles.screenPaddingContainer, { marginTop: 0 }]}>
+                    <SecondaryFontText style={styles.title}>Crypto Payments</SecondaryFontText>
+                    <SecondaryFontText style={styles.title}>made Easy</SecondaryFontText>
+                    <PrimaryFontText style={styles.introductionText}>Make payments for your day to day utilities directly from your wallet</PrimaryFontText>
+                </View>
+                <View style={[reusableStyles.alignJustifyCenter, { width: '100%' }]}>
+                    <PrimaryButton route='/login' textOnButton='Get started'/>
+                </View>
             </View>
         </View>
     );
@@ -26,9 +28,17 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: "#f8f8f8",
-        // paddingBottom: 50
+        // backgroundColor: 'purple',
+        paddingBottom: 30
+    },
+    bottomContainer: {
+        // borderColor: 'black',
+        // borderWidth: 1,
+        width: '100%',
+        zIndex: 0,
     },
     title: {
         fontSize: 28,
@@ -36,13 +46,15 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: '68%'
+        // height: '60%',
+        flex: 1
     },
     introductionText: {
         fontSize: 20,
-        marginTop: 18,
-        marginBottom: 55,
-        lineHeight: 30,
-        width: '96%'
+        // marginTop: 15,
+        // marginBottom: 20,
+        lineHeight: 25,
+        width: '96%',
+        marginVertical: 15
     }
 });

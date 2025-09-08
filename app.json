@@ -2,7 +2,7 @@
   "expo": {
     "name": "Exion",
     "slug": "exion",
-    "version": "1.1.12",
+    "version": "1.1.13",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",

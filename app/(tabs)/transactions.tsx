@@ -166,7 +166,7 @@ export default function Transactions() {
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />
-            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: '#f8f8f8' }]}>
+            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 10, backgroundColor: '#f8f8f8' }]}>
                 <PrimaryFontBold style={{ fontSize: 28 }}>Transactions</PrimaryFontBold>
                 <SecondaryButton
                     // route="/modal"

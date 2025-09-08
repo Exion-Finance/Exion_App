@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, TouchableOpacity, ToastAndroid, Platform } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, ToastAndroid, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import userIcon from '@/assets/images/user.png';
@@ -68,7 +68,8 @@ export default function Profile() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={{backgroundColor: '#f8f8f8'}}>
+      <View style={styles.container}>
       <StatusBar style={'dark'} />
       <NavBar title='Profile' onBackPress={() => route.back()} />
 
@@ -124,7 +125,7 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'center' }}>
-          <PrimaryFontMedium style={{ fontSize: 10, marginBottom: 12, color: 'gray' }}>Version: {appVersion}</PrimaryFontMedium>
+          <PrimaryFontMedium style={{ fontSize: 10, marginBottom: 12, marginTop: 50, color: 'gray' }}>Version: {appVersion}</PrimaryFontMedium>
           {/* <PrimaryButton onPress={() => handleLogout()} textOnButton="Logout" route='/login' widthProp={reusableStyle.width100} /> */}
 
           <View style={[{ justifyContent: 'center', alignItems: 'center' }, reusableStyle.width100]}>
@@ -139,7 +140,8 @@ export default function Profile() {
           </View>
         </View>
       </View>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: '#f8f8f8'
+    backgroundColor: '#f8f8f8',
   },
   title: {
     fontSize: 20,

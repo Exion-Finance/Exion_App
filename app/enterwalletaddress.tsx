@@ -118,7 +118,7 @@ export default function EnterWalletAddress() {
     }, [userTransactions]);
 
     // console.log("allTxs after .flat", allTxs)
-    
+
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
@@ -126,19 +126,40 @@ export default function EnterWalletAddress() {
         const excludeAddress = '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b';
 
         // Only keep “sent” TXs and skip the excluded address
+        // const sent = allTxs.filter(
+        //     (tx) =>
+        //         tx.transactionType === 'Sent' &&
+        //         tx.to !== excludeAddress &&
+        //         tx.to.startsWith('0x') &&
+        //         tx.to.length >= 20
+        // );
+
+        // // Count occurrences and track lastDate
+        // const counts: Record<string, { count: number; lastDate: Date }> = {};
+        // sent.forEach((tx) => {
+        //     const addr = tx.to;
+        //     // const date = new Date(Number(tx.timeStamp) * 1000);
+        //     const date = new Date(tx.date);
+
+
+        //     if (!counts[addr]) counts[addr] = { count: 0, lastDate: date };
+        //     counts[addr].count++;
+        //     if (date.getTime() > counts[addr].lastDate.getTime()) {
+        //         counts[addr].lastDate = date;
+        //     }
+        // });
         const sent = allTxs.filter(
             (tx) =>
                 tx.transactionType === 'Sent' &&
                 tx.to !== excludeAddress &&
-                tx.to.startsWith('0x') &&
+                tx.to?.startsWith('0x') &&
                 tx.to.length >= 20
         );
 
-        // Count occurrences and track lastDate
         const counts: Record<string, { count: number; lastDate: Date }> = {};
         sent.forEach((tx) => {
             const addr = tx.to;
-            const date = new Date(Number(tx.timeStamp) * 1000);
+            const date = new Date(tx.date);
 
             if (!counts[addr]) counts[addr] = { count: 0, lastDate: date };
             counts[addr].count++;
@@ -146,6 +167,7 @@ export default function EnterWalletAddress() {
                 counts[addr].lastDate = date;
             }
         });
+
 
         // Sort by count desc, take top 3
         return Object.entries(counts)
