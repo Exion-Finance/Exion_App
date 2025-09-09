@@ -80,35 +80,51 @@ export interface FavoriteAddress {
   id: string;
 }
 
+// export interface Transaction {
+//   value: string;
+//   amount?: string;
+//   blockHash: string;
+//   blockNumber: string;
+//   confirmations: string;
+//   contractAddress: string;
+//   cumulativeGasUsed: string;
+//   from: string;
+//   gas: string;
+//   gasPrice: string;
+//   gasUsed: string;
+//   hash: string;
+//   input: string;
+//   logIndex: string;
+//   // nonce: string;
+//   timeStamp: string;
+//   to: string;
+//   toAddress?: string;
+//   tokenDecimal: string;
+//   tokenName: string;
+//   tokenSymbol: string;
+//   transactionIndex: string;
+//   transactionType: string;
+//   date: string | null;
+//   username?: string;
+//   usd: string | number;
+//   kes: number
+// };
+
 export interface Transaction {
-  value: string;
-  amount?: string;
-  blockHash: string;
-  blockNumber: string;
-  confirmations: string;
-  contractAddress: string;
-  cumulativeGasUsed: string;
+  asset: string;
+  category: string;
+  date: string;
   from: string;
-  gas: string;
-  gasPrice: string;
-  gasUsed: string;
+  fromUsername: string;
   hash: string;
-  input: string;
-  logIndex: string;
-  // nonce: string;
-  timeStamp: string;
+  kes: number;
   to: string;
-  toAddress?: string;
-  tokenDecimal: string;
-  tokenName: string;
-  tokenSymbol: string;
-  transactionIndex: string;
-  transactionType: string;
-  date: string | null;
-  username?: string;
-  usd: string | number;
-  kes: number
-};
+  toUsername: string;
+  transactionType: "Sent" | "Received" | string;
+  usd: number;
+  value: number;
+}
+
 
 export interface OnchainSection {
   title: string;

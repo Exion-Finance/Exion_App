@@ -166,13 +166,13 @@ export default function Transactions() {
     return (
         <View style={styles.container}>
             <StatusBar style={'dark'} />
-            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 20, backgroundColor: '#f8f8f8' }]}>
+            <View style={[reusableStyle.paddingContainer, reusableStyle.rowJustifyBetween, { paddingVertical: 10, backgroundColor: '#f8f8f8' }]}>
                 <PrimaryFontBold style={{ fontSize: 28 }}>Transactions</PrimaryFontBold>
                 <SecondaryButton
                     // route="/modal"
                     textOnButton="Filter"
                     icon={<Ionicons name="filter-outline" size={15} color="black" />}
-                    containerStyle={{ backgroundColor: '#f8f8f8', borderWidth: 0.8, borderColor: '#DFE4E5' }}
+                    containerStyle={{ backgroundColor: '#f8f8f8', borderWidth: 0.8, borderColor: '#DFE4E5', opacity: 0 }}
                     textStyle={{ fontSize: 16, color: "#074A4F" }}
                 />
             </View>

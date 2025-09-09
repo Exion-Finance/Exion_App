@@ -11,7 +11,7 @@ const logoSources: Record<string, any> = {
     USDT: require('@/assets/logos/tether.png'),
     cUSD: require('@/assets/logos/cusd.png'),
     cKes: require('@/assets/logos/ckes.png'),
-    usdc: require('@/assets/logos/usdc.png'),
+    USDC: require('@/assets/logos/usdc.png'),
     cEUR: require('@/assets/logos/ceur.png'),
 };
 
@@ -20,7 +20,7 @@ const tokenId: Record<string, number> = {
     USDT: 0,
     cUSD: 1,
     cKes: 2,
-    usdc: 3,
+    USDC: 3,
     cEUR: 4,
 };
 interface TokenListProps {
@@ -36,11 +36,12 @@ export default function TokenList({ response }: TokenListProps) {
         // route.push({ pathname: "/fundingmethod", params: { id} });
         console.log("Clicked")
     }
+    // console.log("Tokens from props-->", response)
     const tokens = Object.keys(response.balance).map((key) => {
         const tokenKey = key as keyof typeof response.balance;
         return {
             tokenName: key,
-            fullName: key == 'USDT' ? 'Tether USD' : key == 'cUSD' ? 'Celo Dollar' : key == 'cKes' ? 'Celo Kenyan Shilling' : key == 'usdc' ? 'USDC' : 'Other Name',
+            fullName: key == 'USDT' ? 'Tether USD' : key == 'cUSD' ? 'Celo Dollar' : key == 'cKes' ? 'Celo Kenyan Shilling' : key == 'USDC' ? 'USDC' : 'Other Name',
             balance: response.balance[tokenKey].token,
             ksh: response.balance[tokenKey].kes,
             logo: logoSources[tokenKey],

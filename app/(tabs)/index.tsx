@@ -1,5 +1,4 @@
-
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import reusableStyle from '@/constants/ReusableStyles'
@@ -18,9 +17,8 @@ import SecondaryButton from '@/components/SecondaryButton';
 import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { MobileTransactions } from '@/components/MobileTransactions';
 import { Href } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import TokenList from '@/components/TokenList';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSharedValue } from 'react-native-reanimated';
@@ -95,6 +93,16 @@ export default function TabOneScreen() {
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
   // console.log("user_profile from redux...>", user_profile)
+
+  // const initialSnapPoints = useMemo(() => ['25%', 'CONTENT_HEIGHT'], []);
+  const initialSnapPoints = ['CONTENT_HEIGHT'];
+
+  const {
+    animatedHandleHeight,
+    animatedSnapPoints,
+    animatedContentHeight,
+    handleContentLayout,
+  } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetTxRef = useRef<BottomSheet>(null);
@@ -473,22 +481,37 @@ export default function TabOneScreen() {
             </View>
 
             <View style={[styles.flexRow, { height: '38%', marginTop: 0 }]}>
-              <SecondaryButton
-                route={"/contacts" as Href<string | object>}
-                textOnButton="Transfer"
-                icon={<Feather name="arrow-up" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#4781D9', padding: 17, paddingHorizontal: 15, paddingRight: 25 }}
-                textStyle={{ fontSize: 17, color: "white" }}
-              />
+            <SecondaryButton
+              route={"/contacts" as Href<string | object>}
+              textOnButton="Transfer"
+              icon={<Feather name="arrow-up" size={18} color="white" />}
+              containerStyle={{
+              backgroundColor: '#4781D9',
+              flex: 0.8,
+              marginRight: 8,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingVertical: 17,
+             }}
+              textStyle={{ fontSize: 17, color: "white" }}
+            />
 
-              <SecondaryButton
-                route={"/makepayment" as Href<string | object>}
-                textOnButton="Make Payment"
-                icon={<Feather name="arrow-down" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 19, paddingRight: 24, marginLeft: 17 }}
-                textStyle={{ fontSize: 17, color: "white" }}
-              />
-            </View>
+            <SecondaryButton
+              route={"/makepayment" as Href<string | object>}
+              textOnButton="Make Payment"
+              icon={<Feather name="arrow-down" size={18} color="white" />}
+              containerStyle={{
+                backgroundColor: '#00C48F',
+                flex: 1.2, 
+                marginLeft: 8,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingVertical: 17,
+              }}
+              textStyle={{ fontSize: 17, color: "white" }}
+            />
+          </View>
+
           </View>
         </View>
       </ImageBackground>
@@ -527,30 +550,32 @@ export default function TabOneScreen() {
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={['50%']}
+        // snapPoints={['50%']}
+        snapPoints={animatedSnapPoints}
+        handleHeight={animatedHandleHeight}
+        contentHeight={animatedContentHeight}
         enablePanDownToClose={true}
         animatedIndex={animatedTokenIndex}
         backgroundStyle={{ backgroundColor: '#fff' }}
       >
-        {/* <PrimaryFontBold
-            style={[reusableStyle.paddingContainer,
-            { fontSize: 22, marginTop: 30, marginBottom: 15, paddingHorizontal: 23 }]}
-          >
-            Please choose a token
-          </PrimaryFontBold> */}
-        <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-          <PrimaryFontBold style={{ fontSize: 22 }}>
-            Tokens
-          </PrimaryFontBold>
+        <BottomSheetView
+        style={{ paddingBottom: 18 }}
+        onLayout={handleContentLayout}
+        >
+          <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+            <PrimaryFontBold style={{ fontSize: 22 }}>
+              Tokens
+            </PrimaryFontBold>
 
-          <PrimaryFontMedium style={styles.rate}>
-            {buyingRate ? `$1 ≈ ${buyingRate} KSh` : "Loading.."}
-          </PrimaryFontMedium>
-        </View>
+            <PrimaryFontMedium style={styles.rate}>
+              {buyingRate ? `$1 ≈ ${buyingRate} KSh` : "Loading.."}
+            </PrimaryFontMedium>
+          </View>
 
 
-        <TokenList response={tokens} />
-        {/* <TokenList routeProp='/fundingmethod'/> */}
+          <TokenList response={tokens} />
+          {/* <TokenList routeProp='/fundingmethod'/> */}
+        </BottomSheetView>
       </BottomSheet>
     </View>
 
@@ -574,12 +599,12 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   background: {
-    height: 330,
+    height: 320,
     resizeMode: 'cover',
     width: '100%',
   },
   dashBackground: {
-    height: 320,
+    height: 310,
     paddingTop: statusBarHeight
   },
   flexRow: {
