@@ -245,9 +245,9 @@ export default function PinAuth({
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, color: '#222' },
-  subtitle: { fontSize: 17, color: '#555', marginBottom: 24, textAlign: 'center' },
+  subtitle: { fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' },
   // 
-  dotsRow: { flexDirection: 'row', marginBottom: 32 },
+  dotsRow: { flexDirection: 'row', marginBottom: 30 },
   dotContainer: { marginHorizontal: 12 },
   dot: {
     width: 16,
@@ -267,12 +267,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 20
+    marginTop: 10
   },
   key: {
     width: '30%',
     // aspectRatio: 0.8,
-    paddingVertical: 15,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 8,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   keyText: { fontSize: 24, color: '#333' },
-  forgot: { color: '#007AFF', marginTop: 30, fontSize: 16 },
+  forgot: { color: '#007AFF', marginTop: 20, fontSize: 16 },
   closeContainer: {
     width: '100%',
     paddingHorizontal: 18,

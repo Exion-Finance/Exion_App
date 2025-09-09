@@ -122,37 +122,10 @@ export default function EnterWalletAddress() {
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
-        //Exion wallet address
-        const excludeAddress = '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b';
-
-        // Only keep “sent” TXs and skip the excluded address
-        // const sent = allTxs.filter(
-        //     (tx) =>
-        //         tx.transactionType === 'Sent' &&
-        //         tx.to !== excludeAddress &&
-        //         tx.to.startsWith('0x') &&
-        //         tx.to.length >= 20
-        // );
-
-        // // Count occurrences and track lastDate
-        // const counts: Record<string, { count: number; lastDate: Date }> = {};
-        // sent.forEach((tx) => {
-        //     const addr = tx.to;
-        //     // const date = new Date(Number(tx.timeStamp) * 1000);
-        //     const date = new Date(tx.date);
-
-
-        //     if (!counts[addr]) counts[addr] = { count: 0, lastDate: date };
-        //     counts[addr].count++;
-        //     if (date.getTime() > counts[addr].lastDate.getTime()) {
-        //         counts[addr].lastDate = date;
-        //     }
-        // });
         const sent = allTxs.filter(
             (tx) =>
                 tx.transactionType === 'Sent' &&
-                tx.to !== excludeAddress &&
-                tx.to?.startsWith('0x') &&
+                tx.toUsername?.startsWith('0x') &&
                 tx.to.length >= 20
         );
 
@@ -407,172 +380,288 @@ export default function EnterWalletAddress() {
         }
     }
 
+    // return (
+    //     <View style={styles.container}>
+    //         <StatusBar style={'dark'} />
+    //         <NavBar title='Wallet Address' onBackPress={() => route.back()} />
+    //         <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
+    //             <View>
+    //                 <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
+    //                 <TextInput
+    //                     style={[styles.input, { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 }]}
+    //                     placeholder="E.g OxOdbe52...223fa"
+    //                     placeholderTextColor="#C3C2C2"
+    //                     keyboardType="default"
+    //                     autoCapitalize="none"
+    //                     onChangeText={(text) => {
+    //                         setWalletAddress(text);
+    //                         setError(false)
+    //                     }}
+    //                     onFocus={() => setIsWalletAddressFocused(true)}
+    //                     onBlur={() => setIsWalletAddressFocused(false)}
+    //                     value={walletAddress.startsWith("0x") && walletAddress.length > 30 ?
+    //                         `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
+    //                         : walletAddress}
+    //                 />
+    //                 {/* <FormErrorText error={error} errorDescription={errorDescription} /> */}
+
+    //                 <ScrollView>
+    //                     {clipboardAddress && (
+    //                         <TouchableOpacity
+    //                             style={styles.pasteBanner}
+    //                             activeOpacity={0.8}
+    //                             onPress={handlePaste}
+    //                         >
+    //                             <View style={styles.pasteIcon}>
+    //                                 <MaterialIcons name="content-paste" size={18} color="#fff" />
+    //                             </View>
+    //                             <View style={styles.pasteTextWrapper}>
+    //                                 <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
+    //                                 <PrimaryFontText style={styles.pasteAddress}>
+    //                                     {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
+    //                                 </PrimaryFontText>
+    //                             </View>
+    //                         </TouchableOpacity>
+    //                     )}
+
+    //                     <View style={styles.favoritesContainer}>
+    //                         {displayFavorites.length !== 0 ? (
+    //                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
+    //                                 <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
+    //                                 <Favourites />
+    //                             </View>
+
+    //                         )
+    //                             : null}
+
+    //                         {displayFavorites.length === 0 ? (
+    //                             <View style={styles.emptyFav}>
+    //                                 {/* <MaterialIcons name="link" size={36} color="#888" /> */}
+    //                                 <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
+    //                                 <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
+    //                                 <PrimaryFontText style={styles.emptySubtitle}>
+    //                                     Save wallet addresses to make sending to external wallets simpler and faster
+    //                                 </PrimaryFontText>
+    //                                 <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
+    //                                     <MaterialIcons name="add" size={20} color="#fff" />
+    //                                     <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
+    //                                 </TouchableOpacity>
+    //                             </View>
+    //                         ) : (
+    //                             // Map your favorites
+    //                             displayFavorites.slice(0, 3).map((fav) => (
+    //                                 <FavoriteAddressCard
+    //                                     key={fav.address}
+    //                                     address={fav.address}
+    //                                     lastDate={fav.lastDate}
+    //                                     userName={fav.userName}
+    //                                     onAddUsername={(address) => openUsernameModal(address)}
+    //                                     onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
+    //                                 />
+    //                             ))
+    //                         )}
+
+
+    //                         {displayFavorites.length !== 0 ? (
+    //                             <View style={styles.addFavWrapper}>
+    //                                 <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
+    //                                     <MaterialIcons name="add" size={20} color="#007AFF" />
+    //                                     <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
+    //                                 </TouchableOpacity>
+    //                             </View>
+    //                         )
+    //                             : null}
+
+    //                     </View>
+    //                 </ScrollView>
+
+    //             </View>
+
+    //             <View style={styles.stickyFooter}>
+    //                 <View style={styles.warningRow}>
+    //                     <MaterialIcons name="warning" size={18} color="#FFA500" />
+    //                     <PrimaryFontText style={styles.warningText}>
+    //                         To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
+    //                     </PrimaryFontText>
+    //                 </View>
+
+    //                 <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
+    //                     <PrimaryFontBold style={styles.text}>
+    //                         {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
+    //                     </PrimaryFontBold>
+    //                 </TouchableOpacity>
+    //             </View>
+
+
+    //             <Modal
+    //                 visible={modalVisible}
+    //                 transparent
+    //                 animationType="slide"
+    //                 onRequestClose={() => setModalVisible(false)}
+    //             >
+    //                 <View style={styles.modalBackdrop}>
+    //                     <View style={styles.modalContent}>
+    //                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+    //                             <PrimaryFontBold style={styles.modalTitle}>
+    //                                 {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
+    //                             </PrimaryFontBold>
+
+    //                             {modalMode === 'addAddress' ? null :
+    //                                 <TouchableOpacity onPress={handleDeleteFavorite} style={styles.deleteIcon}>
+    //                                     {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="red" />}
+    //                                 </TouchableOpacity>}
+    //                         </View>
+
+    //                         {/* Address input */}
+    //                         <PrimaryFontMedium style={styles.inputLabel}>Wallet Address</PrimaryFontMedium>
+    //                         <TextInput
+    //                             style={[styles.modalInput, { backgroundColor: modalAddress ? '#f0f0f0' : 'transparent' }]}
+    //                             value={modalAddress}
+    //                             onChangeText={setModalAddress}
+    //                             placeholder="OxOdbe52...223fa"
+    //                             placeholderTextColor="#C3C2C2"
+    //                             editable={modalMode === 'addAddress'}
+    //                         />
+
+    //                         {/* Username input */}
+    //                         <PrimaryFontMedium style={styles.inputLabel}>Username</PrimaryFontMedium>
+    //                         <TextInput
+    //                             style={styles.modalInput}
+    //                             value={modalUsername}
+    //                             onChangeText={setModalUsername}
+    //                             placeholder="E.g John Valora"
+    //                             placeholderTextColor="#C3C2C2"
+    //                             autoCapitalize='words'
+    //                         />
+
+    //                         <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone} disabled={doneButtonClicked}>
+    //                             <PrimaryFontBold style={styles.modalBtnText}>{doneButtonClicked ? <Loading color='#fff' description='' /> : "Done"}</PrimaryFontBold>
+    //                         </TouchableOpacity>
+    //                     </View>
+    //                 </View>
+    //             </Modal>
+
+    //             <Toast position="top" />
+    //         </View>
+
+    //     </View >
+    // );
+
+    
     return (
         <View style={styles.container}>
-            <StatusBar style={'dark'} />
-            <NavBar title='Wallet Address' onBackPress={() => route.back()} />
-            <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
-                <View>
-                    <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
-                    <TextInput
-                        style={[styles.input, { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 }]}
-                        placeholder="E.g OxOdbe52...223fa"
-                        placeholderTextColor="#C3C2C2"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        onChangeText={(text) => {
-                            setWalletAddress(text);
-                            setError(false)
-                        }}
-                        onFocus={() => setIsWalletAddressFocused(true)}
-                        onBlur={() => setIsWalletAddressFocused(false)}
-                        value={walletAddress.startsWith("0x") && walletAddress.length > 30 ?
-                            `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
-                            : walletAddress}
-                    />
-                    <FormErrorText error={error} errorDescription={errorDescription} />
-
-                    <ScrollView>
-                        {clipboardAddress && (
-                            <TouchableOpacity
-                                style={styles.pasteBanner}
-                                activeOpacity={0.8}
-                                onPress={handlePaste}
-                            >
-                                <View style={styles.pasteIcon}>
-                                    <MaterialIcons name="content-paste" size={18} color="#fff" />
-                                </View>
-                                <View style={styles.pasteTextWrapper}>
-                                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
-                                    <PrimaryFontText style={styles.pasteAddress}>
-                                        {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
-                                    </PrimaryFontText>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-
-                        <View style={styles.favoritesContainer}>
-                            {displayFavorites.length !== 0 ? (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
-                                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
-                                    <Favourites />
-                                </View>
-
-                            )
-                                : null}
-
-                            {displayFavorites.length === 0 ? (
-                                <View style={styles.emptyFav}>
-                                    {/* <MaterialIcons name="link" size={36} color="#888" /> */}
-                                    <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
-                                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
-                                    <PrimaryFontText style={styles.emptySubtitle}>
-                                        Save wallet addresses to make sending to external wallets simpler and faster
-                                    </PrimaryFontText>
-                                    <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
-                                        <MaterialIcons name="add" size={20} color="#fff" />
-                                        <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
-                                // Map your favorites
-                                displayFavorites.slice(0, 3).map((fav) => (
-                                    <FavoriteAddressCard
-                                        key={fav.address}
-                                        address={fav.address}
-                                        lastDate={fav.lastDate}
-                                        userName={fav.userName}
-                                        onAddUsername={(address) => openUsernameModal(address)}
-                                        onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
-                                    />
-                                ))
-                            )}
-
-
-                            {displayFavorites.length !== 0 ? (
-                                <View style={styles.addFavWrapper}>
-                                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
-                                        <MaterialIcons name="add" size={20} color="#007AFF" />
-                                        <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
-                                    </TouchableOpacity>
-                                </View>
-                            )
-                                : null}
-
-                        </View>
-                    </ScrollView>
-
-                </View>
-
-                <View style={styles.stickyFooter}>
-                    <View style={styles.warningRow}>
-                        <MaterialIcons name="warning" size={18} color="#FFA500" />
-                        <PrimaryFontText style={styles.warningText}>
-                            To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
-                        </PrimaryFontText>
-                    </View>
-
-                    <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
-                        <PrimaryFontBold style={styles.text}>
-                            {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
-                        </PrimaryFontBold>
-                    </TouchableOpacity>
-                </View>
-
-
-                <Modal
-                    visible={modalVisible}
-                    transparent
-                    animationType="slide"
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalBackdrop}>
-                        <View style={styles.modalContent}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <PrimaryFontBold style={styles.modalTitle}>
-                                    {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
-                                </PrimaryFontBold>
-
-                                {modalMode === 'addAddress' ? null :
-                                    <TouchableOpacity onPress={handleDeleteFavorite} style={styles.deleteIcon}>
-                                        {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="red" />}
-                                    </TouchableOpacity>}
-                            </View>
-
-                            {/* Address input */}
-                            <PrimaryFontMedium style={styles.inputLabel}>Wallet Address</PrimaryFontMedium>
-                            <TextInput
-                                style={[styles.modalInput, { backgroundColor: modalAddress ? '#f0f0f0' : 'transparent' }]}
-                                value={modalAddress}
-                                onChangeText={setModalAddress}
-                                placeholder="OxOdbe52...223fa"
-                                placeholderTextColor="#C3C2C2"
-                                editable={modalMode === 'addAddress'}
-                            />
-
-                            {/* Username input */}
-                            <PrimaryFontMedium style={styles.inputLabel}>Username</PrimaryFontMedium>
-                            <TextInput
-                                style={styles.modalInput}
-                                value={modalUsername}
-                                onChangeText={setModalUsername}
-                                placeholder="E.g John Valora"
-                                placeholderTextColor="#C3C2C2"
-                                autoCapitalize='words'
-                            />
-
-                            <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone} disabled={doneButtonClicked}>
-                                <PrimaryFontBold style={styles.modalBtnText}>{doneButtonClicked ? <Loading color='#fff' description='' /> : "Done"}</PrimaryFontBold>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
-
-                <Toast position="top" />
+          <StatusBar style={'dark'} />
+          <NavBar title='Wallet Address' onBackPress={() => route.back()} />
+      
+          <View style={[reusableStyles.paddingContainer, { flex: 1 }]}>
+            {/* Top static section */}
+            <View style={{ zIndex: 1}}>
+              <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
+              <TextInput
+                style={[
+                  styles.input,
+                  { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 },
+                ]}
+                placeholder="E.g OxOdbe52...223fa"
+                placeholderTextColor="#C3C2C2"
+                keyboardType="default"
+                autoCapitalize="none"
+                onChangeText={(text) => {
+                  setWalletAddress(text);
+                  setError(false);
+                }}
+                onFocus={() => setIsWalletAddressFocused(true)}
+                onBlur={() => setIsWalletAddressFocused(false)}
+                value={
+                  walletAddress.startsWith('0x') && walletAddress.length > 30
+                    ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
+                    : walletAddress
+                }
+              />
+      
+              {clipboardAddress && (
+                <TouchableOpacity style={styles.pasteBanner} activeOpacity={0.8} onPress={handlePaste}>
+                  <View style={styles.pasteIcon}>
+                    <MaterialIcons name="content-paste" size={18} color="#fff" />
+                  </View>
+                  <View style={styles.pasteTextWrapper}>
+                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
+                    <PrimaryFontText style={styles.pasteAddress}>
+                      {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
+                    </PrimaryFontText>
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
-
-        </View >
-    );
+      
+            {/* Middle flexible scrollable section */}
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer}>
+              <View>
+                {displayFavorites.length !== 0 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}>
+                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
+                    <Favourites />
+                  </View>
+                ) : null}
+      
+                {displayFavorites.length === 0 ? (
+                  <View style={styles.emptyFav}>
+                    <LottieAnimation
+                      animationSource={require('@/assets/animations/wallet.json')}
+                      animationStyle={{ width: '80%', height: 100 }}
+                    />
+                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
+                    <PrimaryFontText style={styles.emptySubtitle}>
+                      Save wallet addresses to make sending to external wallets simpler and faster
+                    </PrimaryFontText>
+                    <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
+                      <MaterialIcons name="add" size={20} color="#fff" />
+                      <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  displayFavorites.map((fav) => (
+                    <FavoriteAddressCard
+                      key={fav.address}
+                      address={fav.address}
+                      lastDate={fav.lastDate}
+                      userName={fav.userName}
+                      onAddUsername={(address) => openUsernameModal(address)}
+                      onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
+                    />
+                  ))
+                )}
+      
+                {displayFavorites.length !== 0 ? (
+                  <View style={styles.addFavWrapper}>
+                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
+                      <MaterialIcons name="add" size={20} color="#007AFF" />
+                      <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+            </ScrollView>
+      
+            {/* Footer static at bottom */}
+            <View style={styles.stickyFooter}>
+              <View style={styles.warningRow}>
+                <MaterialIcons name="warning" size={18} color="#FFA500" />
+                <PrimaryFontText style={styles.warningText}>
+                  To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
+                </PrimaryFontText>
+              </View>
+      
+              <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
+                <PrimaryFontBold style={styles.text}>
+                  {buttonClicked ? <Loading color="#fff" description="Please wait..." /> : 'Continue'}
+                </PrimaryFontBold>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      );
+      
 }
 
 const styles = StyleSheet.create({
@@ -597,7 +686,8 @@ const styles = StyleSheet.create({
         borderRadius: 9,
         alignItems: 'center',
         paddingVertical: 18,
-        width: '100%'
+        width: '100%',
+        marginBottom: 20
     },
     text: {
         color: '#fff',
@@ -618,7 +708,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: '#eef6ff',
         borderRadius: 6,
-        marginTop: 0,
+        marginTop: 7,
         padding: 10,
         alignItems: 'center',
         borderWidth: 1,
@@ -645,12 +735,15 @@ const styles = StyleSheet.create({
     pasteAddress: {
         fontSize: 13,
         color: '#333',
-    }, favoritesContainer: {
+    },
+    favoritesContainer: {
         borderWidth: 1.2,
         borderColor: '#eee',
         borderRadius: 6,
         padding: 12,
         marginTop: 10,
+        zIndex: 0
+        // paddingBottom: 12,
     },
     emptyFav: {
         alignItems: 'center',
@@ -724,22 +817,22 @@ const styles = StyleSheet.create({
         fontSize: 17
     },
     stickyFooter: {
-        paddingTop: 18,
+        paddingTop: 15,
         borderTopWidth: 1,
         borderColor: '#eee',
     },
     warningRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 10
+        marginBottom: 15,
+        // paddingHorizontal: 2
     },
     warningText: {
         flex: 1,
         marginLeft: 8,
         fontSize: 13,
         color: 'grey',
-        lineHeight: 20,
+        lineHeight: 18,
     },
     deleteIcon: {
         backgroundColor: '#f8f8f8',

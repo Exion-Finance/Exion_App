@@ -91,46 +91,91 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         );
     }
 
+    // function groupOnChainTransactions(txs: Transaction[]): OnchainSection[] {
+    //     const now = new Date();
+    //     const yesterday = new Date(now);
+    //     yesterday.setDate(now.getDate() - 1);
+
+    //     // 1) filter if needed
+    //     // const filtered = txs;
+    //     const filtered = [...txs];
+
+    //     // 2) sort descending by date
+    //     filtered.sort(
+    //         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    //     );
+
+    //     // 3) group
+    //     const buckets: Record<string, Transaction[]> = {};
+    //     filtered.forEach((tx) => {
+    //         const date = new Date(tx.date);
+    //         let key: string;
+
+    //         if (isSameDay(date, now)) {
+    //             key = 'Today';
+    //         } else if (isSameDay(date, yesterday)) {
+    //             key = 'Yesterday';
+    //         } else {
+    //             key = date.toLocaleDateString('en-KE', {
+    //                 weekday: 'short',
+    //                 day: 'numeric',
+    //                 month: 'short',
+    //                 year: 'numeric',
+    //             });
+    //         }
+
+    //         (buckets[key] ||= []).push(tx);
+    //     });
+
+    //     return Object.entries(buckets).map(([title, data]) => ({
+    //         title,
+    //         data,
+    //     }));
+    // }
+
     function groupOnChainTransactions(txs: Transaction[]): OnchainSection[] {
         const now = new Date();
         const yesterday = new Date(now);
         yesterday.setDate(now.getDate() - 1);
-
-        // 1) filter if needed
-        const filtered = txs;
-
+      
+        // 1) clone to avoid mutating frozen state
+        const filtered = [...txs];
+      
         // 2) sort descending by date
         filtered.sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
-
+      
         // 3) group
         const buckets: Record<string, Transaction[]> = {};
         filtered.forEach((tx) => {
-            const date = new Date(tx.date);
-            let key: string;
-
-            if (isSameDay(date, now)) {
-                key = 'Today';
-            } else if (isSameDay(date, yesterday)) {
-                key = 'Yesterday';
-            } else {
-                key = date.toLocaleDateString('en-KE', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                });
-            }
-
-            (buckets[key] ||= []).push(tx);
+          const date = new Date(tx.date);
+          let key: string;
+      
+          if (isSameDay(date, now)) {
+            key = "Today";
+          } else if (isSameDay(date, yesterday)) {
+            key = "Yesterday";
+          } else {
+            key = date.toLocaleDateString("en-KE", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+          }
+      
+          if (!buckets[key]) {
+            buckets[key] = [];
+          }
+          buckets[key].push(tx);
         });
-
+      
         return Object.entries(buckets).map(([title, data]) => ({
-            title,
-            data,
+          title,
+          data,
         }));
-    }
+      }
 
 
     return (

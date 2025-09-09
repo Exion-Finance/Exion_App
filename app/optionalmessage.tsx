@@ -14,7 +14,7 @@ import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { tokens } from '@/utill/tokens';
 import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY, useAuth } from './context/AuthContext';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import { SecondaryFontText } from '@/components/SecondaryFontText';
 import LottieAnimation from '@/components/LottieAnimation';
 import reusableStyle from '@/constants/ReusableStyles'
@@ -46,6 +46,15 @@ export default function OptionalMessage() {
     // Define the snap points (height) for the Bottom Sheet
     const snapPoints = useMemo(() => ['40%', '50%'], []);
 
+    const initialSnapPoints = ['CONTENT_HEIGHT'];
+
+    const {
+        animatedHandleHeight,
+        animatedSnapPoints,
+        animatedContentHeight,
+        handleContentLayout,
+    } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
+
     const maxLength = 70;
     const userInitial = name.slice(0, 1)
 
@@ -67,7 +76,7 @@ export default function OptionalMessage() {
 
     const sendCrypto = async () => {
         try {
-            bottomSheetRef.current?.snapToIndex(0)
+            bottomSheetRef.current?.expand()
             const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
 
             console.log("recipient", phoneNumber ? phoneNumber as string : recipient_address as string)
@@ -85,7 +94,7 @@ export default function OptionalMessage() {
 
             if (response.hash && !response.error) {
                 setResponseReceived(true);
-                bottomSheetRef.current?.snapToIndex(1)
+                // bottomSheetRef.current?.snapToIndex(1)
                 setTransactionDescription("Transaction sent successfully🎉")
             }
             else if (response.error) {
@@ -231,35 +240,43 @@ export default function OptionalMessage() {
                 <BottomSheet
                     ref={bottomSheetRef}
                     index={-1}
-                    snapPoints={snapPoints}
-                    enablePanDownToClose={true}
+                    // snapPoints={snapPoints}
+                    snapPoints={animatedSnapPoints}
+                    handleHeight={animatedHandleHeight}
+                    contentHeight={animatedContentHeight}
+                    // enablePanDownToClose={true}
                     animatedIndex={animatedIndex}
                     backgroundStyle={{ backgroundColor: '#052330' }}
                     handleIndicatorStyle={{ backgroundColor: 'white' }}
                 >
-                    <View>
+                    <BottomSheetView
+                        onLayout={handleContentLayout}
+                        style={{ paddingBottom: 20 }}
+                    >
                         <LottieAnimation animationSource={responseReceived ?
                             require('@/assets/animations/done.json')
                             :
                             require('@/assets/animations/loading.json')}
-                            animationStyle={{ width: "100%", height: responseReceived ? "80%" : "40%", marginTop: responseReceived ? -28 : 15 }}
+                            animationStyle={{ width: "100%", height: responseReceived ? 285 : 150, marginTop: responseReceived ? -30 : 20 }}
                             loop={responseReceived ? false : true}
                         />
                         <SecondaryFontText
                             style={[reusableStyle.paddingContainer,
-                            { fontSize: 22, marginTop: responseReceived ? -80 : 20, marginBottom: 30, textAlign: 'center', color: 'white' }]}
+                            { fontSize: 22, marginTop: responseReceived ? -80 : 10, textAlign: 'center', color: 'white' }]}
                         >
                             {responseReceived ? "Sent" : "Sending"}
                         </SecondaryFontText>
 
                         <PrimaryFontMedium style={styles.actionDescription}>{transactionDescription}</PrimaryFontMedium>
 
-                        <View style={reusableStyle.paddingContainer}>
+                        {responseReceived ?
+                         <View style={reusableStyle.paddingContainer}>
                             <TouchableOpacity style={[styles.button, { opacity: responseReceived ? 1 : 0 }]} onPress={handleButtonClick}>
                                 <PrimaryFontBold style={styles.text}>Done</PrimaryFontBold>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                        : null}
+                    </BottomSheetView>
                 </BottomSheet>
 
             </View>
@@ -356,7 +373,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%',
-        marginTop: 20
+        marginTop: 20,
+        marginBottom: 10
     },
     text: {
         color: '#fff',
@@ -368,6 +386,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         color: '#E0E0E0',
         textAlign: 'center',
-        marginTop: -13
+        marginTop: 16
     }
 });
