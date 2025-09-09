@@ -480,24 +480,6 @@ export default function TabOneScreen() {
               />
             </View>
 
-            {/* <View style={[styles.flexRow, { height: '38%', marginTop: 0 }]}>
-              <SecondaryButton
-                route={"/contacts" as Href<string | object>}
-                textOnButton="Transfer"
-                icon={<Feather name="arrow-up" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#4781D9', padding: 17, paddingHorizontal: 15, paddingRight: 25 }}
-                textStyle={{ fontSize: 17, color: "white" }}
-              />
-
-              <SecondaryButton
-                route={"/makepayment" as Href<string | object>}
-                textOnButton="Make Payment"
-                icon={<Feather name="arrow-down" size={18} color="white" />}
-                containerStyle={{ backgroundColor: '#00C48F', padding: 17, paddingHorizontal: 19, paddingRight: 24, marginLeft: 17 }}
-                textStyle={{ fontSize: 17, color: "white" }}
-              />
-            </View> */}
-
             <View style={[styles.flexRow, { height: '38%', marginTop: 0 }]}>
             <SecondaryButton
               route={"/contacts" as Href<string | object>}

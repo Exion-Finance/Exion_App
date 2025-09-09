@@ -112,9 +112,6 @@ export default function ResetPinOtp() {
         // set flag locally
         await SecureStore.setItemAsync('user_has_pin', 'true');
         Toast.show({ type: 'success', text1: 'Pin reset successful' });
-
-        // done: go back to previous screen (keyboard). Because PinAuth called onClose before routing,
-        // its modal is closed. Return to keyboard so user can Send.
         route.back();
       } else {
         const msg = res?.data?.message || 'Failed to reset PIN';

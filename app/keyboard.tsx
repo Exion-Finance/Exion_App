@@ -84,6 +84,13 @@ const CustomKeyboard = () => {
     handleContentLayout,
   } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
 
+  const {
+    animatedHandleHeight: animatedHandleHeight2,
+    animatedSnapPoints: animatedSnapPoints2,
+    animatedContentHeight: animatedContentHeight2,
+    handleContentLayout: handleContentLayout2,
+  } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
+
   let textOnButton
   if (source === 'contacts' || source === "sendcrypto") {
     textOnButton = "NEXT"
@@ -738,16 +745,15 @@ const CustomKeyboard = () => {
         <BottomSheet
           ref={bottomSheetRef2}
           index={-1}
-          // snapPoints={['40%', '60%']}
-          snapPoints={animatedSnapPoints}
-          handleHeight={animatedHandleHeight}
-          contentHeight={animatedContentHeight}
+          snapPoints={animatedSnapPoints2}
+          handleHeight={animatedHandleHeight2}
+          contentHeight={animatedContentHeight2}
           // enablePanDownToClose={true}
           animatedIndex={animatedIndex2}
         >
           <BottomSheetView
             style={{ paddingBottom: 18, alignItems: 'center' }}
-            onLayout={handleContentLayout}
+            onLayout={handleContentLayout2}
           >
             <LottieAnimation
               loop={transactionLoading ? true : false}

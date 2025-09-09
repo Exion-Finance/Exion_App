@@ -10,7 +10,7 @@ const logoSources: Record<string, any> = {
     Celo: require('@/assets/logos/celo.png'),
     cUSD: require('@/assets/logos/cusd.png'),
     cKes: require('@/assets/logos/ckes.png'),
-    usdc: require('@/assets/logos/usdc.png'),
+    USDC: require('@/assets/logos/usdc.png'),
     cEUR: require('@/assets/logos/ceur.png'),
 };
 
@@ -18,7 +18,7 @@ const tokenId: Record<string, number> = {
     Celo: 0,
     cUSD: 1,
     cKes: 2,
-    usdc: 3,
+    USDC: 3,
     cEUR: 4,
 };
 
@@ -46,7 +46,7 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
                 key === 'Celo' ? 'Celo' :
                     key === 'cUSD' ? 'Celo Dollar' :
                         key === 'cKes' ? 'Celo Kenyan Shilling' :
-                            key === 'usdc' ? 'USDC' :
+                            key === 'USDC' ? 'USDC' :
                                 key === 'cEUR' ? 'Celo Europe' : 'Other Name',
             balance: response.balance[tokenKey].token,
             ksh: response.balance[tokenKey].kes,
