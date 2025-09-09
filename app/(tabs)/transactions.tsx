@@ -172,7 +172,7 @@ export default function Transactions() {
                     // route="/modal"
                     textOnButton="Filter"
                     icon={<Ionicons name="filter-outline" size={15} color="black" />}
-                    containerStyle={{ backgroundColor: '#f8f8f8', borderWidth: 0.8, borderColor: '#DFE4E5' }}
+                    containerStyle={{ backgroundColor: '#f8f8f8', borderWidth: 0.8, borderColor: '#DFE4E5', opacity: 0 }}
                     textStyle={{ fontSize: 16, color: "#074A4F" }}
                 />
             </View>

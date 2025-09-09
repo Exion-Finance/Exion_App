@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 14.5,
-        marginTop: 13,
-        marginBottom: 17,
+        marginTop: 2,
+        marginBottom: 15,
         color: '#79828E'
     },
     row: {

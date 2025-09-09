@@ -427,7 +427,7 @@ export default function EnterWalletAddress() {
             </View>
       
             {/* Middle flexible scrollable section */}
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer} showsVerticalScrollIndicator={false}>
               <View>
                 {displayFavorites.length !== 0 ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}>
@@ -440,7 +440,7 @@ export default function EnterWalletAddress() {
                   <View style={styles.emptyFav}>
                     <LottieAnimation
                       animationSource={require('@/assets/animations/wallet.json')}
-                      animationStyle={{ width: '80%', height: 100 }}
+                      animationStyle={{ width: '80%', height: 100, marginTop: -10 }}
                     />
                     <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
                     <PrimaryFontText style={styles.emptySubtitle}>
@@ -452,7 +452,7 @@ export default function EnterWalletAddress() {
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  displayFavorites.map((fav) => (
+                  displayFavorites.slice(0, 3).map((fav) => (
                     <FavoriteAddressCard
                       key={fav.address}
                       address={fav.address}
@@ -490,6 +490,55 @@ export default function EnterWalletAddress() {
                 </PrimaryFontBold>
               </TouchableOpacity>
             </View>
+
+
+            <Modal
+                    visible={modalVisible}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalContent}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <PrimaryFontBold style={styles.modalTitle}>
+                                    {modalMode === 'addAddress' ? 'Save Address' : 'Add Username'}
+                                </PrimaryFontBold>
+
+                                {modalMode === 'addAddress' ? null :
+                                    <TouchableOpacity onPress={handleDeleteFavorite} style={styles.deleteIcon}>
+                                        {deleteButtonClicked ? <ActivityIndicator size="small" color='grey' /> : <Feather name="trash" size={15} color="red" />}
+                                    </TouchableOpacity>}
+                            </View>
+
+                            {/* Address input */}
+                            <PrimaryFontMedium style={styles.inputLabel}>Wallet Address</PrimaryFontMedium>
+                            <TextInput
+                                style={[styles.modalInput, { backgroundColor: modalAddress ? '#f0f0f0' : 'transparent' }]}
+                                value={modalAddress}
+                                onChangeText={setModalAddress}
+                                placeholder="OxOdbe52...223fa"
+                                placeholderTextColor="#C3C2C2"
+                                editable={modalMode === 'addAddress'}
+                            />
+
+                            {/* Username input */}
+                            <PrimaryFontMedium style={styles.inputLabel}>Username</PrimaryFontMedium>
+                            <TextInput
+                                style={styles.modalInput}
+                                value={modalUsername}
+                                onChangeText={setModalUsername}
+                                placeholder="E.g John Valora"
+                                placeholderTextColor="#C3C2C2"
+                                autoCapitalize='words'
+                            />
+
+                            <TouchableOpacity style={styles.modalBtn} onPress={handleModalDone} disabled={doneButtonClicked}>
+                                <PrimaryFontBold style={styles.modalBtnText}>{doneButtonClicked ? <Loading color='#fff' description='' /> : "Done"}</PrimaryFontBold>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
           </View>
         </View>
       );
@@ -579,10 +628,10 @@ const styles = StyleSheet.create({
     },
     emptyFav: {
         alignItems: 'center',
-        paddingBottom: 24,
+        paddingBottom: 10,
     },
-    emptyTitle: { fontSize: 16.5, marginTop: 0 },
-    emptySubtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginVertical: 8 },
+    emptyTitle: { fontSize: 16.5, marginTop: -10 },
+    emptySubtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginVertical: 5 },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -590,7 +639,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 6,
-        marginTop: 12,
+        marginTop: 10,
     },
     addBtnText: { color: '#fff', marginLeft: 6, fontSize: 14 },
     addFavWrapper: {
@@ -649,22 +698,22 @@ const styles = StyleSheet.create({
         fontSize: 17
     },
     stickyFooter: {
-        paddingTop: 15,
+        paddingTop: 10,
         borderTopWidth: 1,
         borderColor: '#eee',
     },
     warningRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 10,
         // paddingHorizontal: 2
     },
     warningText: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 13,
+        fontSize: 12,
         color: 'grey',
-        lineHeight: 18,
+        lineHeight: 16,
     },
     deleteIcon: {
         backgroundColor: '#f8f8f8',
