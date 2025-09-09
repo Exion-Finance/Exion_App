@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
@@ -69,6 +70,7 @@ export default function ResetPwdProfile() {
 
     return (
         <View style={styles.container}>
+            <StatusBar style={'dark'} />
             <NavBar title='Reset password' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
         fontFamily: 'DMSansMedium'
     },
     label: {
-        fontSize: 20,
+        fontSize: 19,
         marginBottom: 16,
         color: '#052330',
     },

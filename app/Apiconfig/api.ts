@@ -116,7 +116,7 @@ export const RedeemPromo = async (token: string, tokenId: number = 1, promoCode:
 export const transactionHistory = async ( pagination?: number) => {
     try {
         // Pass pagination as a query parameter
-        const response = await authAPI.get(`/tx/history`, {
+        const response = await authAPI.get(`/tx/txhistory`, {
             params: { pagination },
             timeout: 30000
         });

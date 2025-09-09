@@ -30,7 +30,7 @@ export default function NavBar({ title, onBackPress }: NavBarProps) {
 
 const styles = StyleSheet.create({
     headerContainer: {
-        height: 80,
+        height: 70,
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   Animated,
@@ -35,6 +36,8 @@ export default function PinAuth({
   const [mode, setMode] = useState<Mode>('create');
   const [firstPin, setFirstPin] = useState<string>('');
   const [pin, setPin] = useState<string>('');
+
+  const route = useRouter()
 
   // Hold a reference to the looping animation
   const loopAnim = useRef<Animated.CompositeAnimation | null>(null);
@@ -231,11 +234,25 @@ export default function PinAuth({
       </View>
 
       {/* Forgot Pin link only in verify mode */}
+      {/* {mode === 'verify' && (
+        <TouchableOpacity onPress={() => route.push('/resetpinotp')}>
+          <PrimaryFontMedium style={styles.forgot}>Forgot Pin?</PrimaryFontMedium>
+        </TouchableOpacity>
+      )} */}
+
       {mode === 'verify' && (
-        <TouchableOpacity onPress={() => setMode('create')}>
+        <TouchableOpacity
+          onPress={() => {
+            // close the PinAuth modal in the parent (keyboard.tsx)
+            onClose && onClose();
+            // then navigate to reset flow screen
+            route.push('/resetpinotp');
+          }}
+        >
           <PrimaryFontMedium style={styles.forgot}>Forgot Pin?</PrimaryFontMedium>
         </TouchableOpacity>
       )}
+
 
       <Toast position="top" />
     </KeyboardAvoidingView>
@@ -245,9 +262,9 @@ export default function PinAuth({
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, color: '#222' },
-  subtitle: { fontSize: 17, color: '#555', marginBottom: 24, textAlign: 'center' },
+  subtitle: { fontSize: 16, color: '#555', marginBottom: 24, textAlign: 'center' },
   // 
-  dotsRow: { flexDirection: 'row', marginBottom: 32 },
+  dotsRow: { flexDirection: 'row', marginBottom: 30 },
   dotContainer: { marginHorizontal: 12 },
   dot: {
     width: 16,
@@ -267,12 +284,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 20
+    marginTop: 10
   },
   key: {
     width: '30%',
     // aspectRatio: 0.8,
-    paddingVertical: 15,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 8,
@@ -280,7 +297,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   keyText: { fontSize: 24, color: '#333' },
-  forgot: { color: '#007AFF', marginTop: 30, fontSize: 16 },
+  forgot: { color: '#007AFF', marginTop: 20, fontSize: 16 },
   closeContainer: {
     width: '100%',
     paddingHorizontal: 18,

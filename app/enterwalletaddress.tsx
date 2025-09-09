@@ -118,27 +118,21 @@ export default function EnterWalletAddress() {
     }, [userTransactions]);
 
     // console.log("allTxs after .flat", allTxs)
-    
+
 
     // derive top-3 sent-to addresses
     const favorites = useMemo(() => {
-        //Exion wallet address
-        const excludeAddress = '0xabdee117d9236cba1477fa48ec1a2d3f1a53561b';
-
-        // Only keep “sent” TXs and skip the excluded address
         const sent = allTxs.filter(
             (tx) =>
                 tx.transactionType === 'Sent' &&
-                tx.to !== excludeAddress &&
-                tx.to.startsWith('0x') &&
+                tx.toUsername?.startsWith('0x') &&
                 tx.to.length >= 20
         );
 
-        // Count occurrences and track lastDate
         const counts: Record<string, { count: number; lastDate: Date }> = {};
         sent.forEach((tx) => {
             const addr = tx.to;
-            const date = new Date(Number(tx.timeStamp) * 1000);
+            const date = new Date(tx.date);
 
             if (!counts[addr]) counts[addr] = { count: 0, lastDate: date };
             counts[addr].count++;
@@ -146,6 +140,7 @@ export default function EnterWalletAddress() {
                 counts[addr].lastDate = date;
             }
         });
+
 
         // Sort by count desc, take top 3
         return Object.entries(counts)
@@ -384,121 +379,120 @@ export default function EnterWalletAddress() {
             setDeleteButtonClicked(false)
         }
     }
-
+    
     return (
         <View style={styles.container}>
-            <StatusBar style={'dark'} />
-            <NavBar title='Wallet Address' onBackPress={() => route.back()} />
-            <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
-                <View>
-                    <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
-                    <TextInput
-                        style={[styles.input, { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 }]}
-                        placeholder="E.g OxOdbe52...223fa"
-                        placeholderTextColor="#C3C2C2"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        onChangeText={(text) => {
-                            setWalletAddress(text);
-                            setError(false)
-                        }}
-                        onFocus={() => setIsWalletAddressFocused(true)}
-                        onBlur={() => setIsWalletAddressFocused(false)}
-                        value={walletAddress.startsWith("0x") && walletAddress.length > 30 ?
-                            `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
-                            : walletAddress}
+          <StatusBar style={'dark'} />
+          <NavBar title='Wallet Address' onBackPress={() => route.back()} />
+      
+          <View style={[reusableStyles.paddingContainer, { flex: 1 }]}>
+            {/* Top static section */}
+            <View style={{ zIndex: 1}}>
+              <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
+              <TextInput
+                style={[
+                  styles.input,
+                  { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 },
+                ]}
+                placeholder="E.g OxOdbe52...223fa"
+                placeholderTextColor="#C3C2C2"
+                keyboardType="default"
+                autoCapitalize="none"
+                onChangeText={(text) => {
+                  setWalletAddress(text);
+                  setError(false);
+                }}
+                onFocus={() => setIsWalletAddressFocused(true)}
+                onBlur={() => setIsWalletAddressFocused(false)}
+                value={
+                  walletAddress.startsWith('0x') && walletAddress.length > 30
+                    ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
+                    : walletAddress
+                }
+              />
+      
+              {clipboardAddress && (
+                <TouchableOpacity style={styles.pasteBanner} activeOpacity={0.8} onPress={handlePaste}>
+                  <View style={styles.pasteIcon}>
+                    <MaterialIcons name="content-paste" size={18} color="#fff" />
+                  </View>
+                  <View style={styles.pasteTextWrapper}>
+                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
+                    <PrimaryFontText style={styles.pasteAddress}>
+                      {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
+                    </PrimaryFontText>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
+      
+            {/* Middle flexible scrollable section */}
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer} showsVerticalScrollIndicator={false}>
+              <View>
+                {displayFavorites.length !== 0 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}>
+                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
+                    <Favourites />
+                  </View>
+                ) : null}
+      
+                {displayFavorites.length === 0 ? (
+                  <View style={styles.emptyFav}>
+                    <LottieAnimation
+                      animationSource={require('@/assets/animations/wallet.json')}
+                      animationStyle={{ width: '80%', height: 100, marginTop: -10 }}
                     />
-                    <FormErrorText error={error} errorDescription={errorDescription} />
-
-                    <ScrollView>
-                        {clipboardAddress && (
-                            <TouchableOpacity
-                                style={styles.pasteBanner}
-                                activeOpacity={0.8}
-                                onPress={handlePaste}
-                            >
-                                <View style={styles.pasteIcon}>
-                                    <MaterialIcons name="content-paste" size={18} color="#fff" />
-                                </View>
-                                <View style={styles.pasteTextWrapper}>
-                                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
-                                    <PrimaryFontText style={styles.pasteAddress}>
-                                        {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
-                                    </PrimaryFontText>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-
-                        <View style={styles.favoritesContainer}>
-                            {displayFavorites.length !== 0 ? (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 3 }}>
-                                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
-                                    <Favourites />
-                                </View>
-
-                            )
-                                : null}
-
-                            {displayFavorites.length === 0 ? (
-                                <View style={styles.emptyFav}>
-                                    {/* <MaterialIcons name="link" size={36} color="#888" /> */}
-                                    <LottieAnimation animationSource={require('@/assets/animations/wallet.json')} animationStyle={{ width: "80%", height: 100 }} />
-                                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
-                                    <PrimaryFontText style={styles.emptySubtitle}>
-                                        Save wallet addresses to make sending to external wallets simpler and faster
-                                    </PrimaryFontText>
-                                    <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
-                                        <MaterialIcons name="add" size={20} color="#fff" />
-                                        <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
-                                // Map your favorites
-                                displayFavorites.slice(0, 3).map((fav) => (
-                                    <FavoriteAddressCard
-                                        key={fav.address}
-                                        address={fav.address}
-                                        lastDate={fav.lastDate}
-                                        userName={fav.userName}
-                                        onAddUsername={(address) => openUsernameModal(address)}
-                                        onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
-                                    />
-                                ))
-                            )}
-
-
-                            {displayFavorites.length !== 0 ? (
-                                <View style={styles.addFavWrapper}>
-                                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
-                                        <MaterialIcons name="add" size={20} color="#007AFF" />
-                                        <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
-                                    </TouchableOpacity>
-                                </View>
-                            )
-                                : null}
-
-                        </View>
-                    </ScrollView>
-
-                </View>
-
-                <View style={styles.stickyFooter}>
-                    <View style={styles.warningRow}>
-                        <MaterialIcons name="warning" size={18} color="#FFA500" />
-                        <PrimaryFontText style={styles.warningText}>
-                            To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
-                        </PrimaryFontText>
-                    </View>
-
-                    <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
-                        <PrimaryFontBold style={styles.text}>
-                            {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
-                        </PrimaryFontBold>
+                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
+                    <PrimaryFontText style={styles.emptySubtitle}>
+                      Save wallet addresses to make sending to external wallets simpler and faster
+                    </PrimaryFontText>
+                    <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
+                      <MaterialIcons name="add" size={20} color="#fff" />
+                      <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
                     </TouchableOpacity>
-                </View>
+                  </View>
+                ) : (
+                  displayFavorites.slice(0, 3).map((fav) => (
+                    <FavoriteAddressCard
+                      key={fav.address}
+                      address={fav.address}
+                      lastDate={fav.lastDate}
+                      userName={fav.userName}
+                      onAddUsername={(address) => openUsernameModal(address)}
+                      onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
+                    />
+                  ))
+                )}
+      
+                {displayFavorites.length !== 0 ? (
+                  <View style={styles.addFavWrapper}>
+                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
+                      <MaterialIcons name="add" size={20} color="#007AFF" />
+                      <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+            </ScrollView>
+      
+            {/* Footer static at bottom */}
+            <View style={styles.stickyFooter}>
+              <View style={styles.warningRow}>
+                <MaterialIcons name="warning" size={18} color="#FFA500" />
+                <PrimaryFontText style={styles.warningText}>
+                  To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
+                </PrimaryFontText>
+              </View>
+      
+              <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
+                <PrimaryFontBold style={styles.text}>
+                  {buttonClicked ? <Loading color="#fff" description="Please wait..." /> : 'Continue'}
+                </PrimaryFontBold>
+              </TouchableOpacity>
+            </View>
 
 
-                <Modal
+            <Modal
                     visible={modalVisible}
                     transparent
                     animationType="slide"
@@ -545,12 +539,10 @@ export default function EnterWalletAddress() {
                         </View>
                     </View>
                 </Modal>
-
-                <Toast position="top" />
-            </View>
-
-        </View >
-    );
+          </View>
+        </View>
+      );
+      
 }
 
 const styles = StyleSheet.create({
@@ -575,7 +567,8 @@ const styles = StyleSheet.create({
         borderRadius: 9,
         alignItems: 'center',
         paddingVertical: 18,
-        width: '100%'
+        width: '100%',
+        marginBottom: 20
     },
     text: {
         color: '#fff',
@@ -596,7 +589,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: '#eef6ff',
         borderRadius: 6,
-        marginTop: 0,
+        marginTop: 7,
         padding: 10,
         alignItems: 'center',
         borderWidth: 1,
@@ -623,19 +616,22 @@ const styles = StyleSheet.create({
     pasteAddress: {
         fontSize: 13,
         color: '#333',
-    }, favoritesContainer: {
+    },
+    favoritesContainer: {
         borderWidth: 1.2,
         borderColor: '#eee',
         borderRadius: 6,
         padding: 12,
         marginTop: 10,
+        zIndex: 0
+        // paddingBottom: 12,
     },
     emptyFav: {
         alignItems: 'center',
-        paddingBottom: 24,
+        paddingBottom: 10,
     },
-    emptyTitle: { fontSize: 16.5, marginTop: 0 },
-    emptySubtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginVertical: 8 },
+    emptyTitle: { fontSize: 16.5, marginTop: -10 },
+    emptySubtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginVertical: 5 },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -643,7 +639,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 6,
-        marginTop: 12,
+        marginTop: 10,
     },
     addBtnText: { color: '#fff', marginLeft: 6, fontSize: 14 },
     addFavWrapper: {
@@ -702,22 +698,22 @@ const styles = StyleSheet.create({
         fontSize: 17
     },
     stickyFooter: {
-        paddingTop: 18,
+        paddingTop: 10,
         borderTopWidth: 1,
         borderColor: '#eee',
     },
     warningRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 10
+        marginBottom: 10,
+        // paddingHorizontal: 2
     },
     warningText: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 13,
+        fontSize: 12,
         color: 'grey',
-        lineHeight: 20,
+        lineHeight: 16,
     },
     deleteIcon: {
         backgroundColor: '#f8f8f8',

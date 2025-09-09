@@ -91,6 +91,7 @@ function AppInitializer() {
       <Stack.Screen name="editprofile" options={{ headerShown: false }} />
       <Stack.Screen name="changeemail" options={{ headerShown: false }} />
       <Stack.Screen name="resetpasswordprofile" options={{ headerShown: false }} />
+      <Stack.Screen name="resetpinotp" options={{ headerShown: false }} />
       <Stack.Screen name="changephonenumber" options={{ headerShown: false }} />
       <Stack.Screen name="settings" options={{ headerShown: false }} />
       <Stack.Screen name="enterwalletaddress" options={{ headerShown: false }} />

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Platform } from 'react-native';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { SharedValue } from 'react-native-reanimated';
 import { MobileTransaction } from '@/types/datatypes';
@@ -22,7 +22,15 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
     transaction,
     animatedIndex
 }) => {
-    const snapPoints = ['80%'];
+    // const snapPoints = ['80%'];
+    const initialSnapPoints = ['CONTENT_HEIGHT'];
+
+    const {
+        animatedHandleHeight,
+        animatedSnapPoints,
+        animatedContentHeight,
+        handleContentLayout,
+    } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
 
     const handleClose = useCallback(() => {
         sheetRef.current?.close();
@@ -189,10 +197,12 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
     if (!transaction) {
         return (
-            <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints}>
-                <View style={styles.emptyContainer}>
+            <BottomSheet ref={sheetRef} index={-1} snapPoints={animatedSnapPoints} handleHeight={animatedHandleHeight} contentHeight={animatedContentHeight} >
+                <BottomSheetView onLayout={handleContentLayout}>
+                    <View style={styles.emptyContainer}>
                     <Text>No transaction selected</Text>
-                </View>
+                    </View>
+                </BottomSheetView>
             </BottomSheet>
         );
     }
@@ -205,9 +215,19 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
 
     return (
-        <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} animatedIndex={animatedIndex} enablePanDownToClose={true} backgroundStyle={{ backgroundColor: '#f8f8f8' }}>
+        <BottomSheet
+            ref={sheetRef}
+            index={-1}
+            // snapPoints={snapPoints}
+            snapPoints={animatedSnapPoints}
+            handleHeight={animatedHandleHeight}
+            contentHeight={animatedContentHeight}
+            animatedIndex={animatedIndex}
+            enablePanDownToClose={true}
+            backgroundStyle={{ backgroundColor: '#f8f8f8' }}
+        >
+            <BottomSheetView onLayout={handleContentLayout}>
             <View style={styles.contentContainer}>
-
                 <View style={styles.dataTable}>
                     <View style={styles.headerContainer}>
                         <Image
@@ -269,30 +289,31 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
 
                 <View style={styles.container}>
-                    <TouchableOpacity style={[styles.button, styles.shareButton]} onPress={handleShare}>
-                        <Feather name="share" size={16} color="#00C48F" style={styles.icon} />
-                        <PrimaryFontBold style={[styles.buttonText, styles.shareText]}>Share</PrimaryFontBold>
-                    </TouchableOpacity>
-
                     <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleDownload}>
-                        <Feather name="download" size={16} color="#FFFFFF" style={styles.icon} />
+                        <Feather name="download" size={16} color="#00C48F" style={styles.icon} />
                         <PrimaryFontBold style={[styles.buttonText, styles.downloadText]}>Download</PrimaryFontBold>
                     </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.button, styles.shareButton]} onPress={handleShare}>
+                        <Feather name="share" size={16} color="#FFFFFF" style={styles.icon} />
+                        <PrimaryFontBold style={[styles.buttonText, styles.shareText]}>Share</PrimaryFontBold>
+                    </TouchableOpacity>
                 </View>
-            </View>
+                </View>
+            </BottomSheetView>
         </BottomSheet>
     );
 };
 
 const styles = StyleSheet.create({
     emptyContainer: {
-        height: 100,
+        // height: 100,
         justifyContent: 'center',
         alignItems: 'center',
     },
     contentContainer: {
         paddingHorizontal: 19,
-        flex: 1,
+        // flex: 1,
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -378,6 +399,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        // marginBottom: 2
     },
     button: {
         flexDirection: 'row',
@@ -388,14 +410,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     shareButton: {
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#00C48F',
         borderWidth: 1,
         borderColor: '#00C48F',
-        marginRight: 8,
     },
     downloadButton: {
-        backgroundColor: '#00C48F',
+        backgroundColor: 'transparent',
         marginLeft: 8,
+        borderColor: '#00C48F',
+        borderWidth: 1,
+        marginRight: 8,
     },
     icon: {
         marginRight: 6,
@@ -405,10 +429,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     shareText: {
-        color: '#00C48F',
+        color: '#FFFFFF',
     },
     downloadText: {
-        color: '#FFFFFF',
+        color: '#00C48F',
     },
 });
 
