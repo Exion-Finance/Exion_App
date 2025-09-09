@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   Animated,
@@ -35,6 +36,8 @@ export default function PinAuth({
   const [mode, setMode] = useState<Mode>('create');
   const [firstPin, setFirstPin] = useState<string>('');
   const [pin, setPin] = useState<string>('');
+
+  const route = useRouter()
 
   // Hold a reference to the looping animation
   const loopAnim = useRef<Animated.CompositeAnimation | null>(null);
@@ -231,11 +234,25 @@ export default function PinAuth({
       </View>
 
       {/* Forgot Pin link only in verify mode */}
+      {/* {mode === 'verify' && (
+        <TouchableOpacity onPress={() => route.push('/resetpinotp')}>
+          <PrimaryFontMedium style={styles.forgot}>Forgot Pin?</PrimaryFontMedium>
+        </TouchableOpacity>
+      )} */}
+
       {mode === 'verify' && (
-        <TouchableOpacity onPress={() => setMode('create')}>
+        <TouchableOpacity
+          onPress={() => {
+            // close the PinAuth modal in the parent (keyboard.tsx)
+            onClose && onClose();
+            // then navigate to reset flow screen
+            route.push('/resetpinotp');
+          }}
+        >
           <PrimaryFontMedium style={styles.forgot}>Forgot Pin?</PrimaryFontMedium>
         </TouchableOpacity>
       )}
+
 
       <Toast position="top" />
     </KeyboardAvoidingView>

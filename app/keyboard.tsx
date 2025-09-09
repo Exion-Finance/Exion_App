@@ -140,7 +140,7 @@ const CustomKeyboard = () => {
 
   const closePin = () => {
     setShowPinAuth(false);
-    bottomSheetRef2.current?.snapToIndex(0);
+    bottomSheetRef2.current?.expand();
   };
 
   // on mount, check if PIN exists in flag storage
@@ -158,7 +158,7 @@ const CustomKeyboard = () => {
     setSend(true)
 
     try {
-      bottomSheetRef2.current?.snapToIndex(0);
+      bottomSheetRef2.current?.expand();
 
       const chainId = 1
       const tokenName = activeToken.token
@@ -222,7 +222,7 @@ const CustomKeyboard = () => {
     console.log("Buy goods.....")
     setSend(true)
     try {
-      bottomSheetRef2.current?.snapToIndex(0);
+      bottomSheetRef2.current?.expand();
 
       const chainId = 1
       const tokenName = activeToken.token.toUpperCase()
@@ -285,7 +285,7 @@ const CustomKeyboard = () => {
     console.log("Paybill.....")
     setSend(true)
     try {
-      bottomSheetRef2.current?.snapToIndex(0);
+      bottomSheetRef2.current?.expand();
 
       const chainId = 1
       const tokenName = activeToken.token.toUpperCase()
@@ -506,7 +506,6 @@ const CustomKeyboard = () => {
     finally {
       setSend(false)
     }
-
   }
 
   const handleBackspace = () => {
@@ -626,7 +625,7 @@ const CustomKeyboard = () => {
         transactionState === "Transaction sent🎉" ||
         transactionState === "Oops, transaction failed"
       ) {
-        bottomSheetRef2.current?.snapToIndex(1);
+        // bottomSheetRef2.current?.snapToIndex(1);
         setTransactionLoading(false);
       } else {
         setTransactionLoading(false);
@@ -739,21 +738,26 @@ const CustomKeyboard = () => {
         <BottomSheet
           ref={bottomSheetRef2}
           index={-1}
-          snapPoints={['40%', '60%']}
-          
-          enablePanDownToClose={true}
+          // snapPoints={['40%', '60%']}
+          snapPoints={animatedSnapPoints}
+          handleHeight={animatedHandleHeight}
+          contentHeight={animatedContentHeight}
+          // enablePanDownToClose={true}
           animatedIndex={animatedIndex2}
         >
-          <BottomSheetView style={styles.contentContainer}>
+          <BottomSheetView
+            style={{ paddingBottom: 18, alignItems: 'center' }}
+            onLayout={handleContentLayout}
+          >
             <LottieAnimation
               loop={transactionLoading ? true : false}
               animationSource={transactionLoading ? require('@/assets/animations/loading.json') : require('@/assets/animations/done.json')}
-              animationStyle={{ width: transactionLoading ? "60%" : "94%", height: transactionLoading ? "50%" : "50%", marginTop: transactionLoading ? -10 : -20 }}
+              animationStyle={{ width: transactionLoading ? "60%" : "94%", height: transactionLoading ? 160 : 250, marginTop: transactionLoading ? 0 : -30 }}
             />
 
             <SecondaryFontText
               style={[reusableStyle.paddingContainer,
-              { fontSize: 22, marginTop: transactionLoading ? -10 : -50, marginBottom: 30, textAlign: 'center', color: '#00563E' }]}
+              { fontSize: 22, marginTop: transactionLoading ? 7 : -70, marginBottom: 15, textAlign: 'center', color: '#00563E' }]}
             >
               {transactionState}
             </SecondaryFontText>
@@ -958,11 +962,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
     // marginBottom: 20
   },
-  contentContainer: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center'
-  }
+  // contentContainer: {
+  //   flex: 1,
+  //   width: '100%',
+  //   alignItems: 'center'
+  // }
 });
 
 export default CustomKeyboard;
