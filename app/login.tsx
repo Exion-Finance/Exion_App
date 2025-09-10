@@ -51,6 +51,7 @@ export default function Login() {
             const res = await onLogin!(email, password);
             if (res && res.data.accesstoken) {
                 setButtonClicked(false)
+                route.dismissAll();
                 route.replace('/(tabs)');
             } else if (!res.data) {
                 setButtonClicked(false)

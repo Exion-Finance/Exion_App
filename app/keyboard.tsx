@@ -356,6 +356,7 @@ const CustomKeyboard = () => {
 
   const handleDone = () => {
     bottomSheetRef2.current?.close();
+    route.dismissAll();
     route.replace("/(tabs)")
   }
 
