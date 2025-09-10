@@ -136,6 +136,7 @@ export default function OptionalMessage() {
 
     const handleButtonClick = () => {
         bottomSheetRef.current?.close();
+        route.dismissAll();
         route.replace("/(tabs)")
     }
 

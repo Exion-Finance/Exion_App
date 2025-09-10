@@ -73,7 +73,7 @@ export default function Profile() {
       <StatusBar style={'dark'} />
       <NavBar title='Profile' onBackPress={() => route.back()} />
 
-      <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 30 }]}>
+      <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 20 }]}>
         <Image source={userIcon} style={styles.userIcon} />
         <View>
           <View style={styles.flexRow}>
@@ -83,7 +83,7 @@ export default function Profile() {
         </View>
       </View>
 
-      <View style={[reusableStyle.paddingContainer, { flex: 1, justifyContent: 'space-between', backgroundColor: '#f8f8f8', marginTop: 20, paddingBottom: 20 }]}>
+      <View style={[reusableStyle.paddingContainer, { flex: 1, justifyContent: 'space-between', backgroundColor: '#f8f8f8', marginTop: 10, paddingBottom: 20 }]}>
         <View>
           <ProfileOption
             option="Edit profile"
