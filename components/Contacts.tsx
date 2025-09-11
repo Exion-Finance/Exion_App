@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { SectionList, Alert, View, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SectionList, Alert, View, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Image, Linking, Platform, ScrollView, RefreshControl } from 'react-native';
 import * as Contacts from 'expo-contacts';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Application from 'expo-application';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import reusableStyle from '@/constants/ReusableStyles'
 import { PrimaryFontText } from './PrimaryFontText';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
+import { PrimaryFontBold } from './PrimaryFontBold';
 import { useRouter } from 'expo-router';
 import { checkPhoneNumber } from '@/app/Apiconfig/api';
 
@@ -29,6 +32,8 @@ export default function ContactsList({ from }: Props) {
     const [filteredSections, setFilteredSections] = useState<ContactSection[]>([]);
     const [contactClicked, setContactClicked] = useState<string | false>(false);
     const [contactsLoaded, setContactsLoaded] = useState<boolean>(false);
+    const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
     const route = useRouter()
 
     useEffect(() => {
@@ -48,7 +53,8 @@ export default function ContactsList({ from }: Props) {
                         Alert.alert("Oops😕", 'No contacts found');
                     }
                 } else {
-                    Alert.alert("Oops😕", 'Permission denied');
+                    // Alert.alert("Oops😕", 'Permission denied');
+                    setPermissionDenied(true);
                 }
             } catch (err) {
                 console.log(err)
@@ -58,6 +64,43 @@ export default function ContactsList({ from }: Props) {
             }
         })();
     }, []);
+
+    const handleRefresh = async () => {
+        setContactsLoaded(false);
+        setRefreshing(true);
+
+        const { status } = await Contacts.requestPermissionsAsync();
+        if (status === 'granted') {
+            setPermissionDenied(false);
+            const { data } = await Contacts.getContactsAsync({
+                fields: [Contacts.Fields.PhoneNumbers],
+            });
+
+            if (data.length > 0) {
+                const processedContacts = processContacts(data);
+                setSections(processedContacts);
+                setFilteredSections(processedContacts);
+            } else {
+                Alert.alert("Oops😕", 'No contacts found');
+            }
+
+        } else {
+            setPermissionDenied(true);
+        }
+        setContactsLoaded(true);
+        setRefreshing(false);
+    };
+
+
+    const openSettings = () => {
+        if (Platform.OS === 'ios') {
+            Linking.openURL('app-settings:');
+        } else {
+            IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS, {
+                data: 'package:' + Application.applicationId,
+            });
+        }
+    };
 
 
     const processContacts = (contacts: Contacts.Contact[]): ContactSection[] => {
@@ -187,15 +230,15 @@ export default function ContactsList({ from }: Props) {
         } catch (error: any) {
             if (error.response) {
                 // The server responded with a status other than 2xx
-                Alert.alert("Invite 📩", "This contact isn't a regitered Exion user. Try sending using their wallet address instead by clicking on the top right icon");
+                Alert.alert("Invite 📩", "This contact isn't a regitered Exion user. Try sending using their wallet address instead");
             } else if (error.request) {
                 // No response received
 
-                Alert.alert("Error", "Unable to connect to the server. Please try again later.");
+                Alert.alert("Error😕", "Something went wrong. Please try again later.");
             } else {
                 // Something else caused the error
 
-                Alert.alert("Error", "An unexpected error occurred. Please try again.");
+                Alert.alert("Error😕", "An unexpected error occurred. Please try again.");
             }
         } finally {
             setContactClicked(false);
@@ -205,7 +248,7 @@ export default function ContactsList({ from }: Props) {
 
     return (
         <View style={[styles.container, from === "contacts" ? reusableStyle.paddingContainer : reusableStyle.width100]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {permissionDenied && from !== "contacts" ? null : <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%" }]}>
                     <Ionicons name="search" size={20} color="#CFCFCF" style={styles.searchIcon} />
                     <TextInput
@@ -219,38 +262,61 @@ export default function ContactsList({ from }: Props) {
                 <TouchableOpacity style={[styles.qrButton, { display: from === "contacts" ? "flex" : "none" }]} onPress={() => route.push('/sendcrypto')}>
                     <MaterialCommunityIcons name="qrcode-scan" size={20} color="white" />
                 </TouchableOpacity>
-            </View>
+            </View>}
 
-            <PrimaryFontMedium style={styles.chooseText}>Choose from your contacts</PrimaryFontMedium>
+            {permissionDenied && from !== "contacts" ? null : <PrimaryFontMedium style={styles.chooseText}>Choose from your contacts</PrimaryFontMedium>}
 
-            {contactsLoaded ?
-                <SectionList
-                    sections={filteredSections}
-                    initialNumToRender={20}
-                    maxToRenderPerBatch={10}
-                    style={{ backgroundColor: '#f8f8f8' }}
-                    keyExtractor={(item, index) => item.name + index}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity style={[styles.contactContainer, { backgroundColor: contactClicked === item.phoneNumber ? "#F0F0F0" : "transparent" }]} onPress={() => handleSelectContact(item)}>
-                            <View>
-                                <PrimaryFontText style={styles.name}>{item.name}</PrimaryFontText>
-                                <PrimaryFontText style={styles.phoneNumber}>{item.phoneNumber}</PrimaryFontText>
-                            </View>
-                            {contactClicked === item.phoneNumber && (
-                                <ActivityIndicator size="small" color="#00C48F" />
-                            )}
+            {permissionDenied ?
+                <ScrollView
+                    contentContainerStyle={{ flex: 1 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    }
+                >
+                    <View style={styles.permissionContainer}>
+                        <Image source={require('@/assets/images/sad.png')} style={styles.permissionImage} resizeMode="contain" />
+                        <PrimaryFontBold style={styles.permissionTitle}>Permission required</PrimaryFontBold>
+                        <PrimaryFontText style={styles.permissionDescription}>
+                            We need access to your contacts so you can easily send money.
+                        </PrimaryFontText>
+
+                        <TouchableOpacity style={styles.permissionButton} onPress={openSettings}>
+                            <PrimaryFontMedium style={styles.permissionButtonText}>Open Settings</PrimaryFontMedium>
                         </TouchableOpacity>
-                    )}
-                    renderSectionHeader={({ section: { title } }) => (
-                        <View style={styles.sectionHeader}>
-                            <PrimaryFontMedium style={styles.sectionHeaderText}>{title}</PrimaryFontMedium>
-                        </View>
-                    )}
-                />
+                    </View>
+                </ScrollView>
                 :
-                <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: '#f8f8f8' }]}>
-                    <ActivityIndicator size="small" color='#00C48F' />
-                </View>}
+                contactsLoaded ?
+                    <SectionList
+                        sections={filteredSections}
+                        initialNumToRender={20}
+                        maxToRenderPerBatch={10}
+                        style={{ backgroundColor: '#f8f8f8' }}
+                        keyExtractor={(item, index) => item.name + index}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity style={[styles.contactContainer, { backgroundColor: contactClicked === item.phoneNumber ? "#F0F0F0" : "transparent" }]} onPress={() => handleSelectContact(item)}>
+                                <View>
+                                    <PrimaryFontText style={styles.name}>{item.name}</PrimaryFontText>
+                                    <PrimaryFontText style={styles.phoneNumber}>{item.phoneNumber}</PrimaryFontText>
+                                </View>
+                                {contactClicked === item.phoneNumber && (
+                                    <ActivityIndicator size="small" color="#00C48F" />
+                                )}
+                            </TouchableOpacity>
+                        )}
+                        renderSectionHeader={({ section: { title } }) => (
+                            <View style={styles.sectionHeader}>
+                                <PrimaryFontMedium style={styles.sectionHeaderText}>{title}</PrimaryFontMedium>
+                            </View>
+                        )}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                        }
+                    />
+                    :
+                    <View style={[reusableStyle.paddingContainer, { flex: 1, paddingVertical: 30, backgroundColor: '#f8f8f8' }]}>
+                        <ActivityIndicator size="small" color='#00C48F' />
+                    </View>}
         </View>
     );
 }
@@ -322,4 +388,39 @@ const styles = StyleSheet.create({
         marginTop: 9,
         fontSize: 15
     },
+    permissionContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#f8f8f8',
+        // borderWidth: 1,
+        // borderColor: 'black'
+    },
+    permissionImage: {
+        width: 80,
+        height: 80,
+        marginBottom: 25,
+    },
+    permissionTitle: {
+        fontSize: 20,
+        marginBottom: 10,
+        color: '#052330'
+    },
+    permissionDescription: {
+        fontSize: 16,
+        color: '#79828E',
+        textAlign: 'center',
+        marginBottom: 20
+    },
+    permissionButton: {
+        backgroundColor: '#00C48F',
+        paddingVertical: 14,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+    },
+    permissionButtonText: {
+        color: '#fff',
+        fontSize: 17,
+    }
 });

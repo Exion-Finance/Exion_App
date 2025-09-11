@@ -379,120 +379,120 @@ export default function EnterWalletAddress() {
             setDeleteButtonClicked(false)
         }
     }
-    
+
     return (
         <View style={styles.container}>
-          <StatusBar style={'dark'} />
-          <NavBar title='Wallet Address' onBackPress={() => route.back()} />
-      
-          <View style={[reusableStyles.paddingContainer, { flex: 1 }]}>
-            {/* Top static section */}
-            <View style={{ zIndex: 1}}>
-              <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
-              <TextInput
-                style={[
-                  styles.input,
-                  { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 },
-                ]}
-                placeholder="E.g OxOdbe52...223fa"
-                placeholderTextColor="#C3C2C2"
-                keyboardType="default"
-                autoCapitalize="none"
-                onChangeText={(text) => {
-                  setWalletAddress(text);
-                  setError(false);
-                }}
-                onFocus={() => setIsWalletAddressFocused(true)}
-                onBlur={() => setIsWalletAddressFocused(false)}
-                value={
-                  walletAddress.startsWith('0x') && walletAddress.length > 30
-                    ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
-                    : walletAddress
-                }
-              />
-      
-              {clipboardAddress && (
-                <TouchableOpacity style={styles.pasteBanner} activeOpacity={0.8} onPress={handlePaste}>
-                  <View style={styles.pasteIcon}>
-                    <MaterialIcons name="content-paste" size={18} color="#fff" />
-                  </View>
-                  <View style={styles.pasteTextWrapper}>
-                    <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
-                    <PrimaryFontText style={styles.pasteAddress}>
-                      {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
-                    </PrimaryFontText>
-                  </View>
-                </TouchableOpacity>
-              )}
-            </View>
-      
-            {/* Middle flexible scrollable section */}
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer} showsVerticalScrollIndicator={false}>
-              <View>
-                {displayFavorites.length !== 0 ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}>
-                    <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
-                    <Favourites />
-                  </View>
-                ) : null}
-      
-                {displayFavorites.length === 0 ? (
-                  <View style={styles.emptyFav}>
-                    <LottieAnimation
-                      animationSource={require('@/assets/animations/wallet.json')}
-                      animationStyle={{ width: '80%', height: 100, marginTop: -10 }}
+            <StatusBar style={'dark'} />
+            <NavBar title='Wallet Address' onBackPress={() => route.back()} />
+
+            <View style={[reusableStyles.paddingContainer, { flex: 1 }]}>
+                {/* Top static section */}
+                <View style={{ zIndex: 1 }}>
+                    <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
+                    <TextInput
+                        style={[
+                            styles.input,
+                            { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 },
+                        ]}
+                        placeholder="E.g OxOdbe52...223fa"
+                        placeholderTextColor="#C3C2C2"
+                        keyboardType="default"
+                        autoCapitalize="none"
+                        onChangeText={(text) => {
+                            setWalletAddress(text);
+                            setError(false);
+                        }}
+                        onFocus={() => setIsWalletAddressFocused(true)}
+                        onBlur={() => setIsWalletAddressFocused(false)}
+                        value={
+                            walletAddress.startsWith('0x') && walletAddress.length > 30
+                                ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
+                                : walletAddress
+                        }
                     />
-                    <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
-                    <PrimaryFontText style={styles.emptySubtitle}>
-                      Save wallet addresses to make sending to external wallets simpler and faster
-                    </PrimaryFontText>
-                    <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
-                      <MaterialIcons name="add" size={20} color="#fff" />
-                      <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
+
+                    {clipboardAddress && (
+                        <TouchableOpacity style={styles.pasteBanner} activeOpacity={0.8} onPress={handlePaste}>
+                            <View style={styles.pasteIcon}>
+                                <MaterialIcons name="content-paste" size={18} color="#fff" />
+                            </View>
+                            <View style={styles.pasteTextWrapper}>
+                                <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
+                                <PrimaryFontText style={styles.pasteAddress}>
+                                    {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
+                                </PrimaryFontText>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Middle flexible scrollable section */}
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.favoritesContainer} showsVerticalScrollIndicator={false}>
+                    <View>
+                        {displayFavorites.length !== 0 ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}>
+                                <PrimaryFontBold style={{ fontSize: 16.5, marginRight: 2 }}>Favourites</PrimaryFontBold>
+                                <Favourites />
+                            </View>
+                        ) : null}
+
+                        {displayFavorites.length === 0 ? (
+                            <View style={styles.emptyFav}>
+                                <LottieAnimation
+                                    animationSource={require('@/assets/animations/wallet.json')}
+                                    animationStyle={{ width: '80%', height: 100, marginTop: -10 }}
+                                />
+                                <PrimaryFontBold style={styles.emptyTitle}>Save wallet address</PrimaryFontBold>
+                                <PrimaryFontText style={styles.emptySubtitle}>
+                                    Save wallet addresses to make sending to external wallets simpler and faster
+                                </PrimaryFontText>
+                                <TouchableOpacity style={styles.addButton} onPress={openAddressModal}>
+                                    <MaterialIcons name="add" size={20} color="#fff" />
+                                    <PrimaryFontBold style={styles.addBtnText}>Add address</PrimaryFontBold>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            displayFavorites.slice(0, 3).map((fav) => (
+                                <FavoriteAddressCard
+                                    key={fav.address}
+                                    address={fav.address}
+                                    lastDate={fav.lastDate}
+                                    userName={fav.userName}
+                                    onAddUsername={(address) => openUsernameModal(address)}
+                                    onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
+                                />
+                            ))
+                        )}
+
+                        {displayFavorites.length !== 0 ? (
+                            <View style={styles.addFavWrapper}>
+                                <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
+                                    <MaterialIcons name="add" size={20} color="#007AFF" />
+                                    <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
+                                </TouchableOpacity>
+                            </View>
+                        ) : null}
+                    </View>
+                </ScrollView>
+
+                {/* Footer static at bottom */}
+                <View style={styles.stickyFooter}>
+                    <View style={styles.warningRow}>
+                        <MaterialIcons name="warning" size={18} color="#FFA500" />
+                        <PrimaryFontText style={styles.warningText}>
+                            To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
+                        </PrimaryFontText>
+                    </View>
+
+                    <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
+                        <PrimaryFontBold style={styles.text}>
+                            {buttonClicked ? <Loading color="#fff" description="Please wait..." /> : 'Continue'}
+                        </PrimaryFontBold>
                     </TouchableOpacity>
-                  </View>
-                ) : (
-                  displayFavorites.slice(0, 3).map((fav) => (
-                    <FavoriteAddressCard
-                      key={fav.address}
-                      address={fav.address}
-                      lastDate={fav.lastDate}
-                      userName={fav.userName}
-                      onAddUsername={(address) => openUsernameModal(address)}
-                      onSelect={() => handleFavoriteSelect(fav.address, fav.userName)}
-                    />
-                  ))
-                )}
-      
-                {displayFavorites.length !== 0 ? (
-                  <View style={styles.addFavWrapper}>
-                    <TouchableOpacity style={styles.addSmallButton} onPress={openAddressModal}>
-                      <MaterialIcons name="add" size={20} color="#007AFF" />
-                      <PrimaryFontBold style={styles.addSmallText}>Save Address</PrimaryFontBold>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
-              </View>
-            </ScrollView>
-      
-            {/* Footer static at bottom */}
-            <View style={styles.stickyFooter}>
-              <View style={styles.warningRow}>
-                <MaterialIcons name="warning" size={18} color="#FFA500" />
-                <PrimaryFontText style={styles.warningText}>
-                  To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
-                </PrimaryFontText>
-              </View>
-      
-              <TouchableOpacity style={styles.button} onPress={handleWalletAddressSubmit}>
-                <PrimaryFontBold style={styles.text}>
-                  {buttonClicked ? <Loading color="#fff" description="Please wait..." /> : 'Continue'}
-                </PrimaryFontBold>
-              </TouchableOpacity>
-            </View>
+                </View>
 
 
-            <Modal
+                <Modal
                     visible={modalVisible}
                     transparent
                     animationType="slide"
@@ -539,10 +539,10 @@ export default function EnterWalletAddress() {
                         </View>
                     </View>
                 </Modal>
-          </View>
+            </View>
         </View>
-      );
-      
+    );
+
 }
 
 const styles = StyleSheet.create({
