@@ -248,7 +248,7 @@ export default function ContactsList({ from }: Props) {
 
     return (
         <View style={[styles.container, from === "contacts" ? reusableStyle.paddingContainer : reusableStyle.width100]}>
-            {permissionDenied ? null : <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {permissionDenied && from !== "contacts" ? null : <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={[styles.searchContainer, { width: from === "contacts" ? "83%" : "100%" }]}>
                     <Ionicons name="search" size={20} color="#CFCFCF" style={styles.searchIcon} />
                     <TextInput
@@ -264,7 +264,7 @@ export default function ContactsList({ from }: Props) {
                 </TouchableOpacity>
             </View>}
 
-            {permissionDenied ? null : <PrimaryFontMedium style={styles.chooseText}>Choose from your contacts</PrimaryFontMedium>}
+            {permissionDenied && from !== "contacts" ? null : <PrimaryFontMedium style={styles.chooseText}>Choose from your contacts</PrimaryFontMedium>}
 
             {permissionDenied ?
                 <ScrollView
