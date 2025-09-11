@@ -230,15 +230,15 @@ export default function ContactsList({ from }: Props) {
         } catch (error: any) {
             if (error.response) {
                 // The server responded with a status other than 2xx
-                Alert.alert("Invite 📩", "This contact isn't a regitered Exion user. Try sending using their wallet address instead by clicking on the top right icon");
+                Alert.alert("Invite 📩", "This contact isn't a regitered Exion user. Try sending using their wallet address instead");
             } else if (error.request) {
                 // No response received
 
-                Alert.alert("Error", "Unable to connect to the server. Please try again later.");
+                Alert.alert("Error😕", "Something went wrong. Please try again later.");
             } else {
                 // Something else caused the error
 
-                Alert.alert("Error", "An unexpected error occurred. Please try again.");
+                Alert.alert("Error😕", "An unexpected error occurred. Please try again.");
             }
         } finally {
             setContactClicked(false);
