@@ -271,12 +271,12 @@ export default function OptionalMessage() {
                         <PrimaryFontMedium style={styles.actionDescription}>{transactionDescription}</PrimaryFontMedium>
 
                         {responseReceived ?
-                         <View style={reusableStyle.paddingContainer}>
-                            <TouchableOpacity style={[styles.button, { opacity: responseReceived ? 1 : 0 }]} onPress={handleButtonClick}>
-                                <PrimaryFontBold style={styles.text}>Done</PrimaryFontBold>
-                            </TouchableOpacity>
-                        </View>
-                        : null}
+                            <View style={reusableStyle.paddingContainer}>
+                                <TouchableOpacity style={[styles.button, { opacity: responseReceived ? 1 : 0 }]} onPress={handleButtonClick}>
+                                    <PrimaryFontBold style={styles.text}>Done</PrimaryFontBold>
+                                </TouchableOpacity>
+                            </View>
+                            : null}
                     </BottomSheetView>
                 </BottomSheet>
 

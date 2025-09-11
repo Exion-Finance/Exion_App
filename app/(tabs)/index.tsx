@@ -481,36 +481,36 @@ export default function TabOneScreen() {
             </View>
 
             <View style={[styles.flexRow, { height: '38%', marginTop: 0 }]}>
-            <SecondaryButton
-              route={"/contacts" as Href<string | object>}
-              textOnButton="Transfer"
-              icon={<Feather name="arrow-up" size={18} color="white" />}
-              containerStyle={{
-              backgroundColor: '#4781D9',
-              flex: 0.8,
-              marginRight: 8,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingVertical: 17,
-             }}
-              textStyle={{ fontSize: 17, color: "white" }}
-            />
+              <SecondaryButton
+                route={"/contacts" as Href<string | object>}
+                textOnButton="Transfer"
+                icon={<Feather name="arrow-up" size={18} color="white" />}
+                containerStyle={{
+                  backgroundColor: '#4781D9',
+                  flex: 0.8,
+                  marginRight: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingVertical: 17,
+                }}
+                textStyle={{ fontSize: 17, color: "white" }}
+              />
 
-            <SecondaryButton
-              route={"/makepayment" as Href<string | object>}
-              textOnButton="Make Payment"
-              icon={<Feather name="arrow-down" size={18} color="white" />}
-              containerStyle={{
-                backgroundColor: '#00C48F',
-                flex: 1.2, 
-                marginLeft: 8,
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingVertical: 17,
-              }}
-              textStyle={{ fontSize: 17, color: "white" }}
-            />
-          </View>
+              <SecondaryButton
+                route={"/makepayment" as Href<string | object>}
+                textOnButton="Make Payment"
+                icon={<Feather name="arrow-down" size={18} color="white" />}
+                containerStyle={{
+                  backgroundColor: '#00C48F',
+                  flex: 1.2,
+                  marginLeft: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingVertical: 17,
+                }}
+                textStyle={{ fontSize: 17, color: "white" }}
+              />
+            </View>
 
           </View>
         </View>
@@ -559,8 +559,8 @@ export default function TabOneScreen() {
         backgroundStyle={{ backgroundColor: '#fff' }}
       >
         <BottomSheetView
-        style={{ paddingBottom: 18 }}
-        onLayout={handleContentLayout}
+          style={{ paddingBottom: 18 }}
+          onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
             <PrimaryFontBold style={{ fontSize: 22 }}>
