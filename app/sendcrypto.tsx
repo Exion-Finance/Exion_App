@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, Platform, ToastAndroid, StatusBar, ActivityIndicator, Image, Linking, ScrollView, RefreshControl } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, Platform, ToastAndroid, StatusBar, ImageBackground, Image, Linking, ScrollView, RefreshControl } from "react-native";
 import { StatusBar as StatBar } from 'expo-status-bar';
 import { CameraView, Camera } from "expo-camera";
 import QRCode from "react-native-qrcode-svg";
@@ -26,6 +26,8 @@ const SCAN_WINDOW_SIZE = SCREEN_W * 0.75;
 
 const HEADER_HEIGHT = statusBarHeight - 30
 const SCAN_AREA_HEIGHT = SCREEN_H - HEADER_HEIGHT;
+
+const settingsBackground = require('@/assets/images/Edit Profile Bg.png');
 
 const CryptoScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<"myCode" | "scan">("scan");
@@ -142,27 +144,10 @@ const CryptoScreen: React.FC = () => {
             <StatBar style={'dark'} />
             <View style={styles.container}>
                 {/* Top Navigation */}
-                <View style={styles.topNav}>
+                <ImageBackground style={styles.topNav} source={settingsBackground}>
                     <TouchableOpacity style={styles.closeIcon} onPress={() => route.back()}>
-                        <Feather name='x' color={'gray'} size={25} />
+                        <Feather name='x' color={'#f8f8f8'} size={25} />
                     </TouchableOpacity>
-
-                    {/* <View style={styles.tabContainer}>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === "myCode" && styles.activeTab]}
-                            onPress={() => setActiveTab("myCode")}
-                        >
-                            <PrimaryFontMedium style={[styles.tabText, activeTab === "myCode" && styles.activeTabText]}>My QR</PrimaryFontMedium>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === "scan" && styles.activeTab]}
-                            onPress={() => {
-                                setActiveTab("scan");
-                            }}
-                        >
-                            <PrimaryFontMedium style={[styles.tabText, activeTab === "scan" && styles.activeTabText]}>Scan</PrimaryFontMedium>
-                        </TouchableOpacity>
-                    </View> */}
 
                     <View style={styles.tabContainer}>
                         <View style={styles.tabBackground}>
@@ -195,7 +180,7 @@ const CryptoScreen: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </ImageBackground>
 
                 {hasPermission === null ?
                     <View style={styles.myCodeContainer}>
@@ -316,8 +301,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 15,
         backgroundColor: "transparent",
-        marginTop: statusBarHeight + 5,
-        // borderWidth: 1
+        paddingTop: statusBarHeight + 10,
+        zIndex: 10,
+        // resizeMode: "cover",
+        // borderWidth: 1,
+        // borderColor: 'black'
     },
     closeIcon: {
         fontSize: 20,
@@ -327,7 +315,8 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        flex: 1
+        flex: 1,
+        elevation: 35,
     },
     tabBackground: {
         flexDirection: "row",
