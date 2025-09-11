@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Button, Dimensions, Alert, Platform, ToastAndroid, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, Platform, ToastAndroid, StatusBar, ActivityIndicator, Image, Linking, ScrollView, RefreshControl } from "react-native";
 import { StatusBar as StatBar } from 'expo-status-bar';
 import { CameraView, Camera } from "expo-camera";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from 'expo-clipboard';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Application from 'expo-application';
 import { Feather } from '@expo/vector-icons';
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
+import { PrimaryFontText } from "@/components/PrimaryFontText";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
@@ -33,6 +36,7 @@ const CryptoScreen: React.FC = () => {
     const [recipientAddress, setRecipientAddress] = useState<string>('');
     const [walletAddress, setWalletAddress] = useState<string>("")
     const [userName, setUserName] = useState<string>("")
+    const [refreshing, setRefreshing] = useState<boolean>(false);
 
     const route = useRouter()
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -44,11 +48,29 @@ const CryptoScreen: React.FC = () => {
 
     //bottomSheetRef.current?.close();  // Close the BottomSheet after selection
 
-    const handleEnterWalletAddress = () => {
-        // bottomSheetRef.current?.expand()
-        route.push('/enterwalletaddress')
-    }
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        setHasPermission(status === "granted");
 
+        if (user_profile) {
+            // const parsedToken = JSON.parse(token);
+            setWalletAddress(user_profile?.wallet.publicKey)
+            setUserName(user_profile?.userName)
+        }
+        setRefreshing(false);
+    };
+
+
+    const openSettings = () => {
+        if (Platform.OS === 'ios') {
+            Linking.openURL('app-settings:');
+        } else {
+            IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS, {
+                data: 'package:' + Application.applicationId,
+            });
+        }
+    }
 
     useEffect(() => {
         const getCameraPermissions = async () => {
@@ -83,14 +105,6 @@ const CryptoScreen: React.FC = () => {
             Alert.alert("Oops😕", 'Could not scan Qr Code');
         }
     };
-
-    if (hasPermission === null) {
-        return <Text>Requesting for camera permission</Text>;
-    }
-    if (hasPermission === false) {
-        // getCameraPermissions();
-        // return Alert.alert("Oops😕", 'Permission required to access camera, please change it in settings');
-    }
 
     const copyToClipboard = () => {
         Clipboard.setStringAsync(walletAddress as string);
@@ -133,7 +147,7 @@ const CryptoScreen: React.FC = () => {
                         <Feather name='x' color={'gray'} size={25} />
                     </TouchableOpacity>
 
-                    <View style={styles.tabContainer}>
+                    {/* <View style={styles.tabContainer}>
                         <TouchableOpacity
                             style={[styles.tab, activeTab === "myCode" && styles.activeTab]}
                             onPress={() => setActiveTab("myCode")}
@@ -148,90 +162,144 @@ const CryptoScreen: React.FC = () => {
                         >
                             <PrimaryFontMedium style={[styles.tabText, activeTab === "scan" && styles.activeTabText]}>Scan</PrimaryFontMedium>
                         </TouchableOpacity>
+                    </View> */}
+
+                    <View style={styles.tabContainer}>
+                        <View style={styles.tabBackground}>
+                            <TouchableOpacity
+                                style={[styles.tab, activeTab === "myCode" && styles.activeTab]}
+                                onPress={() => setActiveTab("myCode")}
+                            >
+                                <PrimaryFontMedium
+                                    style={[
+                                        styles.tabText,
+                                        activeTab === "myCode" && styles.activeTabText,
+                                    ]}
+                                >
+                                    My QR
+                                </PrimaryFontMedium>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.tab, activeTab === "scan" && styles.activeTab]}
+                                onPress={() => setActiveTab("scan")}
+                            >
+                                <PrimaryFontMedium
+                                    style={[
+                                        styles.tabText,
+                                        activeTab === "scan" && styles.activeTabText,
+                                    ]}
+                                >
+                                    Scan
+                                </PrimaryFontMedium>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
 
-                {activeTab === "myCode" ? (
+                {hasPermission === null ?
                     <View style={styles.myCodeContainer}>
-                        <QRCode value={walletAddress} size={215} />
-                        <PrimaryFontBold style={styles.username}>{userName}</PrimaryFontBold>
-                        <PrimaryFontMedium style={styles.walletAddress}>{walletAddress}</PrimaryFontMedium>
-                        <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-                            <MaterialIcons name="content-copy" size={18} color="#fff" />
-                            <PrimaryFontBold style={styles.copyButtonText}>Copy Address</PrimaryFontBold>
-                        </TouchableOpacity>
+                        <Text>Requesting camera permission⏳</Text>
                     </View>
-                ) : !hasPermission ? (
-                    <PrimaryFontMedium style={styles.permissionText}>Camera permission is required to scan QR codes.</PrimaryFontMedium>
-                ) : (
-                    <View style={styles.scanContainer}>
-                        <CameraView
-                            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-                            barcodeScannerSettings={{
-                                barcodeTypes: ["qr", "pdf417"],
-                            }}
-                            style={StyleSheet.absoluteFillObject}
-                        />
+                    :
+                    activeTab === "myCode" ? (
+                        <View style={styles.myCodeContainer}>
+                            <QRCode value={walletAddress} size={215} />
+                            <PrimaryFontBold style={styles.username}>{userName}</PrimaryFontBold>
+                            <PrimaryFontMedium style={styles.walletAddress}>{walletAddress}</PrimaryFontMedium>
+                            <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
+                                <MaterialIcons name="content-copy" size={18} color="#fff" />
+                                <PrimaryFontBold style={styles.copyButtonText}>Copy Address</PrimaryFontBold>
+                            </TouchableOpacity>
+                        </View>
+                    ) : !hasPermission ? (
+                        <ScrollView
+                            contentContainerStyle={{ flex: 1 }}
+                            refreshControl={
+                                <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                            }
+                        >
+                            <View style={styles.permissionContainer}>
+                                <Image source={require('@/assets/images/sad.png')} style={styles.permissionImage} resizeMode="contain" />
+                                <PrimaryFontBold style={styles.permissionTitle}>Permission required</PrimaryFontBold>
+                                <PrimaryFontText style={styles.permissionDescription}>
+                                    We need access to your camera so you can easily scan QR codes.
+                                </PrimaryFontText>
 
-                        <BlurView intensity={80}
-                            style={[styles.blur, {
-                                top: HEADER_HEIGHT,
-                                left: 0,
-                                right: 0,
-                                height: windowY - HEADER_HEIGHT
-                            }]}
-                        />
-                        {/* Bottom blur */}
-                        <BlurView intensity={80}
-                            style={[styles.blur, {
-                                top: windowY + SCAN_WINDOW_SIZE,
-                                left: 0,
-                                right: 0,
-                                bottom: 0
-                            }]}
-                        />
-                        {/* Left blur */}
-                        <BlurView intensity={80}
-                            style={[styles.blur, {
-                                top: windowY,
-                                left: 0,
-                                width: windowX,
-                                height: SCAN_WINDOW_SIZE
-                            }]}
-                        />
-                        {/* Right blur */}
-                        <BlurView intensity={80}
-                            style={[styles.blur, {
-                                top: windowY,
-                                left: windowX + SCAN_WINDOW_SIZE,
-                                right: 0,
-                                height: SCAN_WINDOW_SIZE
-                            }]}
-                        />
+                                <TouchableOpacity style={styles.permissionButton} onPress={openSettings}>
+                                    <PrimaryFontMedium style={styles.permissionButtonText}>Open Settings</PrimaryFontMedium>
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                    ) : (
+                        <View style={styles.scanContainer}>
+                            <CameraView
+                                onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+                                barcodeScannerSettings={{
+                                    barcodeTypes: ["qr", "pdf417"],
+                                }}
+                                style={StyleSheet.absoluteFillObject}
+                            />
 
-                        {/* Clear window border */}
-                        <View
-                            pointerEvents="none"
-                            style={[
-                                styles.scanWindow,
-                                {
-                                    width: SCAN_WINDOW_SIZE,
-                                    height: SCAN_WINDOW_SIZE,
+                            <BlurView intensity={80}
+                                style={[styles.blur, {
+                                    top: HEADER_HEIGHT,
+                                    left: 0,
+                                    right: 0,
+                                    height: windowY - HEADER_HEIGHT
+                                }]}
+                            />
+                            {/* Bottom blur */}
+                            <BlurView intensity={80}
+                                style={[styles.blur, {
+                                    top: windowY + SCAN_WINDOW_SIZE,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0
+                                }]}
+                            />
+                            {/* Left blur */}
+                            <BlurView intensity={80}
+                                style={[styles.blur, {
                                     top: windowY,
-                                    left: windowX,
-                                },
-                            ]}
-                        />
+                                    left: 0,
+                                    width: windowX,
+                                    height: SCAN_WINDOW_SIZE
+                                }]}
+                            />
+                            {/* Right blur */}
+                            <BlurView intensity={80}
+                                style={[styles.blur, {
+                                    top: windowY,
+                                    left: windowX + SCAN_WINDOW_SIZE,
+                                    right: 0,
+                                    height: SCAN_WINDOW_SIZE
+                                }]}
+                            />
 
-                        {/* <TouchableOpacity onPress={handleEnterWalletAddress}>
+                            {/* Clear window border */}
+                            <View
+                                pointerEvents="none"
+                                style={[
+                                    styles.scanWindow,
+                                    {
+                                        width: SCAN_WINDOW_SIZE,
+                                        height: SCAN_WINDOW_SIZE,
+                                        top: windowY,
+                                        left: windowX,
+                                    },
+                                ]}
+                            />
+
+                            {/* <TouchableOpacity onPress={handleEnterWalletAddress}>
                             <PrimaryFontBold style={styles.scanText}>Enter wallet address</PrimaryFontBold>
                         </TouchableOpacity> */}
-                        <View style={styles.scanButton}>
-                            <PrimaryFontBold style={styles.scanQrText}>Scan QR code</PrimaryFontBold>
+                            <View style={styles.scanButton}>
+                                <PrimaryFontBold style={styles.scanQrText}>Scan QR code</PrimaryFontBold>
+                            </View>
                         </View>
-                    </View>
 
-                )}
+                    )}
 
             </View>
         </GestureHandlerRootView>
@@ -258,23 +326,28 @@ const styles = StyleSheet.create({
     },
     tabContainer: {
         flexDirection: "row",
-        flex: 1,
         justifyContent: "center",
+        flex: 1
+    },
+    tabBackground: {
+        flexDirection: "row",
+        backgroundColor: "#e0e0e0",
+        borderRadius: 30,
+        padding: 5,
     },
     tab: {
         flex: 1,
         alignItems: "center",
+        justifyContent: "center",
         paddingVertical: 9,
-        borderRadius: 20,
-        marginHorizontal: 5,
-        backgroundColor: "#e0e0e0",
+        borderRadius: 25,
     },
     activeTab: {
         backgroundColor: "#00C48F",
     },
     tabText: {
-        fontSize: 16,
-        color: "#000",
+        fontSize: 15,
+        color: "#333",
     },
     activeTabText: {
         color: "#fff",
@@ -311,11 +384,6 @@ const styles = StyleSheet.create({
         fontSize: 17,
         marginLeft: 5
     },
-    permissionText: {
-        fontSize: 16,
-        textAlign: "center",
-        margin: 20,
-    },
     scanContainer: {
         flex: 1,
         alignItems: "center",
@@ -351,8 +419,44 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     scanQrText: {
-      color: '#fff',
-      fontSize: 16,
+        color: '#fff',
+        fontSize: 16,
+    },
+    permissionContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        paddingTop: -30,
+        backgroundColor: '#f8f8f8',
+        // borderWidth: 1,
+        // borderColor: 'black'
+    },
+    permissionImage: {
+        width: 80,
+        height: 80,
+        marginBottom: 25,
+    },
+    permissionTitle: {
+        fontSize: 20,
+        marginBottom: 10,
+        color: '#052330'
+    },
+    permissionDescription: {
+        fontSize: 16,
+        color: '#79828E',
+        textAlign: 'center',
+        marginBottom: 20
+    },
+    permissionButton: {
+        backgroundColor: '#00C48F',
+        paddingVertical: 14,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+    },
+    permissionButtonText: {
+        color: '#fff',
+        fontSize: 17,
     }
 });
 
