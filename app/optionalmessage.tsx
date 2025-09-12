@@ -57,6 +57,7 @@ export default function OptionalMessage() {
 
     const maxLength = 70;
     const userInitial = name.slice(0, 1)
+    console.log("tokeeeen--->", token)
 
     const id = typeof token === 'string' ? tokens[token.toUpperCase()]?.id : undefined;
 

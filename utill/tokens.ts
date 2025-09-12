@@ -24,4 +24,9 @@ type Token = {
       name: "CKES",
       id: 2,
     },
+    USDC: {
+      symbol: "USDC",
+      name: "USDC",
+      id: 3,
+    },
   };

@@ -7,7 +7,6 @@ import { ResponseBalance } from '@/app/(tabs)';
 
 const logoSources: Record<string, any> = {
     USDT: require('@/assets/logos/tether.png'),
-    Celo: require('@/assets/logos/celo.png'),
     cUSD: require('@/assets/logos/cusd.png'),
     cKes: require('@/assets/logos/ckes.png'),
     USDC: require('@/assets/logos/usdc.png'),
@@ -15,7 +14,7 @@ const logoSources: Record<string, any> = {
 };
 
 const tokenId: Record<string, number> = {
-    Celo: 0,
+    USDT: 0,
     cUSD: 1,
     cKes: 2,
     USDC: 3,
@@ -43,7 +42,6 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
         return {
             tokenName: key,
             fullName: key == 'USDT' ? 'Tether USD' :
-                key === 'Celo' ? 'Celo' :
                     key === 'cUSD' ? 'Celo Dollar' :
                         key === 'cKes' ? 'Celo Kenyan Shilling' :
                             key === 'USDC' ? 'USDC' :
@@ -56,6 +54,7 @@ export default function TokenListPayment({ response, onSelectToken }: TokenListP
     });
 
     const handleTokenSelect = (id: number, token: Token) => {
+        // console.log("tokenid", id)
         onSelectToken(id, token);
 
     };

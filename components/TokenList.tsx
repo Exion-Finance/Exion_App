@@ -34,7 +34,7 @@ export default function TokenList({ response }: TokenListProps) {
     const handleTokenSelect = (id: number) => {
         // route.push('/fundingmethod')
         // route.push({ pathname: "/fundingmethod", params: { id} });
-        console.log("Clicked")
+        console.log("Clickedd", id)
     }
     // console.log("Tokens from props-->", response)
     const tokens = Object.keys(response.balance).map((key) => {

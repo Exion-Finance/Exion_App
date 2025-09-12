@@ -27,7 +27,7 @@ const SCAN_WINDOW_SIZE = SCREEN_W * 0.75;
 const HEADER_HEIGHT = statusBarHeight - 30
 const SCAN_AREA_HEIGHT = SCREEN_H - HEADER_HEIGHT;
 
-const settingsBackground = require('@/assets/images/Edit Profile Bg.png');
+const settingsBackground = require('@/assets/images/scan-bg.png');
 
 const CryptoScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<"myCode" | "scan">("scan");
