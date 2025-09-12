@@ -41,6 +41,7 @@ type TokenType = {
   token: string;
   balance: number;
   ksh: number;
+  id: number;
 };
 
 
@@ -57,7 +58,8 @@ const CustomKeyboard = () => {
   const [activeToken, setActiveToken] = useState<TokenType>({
     token: '',
     balance: 0,
-    ksh: 0
+    ksh: 0,
+    id: 0
   });
   const { source, name, phoneNumber, tillNumber, paybillNumber, businessNumber, recipient_address, savedUsername } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
@@ -107,14 +109,16 @@ const CustomKeyboard = () => {
   const calculateTransactionFee = async (amount: string) => {
     setSend(true)
     try {
-      const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
+      // const tokenId = activeToken.token ? tkn[activeToken.token.toUpperCase()]?.id : undefined;
+      const tokenId = activeToken?.id;
+      // console.log("tokenId", tokenId)
       const response = await calculateFee({
         recipient: phoneNumber ? phoneNumber as string : recipient_address as string,
         amount,
         tokenId: tokenId as number,
         chainId: 1,
       });
-
+      // console.log("calc fee res", response.data)
       if (response.status === 200) {
         setFees(response.data)
         return response.data
@@ -516,12 +520,14 @@ const CustomKeyboard = () => {
     }
   }
 
-  const handleBackspace = () => {
+  const handleBackspace = async() => {
     // Remove the last character from the input value
     setInputValue(prev => prev.slice(0, -1));
     setError(false)
+    // await calculateTransactionFee("100")
   };
-
+// console.log("Active Token", activeToken)
+// console.log("Tokens-->", tokens)
 
 
   const bottomSheetRef1 = useRef<BottomSheet>(null);
@@ -548,6 +554,7 @@ const CustomKeyboard = () => {
       token: token.tokenName.toUpperCase(),
       balance: token.balance,
       ksh: parseFloat(token.ksh),
+      id: id
     });
     // console.log(activeToken)
     bottomSheetRef1.current?.close();
@@ -576,6 +583,7 @@ const CustomKeyboard = () => {
               token: selectedKey.toUpperCase(),
               balance: Number(selectedData.token),
               ksh: Number(selectedData.kes),
+              id: 0
             });
           }
 
@@ -615,6 +623,7 @@ const CustomKeyboard = () => {
           token: selectedKey.toUpperCase(),
           balance: Number(selectedData.token),
           ksh: Number(selectedData.kes),
+          id: 0
         });
       }
     }
