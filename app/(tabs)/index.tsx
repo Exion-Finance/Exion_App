@@ -16,8 +16,8 @@ import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import SecondaryButton from '@/components/SecondaryButton';
 import MobileTxReceipt from '@/components/MobileTxReceipt';
 import { MobileTransactions } from '@/components/MobileTransactions';
-import { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { Href, useLocalSearchParams, useRouter } from 'expo-router';
+// import { useRouter } from 'expo-router';
 import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import TokenList from '@/components/TokenList';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -70,6 +70,7 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 export default function TabOneScreen() {
   const route = useRouter()
   const { authState } = useAuth()
+  const { refresh } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
@@ -264,6 +265,7 @@ export default function TabOneScreen() {
   //Fetch Mobile Transactions
   useEffect(() => {
     const loadTx = async () => {
+      console.log("Fetch mobile transactions called")
       if (!authToken) return
       try {
         const pageSize: number = 500;
@@ -291,6 +293,39 @@ export default function TabOneScreen() {
 
     loadTx()
   }, [authToken])
+
+  //Refresh transactions after payment
+  useEffect(() => {
+    const loadTx = async () => {
+      console.log("Refresh mobile tx...")
+      try {
+        const pageSize: number = 500;
+        const tx = await fetchMobileTransactions(pageSize)
+
+        if (tx.data) {
+          console.log("Refresh mobile transactions received")
+          const fullSections = makeSections(tx.data)
+          const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
+          setMobileTransactions(firstThree)
+          dispatch(addMobileTransactions(fullSections))
+          return;
+        }
+        else if (tx.error) {
+          console.log("errror in tx<<-->>", tx.error)
+          return;
+        }
+        // else console.log("tx else in refetch res", tx)/
+      } catch (e: any) {
+        Alert.alert("Oops😕", 'Failed to load transactions')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (refresh === "true") {
+      loadTx();
+    }
+  }, [refresh]);
 
   //Helpers to parse & group mobile transactions by date
   const parseTxDate = (s: string): Date => {

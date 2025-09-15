@@ -196,7 +196,7 @@ const CustomKeyboard = () => {
             setTxChannel(checkTx.data.destinationChannel)
             setAmount(checkTx.data.transactionAmount)
             setTransactionState("Transaction sent🎉")
-          } else if (!checkTx.data.success && retryCount < 2) {
+          } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
@@ -269,7 +269,7 @@ const CustomKeyboard = () => {
             setTxChannel("Buy Goods");
             setAmount(checkTx.data.transactionAmount);
             setTransactionState("Transaction sent🎉");
-          } else if (!checkTx.data.success && retryCount < 2) {
+          } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
@@ -332,7 +332,7 @@ const CustomKeyboard = () => {
             setTxChannel("Paybill");
             setAmount(checkTx.data.transactionAmount);
             setTransactionState("Transaction sent🎉");
-          } else if (!checkTx.data.success && retryCount < 2) {
+          } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
@@ -361,7 +361,8 @@ const CustomKeyboard = () => {
   const handleDone = () => {
     bottomSheetRef2.current?.close();
     route.dismissAll();
-    route.replace("/(tabs)")
+    // route.replace("/(tabs)")
+    route.replace({ pathname: "/(tabs)", params: { refresh: "true" } });
   }
 
   const handleButtonClick = async () => {
