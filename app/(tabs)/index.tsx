@@ -265,7 +265,6 @@ export default function TabOneScreen() {
   //Fetch Mobile Transactions
   useEffect(() => {
     const loadTx = async () => {
-      console.log("Fetch mobile transactions called")
       if (!authToken) return
       try {
         const pageSize: number = 500;

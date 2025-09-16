@@ -39,7 +39,7 @@ export default function TillNumber() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Buy goods' onBackPress={() => route.push('/makepayment')} />
+            <NavBar title='Buy goods' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <InputField
                     label="Enter the till number"
