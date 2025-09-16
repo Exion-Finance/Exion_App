@@ -42,7 +42,7 @@ export default function PaybillAccountNumber() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Pay bill' onBackPress={() => route.push('/paybillbusinessnumber')} />
+            <NavBar title='Pay bill' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <InputField
                     label="Enter the account number"
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     },
     text: {
         color: '#fff',
-        fontSize: 17,
+        fontSize: 19,
         fontFamily: 'DMSansMedium'
     },
     flexContainer: {
