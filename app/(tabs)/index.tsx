@@ -123,6 +123,19 @@ export default function TabOneScreen() {
         setTokensBalance(response.balance)
         setTokens(response);
         dispatch(setTokenBalance(response));
+
+        //Fetch buying rate
+        const currencyCode: string = "USD"
+        const rates = await fetchExchangeRate(currencyCode)
+        if (rates.data.success) {
+          // console.log("rates-->", rates.data)
+          setBuyingRate(rates.data.data.buyingRate)
+        }
+
+        //Update balance after payment
+        // if (refresh === 'true'){
+        //   updateWalletBalance(response.balance)
+        // }
         return response.balance;
       }
       else if (response.error) {
@@ -141,6 +154,18 @@ export default function TabOneScreen() {
   }, [authToken]);
 
   // console.log("AuthToken in indexxxxxx<<<<<<<<<<<", authToken)
+
+  const updateWalletBalance = (data: BalanceData) => {
+    if (data) {
+      console.log("Updating wallet balance...")
+      const totalBalance = Object.values(data).reduce<TotalAmounts>((acc, currency) => {
+        acc.usd += parseFloat(currency.usd);
+        acc.kes += parseFloat(currency.kes);
+        return acc;
+      }, { usd: 0, kes: 0 });
+      dispatch(updateBalance(totalBalance))
+    }
+  }
 
   useEffect(() => {
     if (tokensBalance) {
@@ -218,20 +243,20 @@ export default function TabOneScreen() {
     token()
   }, [authState])
 
-  useEffect(() => {
-    const exchangeRate = async () => {
-      if (!isLoading) {
-        const currencyCode: string = "USD"
-        const rates = await fetchExchangeRate(currencyCode)
-        if (rates.data.success) {
-          // console.log(rates.data)
-          setBuyingRate(rates.data.data.buyingRate)
-          return;
-        }
-      }
-    }
-    exchangeRate()
-  }, [isLoading])
+  // useEffect(() => {
+  //   const exchangeRate = async () => {
+  //     if (!isLoading) {
+  //       const currencyCode: string = "USD"
+  //       const rates = await fetchExchangeRate(currencyCode)
+  //       if (rates.data.success) {
+  //         // console.log(rates.data)
+  //         setBuyingRate(rates.data.data.buyingRate)
+  //         return;
+  //       }
+  //     }
+  //   }
+  //   exchangeRate()
+  // }, [isLoading])
 
   // console.log("<---Parsed authtoken object index---->", authToken)
 
@@ -300,13 +325,16 @@ export default function TabOneScreen() {
       try {
         const pageSize: number = 500;
         const tx = await fetchMobileTransactions(pageSize)
-
         if (tx.data) {
           console.log("Refresh mobile transactions received")
           const fullSections = makeSections(tx.data)
           const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
           setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
+          const balance = await fetchBalance()
+          if(balance) {
+            updateWalletBalance(balance)
+          }
           return;
         }
         else if (tx.error) {
