@@ -57,7 +57,7 @@ export default function OptionalMessage() {
 
     const maxLength = 70;
     const userInitial = name.slice(0, 1)
-    console.log("tokeeeen--->", token)
+    // console.log("tokeeeen--->", token)
 
     const id = typeof token === 'string' ? tokens[token.toUpperCase()]?.id : undefined;
 
@@ -80,9 +80,9 @@ export default function OptionalMessage() {
             bottomSheetRef.current?.expand()
             const amountFloat = parseFloat(conversionToUsd?.toString() || "0").toFixed(4);
 
-            console.log("recipient", phoneNumber ? phoneNumber as string : recipient_address as string)
-            console.log("amountFloat", amountFloat)
-            console.log("token id", id as number)
+            // console.log("recipient", phoneNumber ? phoneNumber as string : recipient_address as string)
+            // console.log("amountFloat", amountFloat)
+            // console.log("token id", id as number)
             // console.log("recipient_address", recipient_address)
 
             const response = await SendMoneyV1({
@@ -181,7 +181,7 @@ export default function OptionalMessage() {
                             <SecondaryFontText style={{ fontSize: 23 }}>{userInitial}</SecondaryFontText>
                         </View>
                         <View>
-                            <PrimaryFontMedium style={{ fontSize: 19 }}>{name.length < 15 ? name : `${recipient_address.slice(0, 8)}...${recipient_address.slice(-8)}`}
+                            <PrimaryFontMedium style={{ fontSize: 19 }}>{name.length < 15 ? name : `${recipient_address.slice(0, 12)}...${recipient_address.slice(-8)}`}
                             </PrimaryFontMedium>
                             <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber ? phoneNumber : savedUsername}</PrimaryFontText>
                         </View>

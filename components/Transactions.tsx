@@ -191,7 +191,7 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
                 const formatNameOrAddress = (nameOrAddress: string) => {
                     if (!nameOrAddress) return "";
                     return nameOrAddress.length > 30
-                        ? `${nameOrAddress.slice(0, 7)}...${nameOrAddress.slice(-4)}`
+                        ? `${nameOrAddress.slice(0, 12)}...${nameOrAddress.slice(-4)}`
                         : nameOrAddress;
                 };
 

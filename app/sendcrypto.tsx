@@ -365,12 +365,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: "#00C48F",
         paddingVertical: 12,
-        paddingHorizontal: 25,
+        paddingHorizontal: 20,
         borderRadius: 10,
     },
     copyButtonText: {
         color: "#fff",
-        fontSize: 17,
+        fontSize: 16,
         marginLeft: 5
     },
     scanContainer: {
@@ -422,12 +422,12 @@ const styles = StyleSheet.create({
         // borderColor: 'black'
     },
     permissionImage: {
-        width: 80,
-        height: 80,
+        width: 70,
+        height: 70,
         marginBottom: 25,
     },
     permissionTitle: {
-        fontSize: 20,
+        fontSize: 19,
         marginBottom: 10,
         color: '#052330'
     },
@@ -439,9 +439,9 @@ const styles = StyleSheet.create({
     },
     permissionButton: {
         backgroundColor: '#00C48F',
-        paddingVertical: 14,
-        paddingHorizontal: 30,
-        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
     },
     permissionButtonText: {
         color: '#fff',

@@ -9,6 +9,7 @@ import Loading from '@/components/Loading';
 import { TransactionData } from '@/types/datatypes';
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import Feather from '@expo/vector-icons/Feather';
+import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { StatusBar } from 'expo-status-bar';
@@ -321,34 +322,24 @@ export default function EnterWalletAddress() {
         })();
     }, []);
 
-    //Merge computed+DB into displayFavorites
+    // Only return db_favorites with their latest tx from favorites(transaction history)
     const displayFavorites = useMemo(() => {
+        return db_favorites.map((db) => {
+            // check if this db favorite has a matching transaction favorite
+            const match = favorites.find((fav) => fav.address === db.walletAddress);
 
-        // Map computed favorites (from tx history), overriding with DB info
-        const computed = favorites.map((fav) => {
-            const db = db_favorites.find((d) => d.walletAddress === fav.address);
             return {
-                address: fav.address,
-                lastDate: fav.lastDate,
-                userName: db?.userName,
-                id: db?.id,
+                address: db.walletAddress,
+                lastDate: match?.lastDate ?? null,
+                userName: db.userName,
+                id: db.id,
             };
         });
-
-        // Find any DB‑only entries not in computed
-        const computedAddrs = new Set(computed.map((c) => c.address));
-        const extras = db_favorites
-            .filter((d) => !computedAddrs.has(d.walletAddress))
-            .map((d) => ({
-                address: d.walletAddress,
-                lastDate: null,
-                userName: d.userName,
-                id: d.id,
-            }));
-
-        // Combine and return
-        return [...computed, ...extras];
     }, [favorites, db_favorites]);
+
+
+    // console.log("db_favorites", db_favorites)
+    // console.log("displayFavorites", displayFavorites)
 
 
     const handleDeleteFavorite = async () => {
@@ -389,27 +380,49 @@ export default function EnterWalletAddress() {
                 {/* Top static section */}
                 <View style={{ zIndex: 1 }}>
                     <PrimaryFontMedium style={styles.label}>Enter the wallet address</PrimaryFontMedium>
-                    <TextInput
-                        style={[
-                            styles.input,
-                            { borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isWalletFocused ? 2 : 1 },
-                        ]}
-                        placeholder="E.g OxOdbe52...223fa"
-                        placeholderTextColor="#C3C2C2"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        onChangeText={(text) => {
-                            setWalletAddress(text);
-                            setError(false);
-                        }}
-                        onFocus={() => setIsWalletAddressFocused(true)}
-                        onBlur={() => setIsWalletAddressFocused(false)}
-                        value={
-                            walletAddress.startsWith('0x') && walletAddress.length > 30
-                                ? `${walletAddress.slice(0, 12)}….${walletAddress.slice(-6)}`
-                                : walletAddress
-                        }
-                    />
+                    <View style={{ position: 'relative' }}>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    borderColor: isWalletFocused ? '#B5BFB5' : '#C3C3C3',
+                                    borderWidth: isWalletFocused ? 2 : 1,
+                                    paddingRight: 40, // give space for the X icon
+                                },
+                            ]}
+                            placeholder="E.g OxOdbe52...223fa"
+                            placeholderTextColor="#C3C2C2"
+                            keyboardType="default"
+                            autoCapitalize="none"
+                            onChangeText={(text) => {
+                                setWalletAddress(text);
+                                setError(false);
+                            }}
+                            onFocus={() => setIsWalletAddressFocused(true)}
+                            onBlur={() => setIsWalletAddressFocused(false)}
+                            value={walletAddress}
+                        />
+
+                        {walletAddress.length > 0 && (
+                            <TouchableOpacity
+                                onPress={() => setWalletAddress('')}
+                                style={{
+                                    position: 'absolute',
+                                    right: 10,
+                                    top: '50%',
+                                    transform: [{ translateY: -12 }],
+                                    backgroundColor: '#E0E0E0',
+                                    borderRadius: 20,
+                                    width: 24,
+                                    height: 24,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Ionicons name="close" size={16} color="#333" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
 
                     {clipboardAddress && (
                         <TouchableOpacity style={styles.pasteBanner} activeOpacity={0.8} onPress={handlePaste}>
@@ -419,7 +432,7 @@ export default function EnterWalletAddress() {
                             <View style={styles.pasteTextWrapper}>
                                 <PrimaryFontMedium style={styles.pasteTitle}>Paste from clipboard</PrimaryFontMedium>
                                 <PrimaryFontText style={styles.pasteAddress}>
-                                    {`${clipboardAddress.slice(0, 12)}.…${clipboardAddress.slice(-6)}`}
+                                    {clipboardAddress}
                                 </PrimaryFontText>
                             </View>
                         </TouchableOpacity>
@@ -614,8 +627,8 @@ const styles = StyleSheet.create({
         marginBottom: 4.5,
     },
     pasteAddress: {
-        fontSize: 13,
-        color: '#333',
+        fontSize: 12,
+        color: '#555',
     },
     favoritesContainer: {
         borderWidth: 1.2,
