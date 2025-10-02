@@ -398,26 +398,26 @@ const styles = StyleSheet.create({
         // borderColor: 'black'
     },
     permissionImage: {
-        width: 80,
-        height: 80,
+        width: 60,
+        height: 60,
         marginBottom: 25,
     },
     permissionTitle: {
-        fontSize: 20,
+        fontSize: 19,
         marginBottom: 10,
         color: '#052330'
     },
     permissionDescription: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#79828E',
         textAlign: 'center',
         marginBottom: 20
     },
     permissionButton: {
         backgroundColor: '#00C48F',
-        paddingVertical: 14,
-        paddingHorizontal: 30,
-        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
     },
     permissionButtonText: {
         color: '#fff',
