@@ -37,7 +37,9 @@ import {
   selectTokenBalances,
   selectUserProfile,
   setFavorites,
-  setOnchainTx
+  setOnchainTx,
+  setExchangeRate,
+  selectExchangeRate
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -79,7 +81,7 @@ export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
-  const [buyingRate, setBuyingRate] = useState<string | null>(null)
+  // const [buyingRate, setBuyingRate] = useState<string | null>(null)
 
   const toggleVisibility = async () => {
     const newValue = !isHidden;
@@ -93,7 +95,8 @@ export default function TabOneScreen() {
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  // console.log("user_profile from redux...>", user_profile)
+  const exchange_rate = useSelector(selectExchangeRate)
+  // console.log("exchange_rate from redux...>", exchange_rate)
 
   // const initialSnapPoints = useMemo(() => ['25%', 'CONTENT_HEIGHT'], []);
   const initialSnapPoints = ['CONTENT_HEIGHT'];
@@ -129,7 +132,8 @@ export default function TabOneScreen() {
         const rates = await fetchExchangeRate(currencyCode)
         if (rates.data.success) {
           // console.log("rates-->", rates.data)
-          setBuyingRate(rates.data.data.buyingRate)
+          // setBuyingRate(rates.data.data.buyingRate)
+          dispatch(setExchangeRate(rates.data.data))
         }
 
         //Update balance after payment
@@ -332,7 +336,7 @@ export default function TabOneScreen() {
           setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
           const balance = await fetchBalance()
-          if(balance) {
+          if (balance) {
             updateWalletBalance(balance)
           }
           return;
@@ -534,8 +538,8 @@ export default function TabOneScreen() {
 
               </View>
               <SecondaryButton
-                textOnButton="Wallet"
-                icon={<FontAwesome6 name="coins" size={15} color="#052330" />}
+                textOnButton="Fund"
+                icon={<Feather name="plus" size={15} color="#052330" />}
                 containerStyle={{ backgroundColor: 'white', marginTop: 15 }}
                 textStyle={{ fontSize: 16, color: "#052330" }}
                 onPress={() => bottomSheetRef.current?.expand()}
@@ -625,12 +629,16 @@ export default function TabOneScreen() {
           onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-            <PrimaryFontBold style={{ fontSize: 22 }}>
+            {/* <PrimaryFontBold style={{ fontSize: 22 }}>
               Tokens
+            </PrimaryFontBold> */}
+
+            <PrimaryFontBold style={{ fontSize: 22 }}>
+              Select token to buy
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              {buyingRate ? `$1 ≈ ${buyingRate} KSh` : "Loading.."}
+              {exchange_rate?.buyingRate ? `$1 ≈ ${exchange_rate.buyingRate} KSh` : "Loading.."}
             </PrimaryFontMedium>
           </View>
 

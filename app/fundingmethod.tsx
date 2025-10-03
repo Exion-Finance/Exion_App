@@ -52,7 +52,7 @@ export default function FundingMethod() {
             <StatusBar style={'dark'} />
             <NavBar title={'Choose payment method'} onBackPress={() => route.back()} />
 
-            <View style={[reusableStyles.paddingContainer, { flex: 1, justifyContent: 'space-between', paddingBottom: 40 }]}>
+            <View style={[reusableStyles.paddingContainer, { flex: 1, justifyContent: 'space-between', paddingBottom: 24 }]}>
                 <View>
                     <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 15, marginBottom: 12 }]}>
                         <View style={styles.initialContainer}>

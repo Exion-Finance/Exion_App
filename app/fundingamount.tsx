@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
 //import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
@@ -24,7 +24,7 @@ export default function FundingAmount() {
     const route = useRouter()
 
 
-    const handleAccountNumberChange = (text: string) => {
+    const handleFundAmountChange = (text: string) => {
         setAmount(text);
         setError(false)
     };
@@ -37,7 +37,7 @@ export default function FundingAmount() {
 
             // Check if the input field is empty
             if (cleanedAmount === '' || id === "" || phoneNumber === "") {
-                setErrorDescription('Field cannot be empty')
+                setErrorDescription('Amount cannot be empty')
                 setError(true)
                 setMakePayment(false)
                 return;
@@ -81,27 +81,53 @@ export default function FundingAmount() {
 
     return (
         <View style={styles.container}>
-            <NavBar title='Amount' onBackPress={() => route.back()} />
-            <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
-                <InputField
-                    label="Enter the amount to send"
-                    placeholder="Ksh"
-                    onInputChange={handleAccountNumberChange}
-                    error={error}
-                    errorDescription={errorDescription}
-                />
-                <Pressable style={styles.button} onPress={handleSubmit}>
-                    <PrimaryFontBold style={styles.text}>
-                        {makepayment ?
-                            <Loading color='#fff' description='Processing' />
-                            : "Make Payment"
-                        }
-                    </PrimaryFontBold>
-                </Pressable>
-            </View>
+            <NavBar title="Amount" onBackPress={() => route.back()} />
 
+            <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
+                <View>
+                    <InputField
+                        label="Enter the amount to send"
+                        placeholder="Ksh"
+                        keyboardType="numeric"
+                        onInputChange={handleFundAmountChange}
+                        error={error}
+                        errorDescription={errorDescription}
+                        passedValue={amount}
+                        source={"fundingAmount"}
+                    />
+
+                    
+                    <View style={styles.gridContainer}>
+                        {["100", "500", "1000", "2000", "5000", "10000"].map((val) => (
+                            <TouchableOpacity
+                                key={val}
+                                style={styles.amountBox}
+                                onPress={() => { setAmount(val); setError(false) }}
+                            >
+                                <PrimaryFontBold style={styles.amountText}>Ksh {val}</PrimaryFontBold>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F" },]}
+                    onPress={handleSubmit}
+                    disabled={makepayment}
+                >
+                    <PrimaryFontBold style={styles.text}>
+                        {makepayment ? (
+                            <Loading color="#fff" description="Processing" />
+                        ) : (
+                            "Make Payment"
+                        )}
+                    </PrimaryFontBold>
+                </TouchableOpacity>
+            </View>
         </View>
     );
+
 }
 
 const styles = StyleSheet.create({
@@ -112,9 +138,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     button: {
-        backgroundColor: '#00C48F',
         padding: 10,
-        borderRadius: 9,
+        borderRadius: 10,
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%'
@@ -130,6 +155,25 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 40
-    }
+        paddingBottom: 24
+    },
+    gridContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        marginTop: 20,
+    },
+    amountBox: {
+        width: "30%",
+        backgroundColor: "#F5F5F5",
+        paddingVertical: 14,
+        marginBottom: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    amountText: {
+        fontSize: 16,
+        color: "#555",
+    },
 });
