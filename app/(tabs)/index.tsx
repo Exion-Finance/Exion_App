@@ -629,16 +629,12 @@ export default function TabOneScreen() {
           onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-            {/* <PrimaryFontBold style={{ fontSize: 22 }}>
-              Tokens
-            </PrimaryFontBold> */}
-
             <PrimaryFontBold style={{ fontSize: 22 }}>
               Select token to buy
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              {exchange_rate?.buyingRate ? `$1 ≈ ${exchange_rate.buyingRate} KSh` : "Loading.."}
+              {exchange_rate?.sellingRate ? `$1 ≈ ${exchange_rate.sellingRate} KSh` : "Loading.."}
             </PrimaryFontMedium>
           </View>
 
@@ -697,7 +693,7 @@ const styles = StyleSheet.create({
     color: '#79828E',
     borderRadius: 15,
     paddingHorizontal: 13,
-    fontSize: 13
+    fontSize: 12
   },
   tokenListHeader: {
     flexDirection: 'row',

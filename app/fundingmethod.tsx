@@ -36,7 +36,7 @@ export default function FundingMethod() {
          
           if(user_profile){
             // const parsedToken = JSON.parse(token);
-            console.log("userdetails", user_profile)
+            // console.log("userdetails", user_profile)
             
             setPhoneNumber(user_profile?.phoneNumber)
     

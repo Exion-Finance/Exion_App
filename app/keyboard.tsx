@@ -26,9 +26,8 @@ import { TotalFeeResponse } from '@/types/datatypes';
 import { tokens as tkn } from '@/utill/tokens';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
-import { useAuth } from "./context/AuthContext";
 import Loading from "@/components/Loading";
-import { selectTokenBalances, setTokenBalance, selectUserProfile } from './state/slices';
+import { selectTokenBalances, setTokenBalance, selectUserProfile, selectExchangeRate } from './state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 import PinAuth from '@/components/PinAuth';
 
@@ -49,6 +48,7 @@ const CustomKeyboard = () => {
   const dispatch = useDispatch()
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
+  const exchange_rate = useSelector(selectExchangeRate)
   // console.log("user_profile from redux...>", user_profile)
 
   const [inputValue, setInputValue] = useState<string>('');
@@ -739,12 +739,15 @@ const CustomKeyboard = () => {
           style={{ paddingBottom: 18 }}
           onLayout={handleContentLayout}
         >
-          <PrimaryFontBold
-            style={[reusableStyle.paddingContainer,
-            { fontSize: 22, marginTop: 25, marginBottom: 15, paddingHorizontal: 23 }]}
-          >
-            Select token to send
-          </PrimaryFontBold>
+          <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+            <PrimaryFontBold style={{ fontSize: 22 }}>
+              Select token to send
+            </PrimaryFontBold>
+
+            <PrimaryFontMedium style={styles.rate}>
+              {exchange_rate?.buyingRate ? `$1 ≈ ${exchange_rate.buyingRate} KSh` : "Loading.."}
+            </PrimaryFontMedium>
+          </View>
 
           <TokenListPayment response={tokens} onSelectToken={handleTokenSelect} />
           </BottomSheetView>
@@ -979,11 +982,21 @@ const styles = StyleSheet.create({
     marginTop: 5,
     // marginBottom: 20
   },
-  // contentContainer: {
-  //   flex: 1,
-  //   width: '100%',
-  //   alignItems: 'center'
-  // }
+  rate: {
+    backgroundColor: '#f2f2f2',
+    padding: 7,
+    color: '#79828E',
+    borderRadius: 15,
+    paddingHorizontal: 13,
+    fontSize: 12
+  },
+  tokenListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 15
+  }
 });
 
 export default CustomKeyboard;

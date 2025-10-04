@@ -57,7 +57,7 @@ const InputField: React.FC<InputFieldProps> = ({ label, placeholder, onInputChan
                 : source === "fundingAmount" && value || source === "fundingAmount" && passedValue ?
                     <View style={styles.conversionContainer}>
                         <PrimaryFontText style={{ color: 'gray', fontSize: 15 }}>You receive ${convertKshToUsd(passedValue ? Number(passedValue) : Number(value))}</PrimaryFontText>
-                        <PrimaryFontText style={{ color: 'gray', fontSize: 15 }}>$1 = {exchange_rate?.sellingRate}Ksh</PrimaryFontText>
+                        <PrimaryFontText style={{ color: 'gray', fontSize: 15 }}>$1 ≈ {exchange_rate?.sellingRate}Ksh</PrimaryFontText>
                     </View>
                     : null}
 

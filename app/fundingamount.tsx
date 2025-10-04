@@ -174,6 +174,6 @@ const styles = StyleSheet.create({
     },
     amountText: {
         fontSize: 16,
-        color: "#555",
+        color: "#444",
     },
 });

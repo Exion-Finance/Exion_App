@@ -175,7 +175,7 @@ const exchangeSlice = createSlice({
   initialState: initialExchangeRateState,
   reducers: {
     setExchangeRate(state, action: PayloadAction<ExchangeRate>) {
-      console.log("exchange payload", action.payload)
+      // console.log("exchange payload", action.payload)
       state.data = action.payload;
     },
     clearExchangeRate(state) {
