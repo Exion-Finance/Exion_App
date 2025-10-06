@@ -246,23 +246,6 @@ export default function TabOneScreen() {
     token()
   }, [authState])
 
-  // useEffect(() => {
-  //   const exchangeRate = async () => {
-  //     if (!isLoading) {
-  //       const currencyCode: string = "USD"
-  //       const rates = await fetchExchangeRate(currencyCode)
-  //       if (rates.data.success) {
-  //         // console.log(rates.data)
-  //         setBuyingRate(rates.data.data.buyingRate)
-  //         return;
-  //       }
-  //     }
-  //   }
-  //   exchangeRate()
-  // }, [isLoading])
-
-  // console.log("<---Parsed authtoken object index---->", authToken)
-
   const getGreetingAndImage = () => {
     const currentHour = new Date().getHours();
 
@@ -639,7 +622,7 @@ export default function TabOneScreen() {
           </View>
 
 
-          <TokenList response={tokens} />
+          <TokenList response={tokens} closeSheet={() => bottomSheetRef.current?.close()}/>
           {/* <TokenList routeProp='/fundingmethod'/> */}
         </BottomSheetView>
       </BottomSheet>

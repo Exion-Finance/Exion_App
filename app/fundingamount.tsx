@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
-//import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
+import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
+import { useSharedValue } from 'react-native-reanimated';
+import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import reusableStyle from '@/constants/ReusableStyles'
+import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import reusableStyles from '@/constants/ReusableStyles';
+import confirm from '@/assets/icons/confirm.png'
 import NavBar from '@/components/NavBar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AddFund } from './Apiconfig/api';
@@ -13,15 +19,27 @@ import { useAuth } from "./context/AuthContext";
 export default function FundingAmount() {
     const { authState } = useAuth()
 
-    const [amount, setAmount] = useState('');
-    const [error, setError] = useState(false);
-    const [errorDescription, setErrorDescription] = useState('');
+    const [amount, setAmount] = useState<string>('');
+    const [error, setError] = useState<boolean>(false);
+    const [errorDescription, setErrorDescription] = useState<string>('');
     const [token, setToken] = useState<string>("")
     const [makepayment, setMakePayment] = useState<boolean>(false)
-    const params = useLocalSearchParams();
-    const { id, phoneNumber } = params;
+    // const params = useLocalSearchParams();
+    const { id, phoneNumber } = useLocalSearchParams();
 
     const route = useRouter()
+
+    const initialSnapPoints = ['CONTENT_HEIGHT'];
+
+    const {
+        animatedHandleHeight,
+        animatedSnapPoints,
+        animatedContentHeight,
+        handleContentLayout,
+    } = useBottomSheetDynamicSnapPoints(initialSnapPoints);
+
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const animatedBottomSheet = useSharedValue(-1);
 
 
     const handleFundAmountChange = (text: string) => {
@@ -42,25 +60,28 @@ export default function FundingAmount() {
                 setMakePayment(false)
                 return;
             }
+            bottomSheetRef.current?.expand()
 
-            const res = await AddFund(token, parseInt(id as string), parseInt(cleanedAmount))
-            console.log("the response is for Add is *********************************8", res)
-            if (!res.errr) {
-                //replace with a toast
-                setMakePayment(false)
-                // route.push({ pathname: "/(tabs)"});
+            // const res = await AddFund(token, parseInt(id as string), parseInt(cleanedAmount))
+            // console.log("the response is for Add is *********************************8", res)
+            // if (!res.errr) {
+            //     //replace with a toast
+            //     setMakePayment(false)
+            //     // route.push({ pathname: "/(tabs)"});
 
 
-            } else {
-                setErrorDescription(res.msg)
-                setError(true)
-                setMakePayment(false)
-            }
+            // } else {
+            //     setErrorDescription(res.msg)
+            //     setError(true)
+            //     setMakePayment(false)
+            // }
 
         } catch (err) {
             console.log(err)
             setMakePayment(false)
-
+        }
+        finally {
+            setMakePayment(false)
         }
 
     };
@@ -80,7 +101,7 @@ export default function FundingAmount() {
     }, [authState])
 
     return (
-        <View style={styles.container}>
+        <GestureHandlerRootView style={styles.container}>
             <NavBar title="Amount" onBackPress={() => route.back()} />
 
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
@@ -96,7 +117,7 @@ export default function FundingAmount() {
                         source={"fundingAmount"}
                     />
 
-                    
+
                     <View style={styles.gridContainer}>
                         {["100", "500", "1000", "2000", "5000", "10000"].map((val) => (
                             <TouchableOpacity
@@ -110,7 +131,7 @@ export default function FundingAmount() {
                     </View>
                 </View>
 
-                
+
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F" },]}
                     onPress={handleSubmit}
@@ -125,7 +146,65 @@ export default function FundingAmount() {
                     </PrimaryFontBold>
                 </TouchableOpacity>
             </View>
-        </View>
+
+            <BottomSheetBackdrop animatedIndex={animatedBottomSheet} />
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={-1}
+                // snapPoints={['50%']}
+                snapPoints={animatedSnapPoints}
+                handleHeight={animatedHandleHeight}
+                contentHeight={animatedContentHeight}
+                enablePanDownToClose={true}
+                animatedIndex={animatedBottomSheet}
+                backgroundStyle={{ backgroundColor: '#fff' }}
+            >
+                <BottomSheetView
+                    style={{ paddingBottom: 18, paddingHorizontal: 16 }}
+                    onLayout={handleContentLayout}
+                >
+                    <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+                        <Image source={confirm} style={styles.confirm} />
+                        <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
+                            Confirm payment
+                        </PrimaryFontBold>
+
+                        <PrimaryFontMedium style={styles.rate}>
+                            You will receive a prompt to complete your transaction
+                        </PrimaryFontMedium>
+                    </View>
+
+                    <View style={styles.infoBox}>
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Phone number</PrimaryFontMedium>
+                            <PrimaryFontBold style={styles.value}>{phoneNumber}</PrimaryFontBold>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Amount</PrimaryFontMedium>
+                            <PrimaryFontBold style={styles.value}>{amount}</PrimaryFontBold>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
+                        onPress={handleSubmit}
+                        disabled={makepayment}
+                    >
+                        <PrimaryFontBold style={styles.text}>
+                            {makepayment ? (
+                                <Loading color="#fff" description="Processing" />
+                            ) : (
+                                "Confirm"
+                            )}
+                        </PrimaryFontBold>
+                    </TouchableOpacity>
+
+                </BottomSheetView>
+            </BottomSheet>
+        </GestureHandlerRootView>
     );
 
 }
@@ -175,5 +254,51 @@ const styles = StyleSheet.create({
     amountText: {
         fontSize: 16,
         color: "#444",
+    },
+    rate: {
+        color: 'gray',
+        fontSize: 16,
+        marginTop: 4,
+        width: '100%',
+        textAlign: 'center'
+    },
+    tokenListHeader: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        // justifyContent: 'space-between',
+        marginTop: 16,
+        marginBottom: 15
+    },
+    confirm: {
+        width: 50,
+        height: 50,
+    },
+    infoBox: {
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginTop: 16,
+        marginBottom: 16
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#E0E0E0',
+    },
+    label: {
+        fontSize: 16,
+        color: '#555',
+    },
+    value: {
+        fontSize: 16,
+        color: '#000',
     },
 });

@@ -25,16 +25,17 @@ const tokenId: Record<string, number> = {
 };
 interface TokenListProps {
     response: ResponseBalance;
+    closeSheet?: () => void;
 }
 
 
 
-export default function TokenList({ response }: TokenListProps) {
+export default function TokenList({ response, closeSheet }: TokenListProps) {
     const route = useRouter()
+    
     const handleTokenSelect = (id: number) => {
-        // route.push('/fundingmethod')
         route.push({ pathname: "/fundingmethod", params: { id} });
-        // console.log("Clickedd", id)
+        setTimeout(() => closeSheet!(), 700)
     }
     // console.log("Tokens from props-->", response)
     const tokens = Object.keys(response.balance).map((key) => {
