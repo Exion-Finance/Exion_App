@@ -248,13 +248,17 @@ export default function TabOneScreen() {
 
   const getGreetingAndImage = () => {
     const currentHour = new Date().getHours();
-
-    if (currentHour >= 0 && currentHour < 12) {
+  
+    if (currentHour >= 0 && currentHour < 5) {
+      return { greeting: 'Good night', image: moon };
+    } else if (currentHour >= 5 && currentHour < 12) {
       return { greeting: 'Good morning', image: morning };
-    } else if (currentHour >= 12 && currentHour < 18) {
+    } else if (currentHour >= 12 && currentHour < 17) {
       return { greeting: 'Good afternoon', image: noon };
-    } else {
+    } else if (currentHour >= 17 && currentHour < 20) {
       return { greeting: 'Good evening', image: moon };
+    } else {
+      return { greeting: 'Good night', image: moon };
     }
   };
 
@@ -617,7 +621,7 @@ export default function TabOneScreen() {
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              Select token to buy with mobile money
+              Select the token you want to buy with mobile money
             </PrimaryFontMedium>
           </View>
 
