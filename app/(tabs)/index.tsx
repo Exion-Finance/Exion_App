@@ -7,6 +7,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import userIcon from '@/assets/images/user.png'
+import dollars from '@/assets/icons/dollars.png'
 import morning from '@/assets/icons/morning.png'
 import noon from '@/assets/icons/noon.png'
 import moon from '@/assets/icons/moon.png'
@@ -39,7 +40,6 @@ import {
   setFavorites,
   setOnchainTx,
   setExchangeRate,
-  selectExchangeRate
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -95,7 +95,6 @@ export default function TabOneScreen() {
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  const exchange_rate = useSelector(selectExchangeRate)
   // console.log("exchange_rate from redux...>", exchange_rate)
 
   // const initialSnapPoints = useMemo(() => ['25%', 'CONTENT_HEIGHT'], []);
@@ -629,12 +628,13 @@ export default function TabOneScreen() {
           onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-            <PrimaryFontBold style={{ fontSize: 22 }}>
-              Select token to buy
+            <Image source={dollars} style={styles.dollars} />
+            <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
+              Add funds
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              {exchange_rate?.sellingRate ? `$1 ≈ ${exchange_rate.sellingRate} KSh` : "Loading.."}
+              Select token to buy with mobile money
             </PrimaryFontMedium>
           </View>
 
@@ -688,18 +688,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rate: {
-    backgroundColor: '#f3f5f9',
-    padding: 7,
-    color: '#79828E',
-    borderRadius: 15,
-    paddingHorizontal: 13,
-    fontSize: 12
+    color: 'gray',
+    fontSize: 16,
+    marginTop: 4,
+    width: '100%',
+    textAlign: 'center'
   },
   tokenListHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 20,
+    // justifyContent: 'space-between',
+    marginTop: 16,
     marginBottom: 15
   },
   qrButton: {
@@ -715,5 +714,9 @@ const styles = StyleSheet.create({
     width: 45,
     height: 50,
     // backgroundColor: '#00C48F',
+  },
+  dollars: {
+    width: 50,
+    height: 50,
   }
 });

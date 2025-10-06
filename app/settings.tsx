@@ -29,7 +29,7 @@ const SettingsScreen: React.FC = () => {
                 </ImageBackground>
 
                 <View style={styles.optionsWrapper}>
-                    <PrimaryFontMedium style={{ marginBottom: 10, fontSize: 15, color: '#888' }}>Policies</PrimaryFontMedium>
+                    <PrimaryFontMedium style={{ marginBottom: 10, fontSize: 15, color: '#888' }}>Legal</PrimaryFontMedium>
                     <SettingOption
                         icon={<Feather name="lock" size={18} color="#444" />}
                         description="Privacy Policy"
