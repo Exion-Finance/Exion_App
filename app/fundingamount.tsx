@@ -171,21 +171,20 @@ export default function FundingAmount() {
             <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
-                // snapPoints={['50%']}
                 snapPoints={animatedSnapPoints}
                 handleHeight={animatedHandleHeight}
                 contentHeight={animatedContentHeight}
-                enablePanDownToClose={true}
+                enablePanDownToClose={processedSuccessfully ? false : true}
                 animatedIndex={animatedBottomSheet}
                 backgroundStyle={{ backgroundColor: '#fff' }}
             >
                 <BottomSheetView
-                    style={{ paddingBottom: 18, paddingHorizontal: 16 }}
+                    style={{ paddingBottom: 18 }}
                     onLayout={handleContentLayout}
                 >
                     {!processsing ?
-                        <View>
-                            <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+                        <View style={[reusableStyle.paddingContainer]}>
+                            <View style={styles.tokenListHeader}>
                                 <Image source={confirm} style={styles.confirm} />
                                 <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
                                     Confirm payment
@@ -233,7 +232,7 @@ export default function FundingAmount() {
                                     animationStyle={{ width: "100%", height: 250, marginTop: -24 }}
                                 />
 
-                                <PrimaryFontBold style={{ fontSize: 22, marginTop: -55 }}>
+                                <PrimaryFontBold style={{ fontSize: 22, marginTop: -58 }}>
                                     Success🎉
                                 </PrimaryFontBold>
 
