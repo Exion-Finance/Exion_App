@@ -260,7 +260,7 @@ export default function OptionalMessage() {
                             :
                             require('@/assets/animations/loading.json')}
                             animationStyle={{ width: "100%", height: responseReceived ? 285 : 150, marginTop: responseReceived ? -30 : 20 }}
-                            loop={responseReceived ? false : true}
+                            loop={responseReceived ? true : true}
                         />
                         <SecondaryFontText
                             style={[reusableStyle.paddingContainer,

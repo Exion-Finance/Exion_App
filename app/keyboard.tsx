@@ -770,7 +770,7 @@ const CustomKeyboard = () => {
             onLayout={handleContentLayout2}
           >
             <LottieAnimation
-              loop={transactionLoading ? true : false}
+              loop={transactionLoading ? true : true}
               animationSource={transactionLoading ? require('@/assets/animations/loading.json') : require('@/assets/animations/done.json')}
               animationStyle={{ width: transactionLoading ? "60%" : "94%", height: transactionLoading ? 160 : 250, marginTop: transactionLoading ? 0 : -30 }}
             />

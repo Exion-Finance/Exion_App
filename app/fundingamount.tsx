@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import reusableStyle from '@/constants/ReusableStyles'
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
+import LottieAnimation from '@/components/LottieAnimation';
 import reusableStyles from '@/constants/ReusableStyles';
 import confirm from '@/assets/icons/confirm.png'
 import NavBar from '@/components/NavBar';
@@ -24,6 +25,8 @@ export default function FundingAmount() {
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [token, setToken] = useState<string>("")
     const [makepayment, setMakePayment] = useState<boolean>(false)
+    const [processsing, setProcessing] = useState<boolean>(false)
+    const [processedSuccessfully, setProcessedSuccessfully] = useState<boolean>(false)
     // const params = useLocalSearchParams();
     const { id, phoneNumber } = useLocalSearchParams();
 
@@ -85,6 +88,23 @@ export default function FundingAmount() {
         }
 
     };
+
+    const processOnRamp = async () => {
+        setTimeout(() => {
+            setProcessing(true)
+            // bottomSheetRef.current?.close()
+        }, 1000)
+        setTimeout(() => {
+            setProcessedSuccessfully(true)
+        }, 4000)
+    }
+
+    const handleDone = () => {
+        bottomSheetRef.current?.close();
+        route.dismissAll();
+        route.replace("/(tabs)")
+    }
+
     useEffect(() => {
         const token = async () => {
             // const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -163,44 +183,97 @@ export default function FundingAmount() {
                     style={{ paddingBottom: 18, paddingHorizontal: 16 }}
                     onLayout={handleContentLayout}
                 >
-                    <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-                        <Image source={confirm} style={styles.confirm} />
-                        <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
-                            Confirm payment
-                        </PrimaryFontBold>
+                    {!processsing ?
+                        <View>
+                            <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+                                <Image source={confirm} style={styles.confirm} />
+                                <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
+                                    Confirm payment
+                                </PrimaryFontBold>
 
-                        <PrimaryFontMedium style={styles.rate}>
-                            You will receive a prompt to complete your transaction
-                        </PrimaryFontMedium>
-                    </View>
+                                <PrimaryFontMedium style={styles.rate}>
+                                    You will receive a prompt to complete your transaction
+                                </PrimaryFontMedium>
+                            </View>
 
-                    <View style={styles.infoBox}>
-                        <View style={styles.row}>
-                            <PrimaryFontMedium style={styles.label}>Phone number</PrimaryFontMedium>
-                            <PrimaryFontBold style={styles.value}>{phoneNumber}</PrimaryFontBold>
+                            <View style={styles.infoBox}>
+                                <View style={styles.row}>
+                                    <PrimaryFontMedium style={styles.label}>Phone number</PrimaryFontMedium>
+                                    <PrimaryFontBold style={styles.value}>{phoneNumber}</PrimaryFontBold>
+                                </View>
+
+                                <View style={styles.divider} />
+
+                                <View style={styles.row}>
+                                    <PrimaryFontMedium style={styles.label}>Amount</PrimaryFontMedium>
+                                    <PrimaryFontBold style={styles.value}>{amount}</PrimaryFontBold>
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
+                                onPress={processOnRamp}
+                                disabled={makepayment}
+                            >
+                                <PrimaryFontBold style={styles.text}>
+                                    {makepayment ? (
+                                        <Loading color="#fff" description="Processing" />
+                                    ) : (
+                                        "Confirm"
+                                    )}
+                                </PrimaryFontBold>
+                            </TouchableOpacity>
                         </View>
+                        :
+                        processedSuccessfully ?
+                            <View style={[reusableStyle.paddingContainer, styles.loadingHeader]}>
+                                <LottieAnimation
+                                    loop={true}
+                                    animationSource={require('@/assets/animations/done.json')}
+                                    animationStyle={{ width: "100%", height: 250, marginTop: -24 }}
+                                />
 
-                        <View style={styles.divider} />
+                                <PrimaryFontBold style={{ fontSize: 22, marginTop: -55 }}>
+                                    Success🎉
+                                </PrimaryFontBold>
 
-                        <View style={styles.row}>
-                            <PrimaryFontMedium style={styles.label}>Amount</PrimaryFontMedium>
-                            <PrimaryFontBold style={styles.value}>{amount}</PrimaryFontBold>
-                        </View>
-                    </View>
+                                <PrimaryFontMedium style={[styles.rate, { fontSize: 18, marginTop: 4 }]}>
+                                    Your transaction was processed successfully
+                                </PrimaryFontMedium>
 
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
-                        onPress={handleSubmit}
-                        disabled={makepayment}
-                    >
-                        <PrimaryFontBold style={styles.text}>
-                            {makepayment ? (
-                                <Loading color="#fff" description="Processing" />
-                            ) : (
-                                "Confirm"
-                            )}
-                        </PrimaryFontBold>
-                    </TouchableOpacity>
+                                <View style={styles.amountRow}>
+                                    <View style={styles.line} />
+                                    <PrimaryFontBold style={styles.onrampAmount}>+ $177.35</PrimaryFontBold>
+                                    <View style={styles.line} />
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[styles.button, { backgroundColor: "#f8f8f8", marginBottom: -14 },]}
+                                    onPress={handleDone}
+                                    disabled={makepayment}
+                                >
+                                    <PrimaryFontBold style={[styles.text, { color: "#00C48F" }]}>
+                                        Done
+                                    </PrimaryFontBold>
+                                </TouchableOpacity>
+                            </View>
+                            :
+                            <View style={[reusableStyle.paddingContainer, styles.loadingHeader]}>
+                                <LottieAnimation
+                                    loop={true}
+                                    animationSource={require('@/assets/animations/hourglass.json')}
+                                    animationStyle={{ width: "100%", height: 160 }}
+                                />
+
+                                <PrimaryFontBold style={{ fontSize: 22, marginTop: -5 }}>
+                                    Processing payment
+                                </PrimaryFontBold>
+
+                                <PrimaryFontMedium style={[styles.rate, { fontSize: 18, marginTop: 8 }]}>
+                                    Please wait as we process your payment...
+                                </PrimaryFontMedium>
+                            </View>
+                    }
 
                 </BottomSheetView>
             </BottomSheet>
@@ -262,12 +335,45 @@ const styles = StyleSheet.create({
         width: '100%',
         textAlign: 'center'
     },
+    onrampAmount: {
+        color: '#333',
+        fontSize: 30,
+        marginTop: 28,
+        marginBottom: 28,
+        // width: '100%',
+        textAlign: 'center',
+        borderWidth: 0.6,
+        borderColor: '#00C48F',
+        backgroundColor: '#F4FFF6',
+        borderRadius: 12,
+        padding: 8,
+        paddingHorizontal: 15,
+    },
+    amountRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    line: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#D3D3D3',
+        marginHorizontal: 12,
+    },
     tokenListHeader: {
         flexDirection: 'column',
         alignItems: 'center',
         // justifyContent: 'space-between',
         marginTop: 16,
         marginBottom: 15
+    },
+    loadingHeader: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        // justifyContent: 'space-between',
+        marginTop: 4,
+        marginBottom: 24
     },
     confirm: {
         width: 50,
