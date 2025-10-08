@@ -16,6 +16,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AddFund } from './Apiconfig/api';
 import Loading from '@/components/Loading';
 import { useAuth } from "./context/AuthContext";
+import { refreshWalletData } from '@/utils/refreshWalletData';
+import { useDispatch } from 'react-redux';
 
 export default function FundingAmount() {
     const { authState } = useAuth()
@@ -31,6 +33,7 @@ export default function FundingAmount() {
     const { id, phoneNumber } = useLocalSearchParams();
 
     const route = useRouter()
+    const dispatch = useDispatch();
 
     const initialSnapPoints = ['CONTENT_HEIGHT'];
 
@@ -99,7 +102,8 @@ export default function FundingAmount() {
         }, 4000)
     }
 
-    const handleDone = () => {
+    const handleDone = async() => {
+        await refreshWalletData(dispatch)
         bottomSheetRef.current?.close();
         route.dismissAll();
         route.replace("/(tabs)")

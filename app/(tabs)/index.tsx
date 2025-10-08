@@ -611,7 +611,7 @@ export default function TabOneScreen() {
         backgroundStyle={{ backgroundColor: '#fff' }}
       >
         <BottomSheetView
-          style={{ paddingBottom: 18 }}
+          style={{ paddingBottom: 8 }}
           onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
@@ -621,7 +621,7 @@ export default function TabOneScreen() {
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              Select the token you want to buy with mobile money
+              Select the token you want to buy instantly with mobile money
             </PrimaryFontMedium>
           </View>
 
@@ -685,8 +685,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     // justifyContent: 'space-between',
-    marginTop: 16,
-    marginBottom: 15
+    marginTop: 12,
+    marginBottom: 12
   },
   qrButton: {
     alignItems: 'center',

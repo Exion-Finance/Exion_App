@@ -32,8 +32,14 @@ interface TokenListProps {
 
 export default function TokenList({ response, closeSheet }: TokenListProps) {
     const route = useRouter()
-    
+
+    const kycVerified: boolean = false
+
     const handleTokenSelect = (id: number) => {
+        if(!kycVerified){
+            route.push('/kycstartscreen')
+            return;
+        }
         route.push({ pathname: "/fundingmethod", params: { id} });
         setTimeout(() => closeSheet!(), 700)
     }

@@ -23,7 +23,7 @@ import { getBalances } from './Apiconfig/api';
 import { ResponseBalance, CurrencyData } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
-import { tokens as tkn } from '@/utill/tokens';
+import { tokens as tkn } from '@/utils/tokens';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import Loading from "@/components/Loading";
@@ -157,7 +157,7 @@ const CustomKeyboard = () => {
   // on mount, check if PIN exists in flag storage
   useEffect(() => {
     (async () => {
-      if(user_profile){
+      if (user_profile) {
         setHasPin(user_profile.pin);
       }
     })();
@@ -521,14 +521,14 @@ const CustomKeyboard = () => {
     }
   }
 
-  const handleBackspace = async() => {
+  const handleBackspace = async () => {
     // Remove the last character from the input value
     setInputValue(prev => prev.slice(0, -1));
     setError(false)
     // await calculateTransactionFee("100")
   };
-// console.log("Active Token", activeToken)
-// console.log("Tokens-->", tokens)
+  // console.log("Active Token", activeToken)
+  // console.log("Tokens-->", tokens)
 
 
   const bottomSheetRef1 = useRef<BottomSheet>(null);
@@ -686,7 +686,7 @@ const CustomKeyboard = () => {
           </PrimaryFontBold>
         </View>
 
-        <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <View style={styles.row}>
             {['1', '2', '3'].map((num) => (
               <KeyButton key={num} label={num} onPress={() => handlePress(num)} />
@@ -736,20 +736,20 @@ const CustomKeyboard = () => {
           backgroundStyle={{ backgroundColor: '#f8f8f8' }}
         >
           <BottomSheetView
-          style={{ paddingBottom: 18 }}
-          onLayout={handleContentLayout}
-        >
-          <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-            <PrimaryFontBold style={{ fontSize: 22 }}>
-              Select token to send
-            </PrimaryFontBold>
+            style={{ paddingBottom: 18 }}
+            onLayout={handleContentLayout}
+          >
+            <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
+              <PrimaryFontBold style={{ fontSize: 22 }}>
+                Select token to send
+              </PrimaryFontBold>
 
-            <PrimaryFontMedium style={styles.rate}>
-              {exchange_rate?.buyingRate ? `$1 ≈ ${exchange_rate.buyingRate} KSh` : "Loading.."}
-            </PrimaryFontMedium>
-          </View>
+              <PrimaryFontMedium style={styles.rate}>
+                {exchange_rate?.buyingRate ? `$1 ≈ ${exchange_rate.buyingRate} KSh` : "Loading.."}
+              </PrimaryFontMedium>
+            </View>
 
-          <TokenListPayment response={tokens} onSelectToken={handleTokenSelect} />
+            <TokenListPayment response={tokens} onSelectToken={handleTokenSelect} />
           </BottomSheetView>
         </BottomSheet>
 
