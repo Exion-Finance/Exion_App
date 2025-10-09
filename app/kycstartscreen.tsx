@@ -22,7 +22,7 @@ export default function KYCStartScreen() {
 
                 <PrimaryFontBold style={styles.title}>Verify Identity</PrimaryFontBold>
                 <PrimaryFontMedium style={styles.subtitle}>
-                    Please complete the simple KYC to start using this service
+                    Complete the simple KYC to start buying stablecoins seamlessly
                 </PrimaryFontMedium>
             </View>
 
@@ -43,20 +43,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     avatarWrap: {
-        width: 120,
-        height: 120,
+        width: 100,
+        height: 100,
         borderRadius: 60,
         marginTop: 70,
         position: 'relative',
-        borderWidth: 1,
+        borderWidth: 1.2,
         borderColor: '#BAC38B',
         backgroundColor: '#E4EDB5',
 
     },
-    avatar: { width: '84%', height: '84%' },
+    avatar: { width: '74%', height: '74%' },
     verifyIcon: { width: 32, height: 32, position: 'absolute', right: 2, bottom: -1 },
-    title: { fontSize: 24, marginTop: 18 },
-    subtitle: { color: '#888', textAlign: 'center', marginTop: 8, fontSize: 18 },
+    title: { fontSize: 22, marginTop: 18 },
+    subtitle: { color: '#888', textAlign: 'center', marginTop: 8, fontSize: 17 },
     button: {
         marginTop: 40,
         width: '100%',

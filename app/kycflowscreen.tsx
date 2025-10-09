@@ -13,8 +13,10 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import KYCImageBox from '@/components/KYCImageBox';
+import SelfieCamera from '@/components/SelfieCamera';
 import { openCamera, openGallery } from '@/utils/imagePickerService';
 // import { Asset } from 'react-native-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { PrimaryFontText } from '@/components/PrimaryFontText';
@@ -23,6 +25,9 @@ import { useSharedValue } from 'react-native-reanimated';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import confirm from '@/assets/icons/confirm.png'
+import personalInfo from '@/assets/images/personalInfo.png'
+import idFront from '@/assets/images/idFront.png'
+import camera from '@/assets/images/camera.png'
 
 const TOTAL_STEPS_FOR_GOV_ID = 4; // Personal info, Front, Back, Selfie
 const TOTAL_STEPS_FOR_PASSPORT = 3; // Personal info, Front (passport), Selfie
@@ -48,6 +53,9 @@ export default function KYCFlowScreen() {
     const [frontImage, setFrontImage] = useState<string | null>(null);
     const [backImage, setBackImage] = useState<string | null>(null);
     const [selfie, setSelfie] = useState<string | null>(null);
+    const [isSelfieMode, setIsSelfieMode] = useState<boolean>(false);
+    // const [selfie, setSelfie] = useState<string | null>(null);
+
 
 
     // const bottomSheetRef = useRef<BottomSheet | null>(null);
@@ -67,6 +75,11 @@ export default function KYCFlowScreen() {
     async function onTakePicture() {
         try {
             bottomSheetRef.current?.close();
+
+            if (activeSlot === 'selfie') {
+                setIsSelfieMode(true);
+                return;
+            }
             const uri = await openCamera();
             if (!uri) return;
             setAssetForSlot(activeSlot, uri);
@@ -106,7 +119,7 @@ export default function KYCFlowScreen() {
     function goNext() {
         // step validation logic
         if (step === 1) {
-            if (!documentType) return Alert.alert('Select document type');
+            if (!documentType) return Alert.alert('Please select document type');
             if (!fullName.trim()) return Alert.alert('Enter full name');
             if (!identificationNumber.trim()) return Alert.alert('Enter identification number');
         } else if (step === 2) {
@@ -163,30 +176,30 @@ export default function KYCFlowScreen() {
             return (
                 <View>
                     <View style={[styles.circleImagePlaceholder, styles.alignCenter]} >
-                        <Image source={confirm} style={styles.confirm} />
+                        <Image source={personalInfo} style={{ width: 64, height: 64 }} />
                     </View>
                     <PrimaryFontBold style={styles.heading}>Personal Info</PrimaryFontBold>
                     <PrimaryFontMedium style={styles.grayText}>Please fill the details below</PrimaryFontMedium>
 
                     <View style={styles.docRow}>
                         <TouchableOpacity
-                            style={[styles.docCard, documentType === 'gov_id' && styles.docCardActive]}
+                            style={[styles.docCard, documentType === 'gov_id' && styles.docCardActive, { flexGrow: 1, marginRight: 10 }]}
                             onPress={() => setDocumentType('gov_id')}
                         >
-                            <Text style={styles.cardTitle}>Government issued ID</Text>
+                            <PrimaryFontMedium style={styles.cardTitle}>Government issued ID</PrimaryFontMedium>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.docCard, documentType === 'passport' && styles.docCardActive]}
+                            style={[styles.docCard, documentType === 'passport' && styles.docCardActive, { flexGrow: 1 }]}
                             onPress={() => setDocumentType('passport')}
                         >
-                            <Text style={styles.cardTitle}>Passport</Text>
+                            <PrimaryFontMedium style={styles.cardTitle}>Passport</PrimaryFontMedium>
                         </TouchableOpacity>
                     </View>
 
                     {/* Inputs (replace with your InputField component) */}
                     <View style={{ marginTop: 16 }}>
-                        <Text style={styles.inputLabel}>Full name</Text>
+                        <PrimaryFontMedium style={styles.inputLabel}>Full name</PrimaryFontMedium>
                         <TextInput
                             style={styles.inputBox}
                             value={fullName}
@@ -194,7 +207,7 @@ export default function KYCFlowScreen() {
                         // placeholder="Enter your full name"
                         />
 
-                        <Text style={[styles.inputLabel, { marginTop: 14 }]}>Identification number</Text>
+                        <PrimaryFontMedium style={[styles.inputLabel, { marginTop: 14 }]}>Identification number</PrimaryFontMedium>
 
                         <TextInput
                             style={styles.inputBox}
@@ -212,7 +225,7 @@ export default function KYCFlowScreen() {
             return (
                 <View>
                     <View style={[styles.circleImagePlaceholder, styles.alignCenter]} >
-                        <Image source={confirm} style={styles.confirm} />
+                        <Image source={idFront} style={{ width: 64, height: 64 }} />
                     </View>
                     <PrimaryFontBold style={styles.heading}>
                         {documentType === 'passport' ? 'Passport' : 'Front ID'}
@@ -239,7 +252,7 @@ export default function KYCFlowScreen() {
             return (
                 <View>
                     <View style={[styles.circleImagePlaceholder, styles.alignCenter]} >
-                        <Image source={confirm} style={styles.confirm} />
+                        <Image source={idFront} style={{ width: 64, height: 64 }} />
                     </View>
                     <PrimaryFontBold style={styles.heading}>Back of ID</PrimaryFontBold>
                     <PrimaryFontMedium style={styles.grayText}>Take clear photo of back of ID</PrimaryFontMedium>
@@ -261,10 +274,10 @@ export default function KYCFlowScreen() {
         return (
             <View>
                 <View style={[styles.circleImagePlaceholder, styles.alignCenter]} >
-                    <Image source={confirm} style={styles.confirm} />
+                    <Image source={camera} style={{ width: 64, height: 64 }} />
                 </View>
                 <PrimaryFontBold style={styles.heading}>{selfieLabel}</PrimaryFontBold>
-                <PrimaryFontMedium style={styles.grayText}>Take a selfie and verify information</PrimaryFontMedium>
+                <PrimaryFontMedium style={styles.grayText}>Take a selfie and verify your information</PrimaryFontMedium>
 
                 <View style={{ marginTop: 12 }}>
                     {/* For selfie we include a "Take Picture" button that opens front camera with in-app overlay (optional) */}
@@ -274,17 +287,25 @@ export default function KYCFlowScreen() {
                         onPress={() => openPickerFor('selfie')}
                         onRemove={() => removeAssetForSlot('selfie')}
                     />
-
-                    <TouchableOpacity style={styles.takePicBtn} onPress={() => openPickerFor('selfie')}>
+                    <TouchableOpacity style={styles.takePicBtn} onPress={() => setIsSelfieMode(true)}>
                         <PrimaryFontBold style={{ color: '#fff' }}>Take Picture</PrimaryFontBold>
                     </TouchableOpacity>
 
                     <View style={styles.confirmCard}>
-                        <Text style={styles.confirmTitle}>Confirm details</Text>
-                        <Text>Full name: {fullName}</Text>
-                        <Text>Document: {documentType}</Text>
-                        <Text>ID number: {identificationNumber}</Text>
+                        <PrimaryFontBold style={styles.confirmTitle}>Confirm details</PrimaryFontBold>
+                        <PrimaryFontMedium style={{ marginTop: 5 }}>Full name: <PrimaryFontBold>{fullName}</PrimaryFontBold></PrimaryFontMedium>
+                        <PrimaryFontMedium style={{ marginTop: 5 }}>Document: <PrimaryFontBold>{documentType === 'gov_id' ? "Government ID" : "Passport"}</PrimaryFontBold></PrimaryFontMedium>
+                        <PrimaryFontMedium style={{ marginTop: 5 }}>ID number: <PrimaryFontBold>{identificationNumber}</PrimaryFontBold></PrimaryFontMedium>
                     </View>
+
+                    <SelfieCamera
+                        visible={isSelfieMode}
+                        onCapture={(uri) => {
+                            setSelfie(uri);
+                            setIsSelfieMode(false);
+                        }}
+                        onCancel={() => setIsSelfieMode(false)}
+                    />
                 </View>
             </View>
         );
@@ -296,8 +317,8 @@ export default function KYCFlowScreen() {
             <View style={styles.screen}>
                 {/* Header: Step X of Y, percent */}
                 <View style={styles.header}>
-                    <Text style={styles.stepLabel}>Step {step} of {totalSteps}</Text>
-                    <Text style={styles.percentLabel}>{progressPercent}%</Text>
+                    <PrimaryFontText style={styles.stepLabel}>Step {step} of {totalSteps}</PrimaryFontText>
+                    <PrimaryFontText style={styles.percentLabel}>{progressPercent}%</PrimaryFontText>
                 </View>
 
                 <View style={styles.progressBarOuter}>
@@ -311,11 +332,11 @@ export default function KYCFlowScreen() {
                 {/* Bottom fixed buttons */}
                 <View style={styles.bottomRow}>
                     <TouchableOpacity style={styles.bottomLeft} onPress={goBack}>
-                        <PrimaryFontBold style={{ color: '#00C48F' }}>{step === 1 ? 'Cancel' : 'Back'}</PrimaryFontBold>
+                        <PrimaryFontBold style={{ color: '#00C48F', fontSize: 16 }}>{step === 1 ? 'Cancel' : 'Back'}</PrimaryFontBold>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.bottomRight} onPress={goNext}>
-                        <PrimaryFontBold style={{ color: '#fff' }}>{step === totalSteps ? 'Submit' : 'Next'}</PrimaryFontBold>
+                        <PrimaryFontBold style={{ color: '#fff', fontSize: 16 }}>{step === totalSteps ? 'Submit' : 'Next'}</PrimaryFontBold>
                     </TouchableOpacity>
                 </View>
 
@@ -336,20 +357,38 @@ export default function KYCFlowScreen() {
                     backgroundStyle={{ backgroundColor: '#f8f8f8' }}
                 >
                     <BottomSheetView
-                        style={{ paddingBottom: 18 }}
                         onLayout={handleContentLayout}
                     >
                         <View style={{ padding: 16 }}>
                             <TouchableOpacity style={styles.optionRow} onPress={onTakePicture}>
-                                <Text>Take picture</Text>
+                                {/* <Ionicons name="camera-outline" size={26} color="#00C48F" style={styles.optionIcon} /> */}
+                                <View style={styles.optionIconBox}>
+                                    <Ionicons name="camera-outline" size={24} color="#00C48F" />
+                                </View>
+                                <View style={styles.optionTextContainer}>
+                                    <PrimaryFontMedium style={styles.optionTitle}>Take picture</PrimaryFontMedium>
+                                    <PrimaryFontText style={styles.optionSubtitle}>Use camera to capture image</PrimaryFontText>
+                                </View>
                             </TouchableOpacity>
+
                             <TouchableOpacity style={styles.optionRow} onPress={onSelectFromGallery}>
-                                <Text>Select from gallery</Text>
+                                <View style={styles.optionIconBox}>
+                                    <Ionicons name="image-outline" size={24} color="#00C48F" />
+                                </View>
+                                <View style={styles.optionTextContainer}>
+                                    <PrimaryFontMedium style={styles.optionTitle}>Select from gallery</PrimaryFontMedium>
+                                    <PrimaryFontText style={styles.optionSubtitle}>Choose an existing image</PrimaryFontText>
+                                </View>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.optionRow} onPress={() => bottomSheetRef.current?.close()}>
-                                <Text style={{ color: 'red' }}>Cancel</Text>
+
+                            <TouchableOpacity
+                                style={[styles.optionRow, { justifyContent: 'center' }]}
+                                onPress={() => bottomSheetRef.current?.close()}
+                            >
+                                <PrimaryFontMedium style={{ color: 'red', fontSize: 16 }}>Cancel</PrimaryFontMedium>
                             </TouchableOpacity>
                         </View>
+
                     </BottomSheetView>
                 </BottomSheet>
             </View>
@@ -365,22 +404,50 @@ const styles = StyleSheet.create({
     progressBarOuter: { height: 6, backgroundColor: '#EEE', marginTop: 8, marginHorizontal: 16, borderRadius: 6 },
     progressFill: { height: '100%', backgroundColor: '#00C48F', borderRadius: 6 },
     content: { flex: 1 },
-    circleImagePlaceholder: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#F4F4F4', alignSelf: 'center' },
-    heading: { textAlign: 'center', fontSize: 18, marginTop: 12 },
+    circleImagePlaceholder: { width: 92, height: 92, borderRadius: 48, backgroundColor: '#ECF2CE', alignSelf: 'center', borderWidth: 1, borderColor: '#D5DBB1' },
+    heading: { textAlign: 'center', fontSize: 19, marginTop: 12 },
     grayText: { textAlign: 'center', color: '#888', marginTop: 6 },
     docRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
-    docCard: { width: '48%', padding: 12, borderWidth: 1, borderColor: '#DDD', borderRadius: 8, alignItems: 'center' },
-    docCardActive: { borderColor: '#00C48F', backgroundColor: '#F2FFF7' },
+    docCard: { paddingVertical: 16, borderWidth: 1, borderColor: '#DDD', borderRadius: 8, alignItems: 'center' },
+    docCardActive: { borderColor: '#00C48F', borderWidth: 1.1, backgroundColor: '#F2FFF7' },
     cardTitle: { fontSize: 14 },
     inputLabel: { color: '#777', marginBottom: 6 },
-    inputBox: { borderWidth: 1, borderColor: '#EEE', padding: 10, borderRadius: 8, backgroundColor: '#FFF' },
+    inputBox: { borderWidth: 1, borderColor: '#E2E2E2', padding: 10, paddingLeft: 16, borderRadius: 8, backgroundColor: '#FFF', fontSize: 18, fontFamily: 'DMSansRegular' },
     takePicBtn: { marginTop: 12, backgroundColor: '#00C48F', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
-    confirmCard: { marginTop: 16, padding: 14, backgroundColor: '#FAFAFA', borderRadius: 8, borderWidth: 1, borderColor: '#EEE' },
-    confirmTitle: { fontWeight: '700', marginBottom: 6 },
+    confirmCard: { marginTop: 16, padding: 15, backgroundColor: '#FAFAFA', borderRadius: 8, borderWidth: 1, borderColor: '#EEE' },
+    confirmTitle: { marginBottom: 6, fontSize: 16 },
     bottomRow: { flexDirection: 'row', padding: 16, borderTopWidth: 1, borderColor: '#F0F0F0', backgroundColor: '#fff' },
-    bottomLeft: { flex: 1, paddingVertical: 12, alignItems: 'center' },
-    bottomRight: { flex: 1, paddingVertical: 12, alignItems: 'center', backgroundColor: '#00C48F', borderRadius: 8 },
-    optionRow: { paddingVertical: 12 },
+    bottomLeft: { flex: 1, paddingVertical: 14, alignItems: 'center' },
+    bottomRight: { flex: 1, paddingVertical: 14, alignItems: 'center', backgroundColor: '#00C48F', borderRadius: 8 },
+    optionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+    },
+    optionIcon: {
+        marginRight: 14,
+    },
+    optionIconBox: {
+      backgroundColor: '#eee',
+      borderRadius: 10,
+      width: 42,
+      height: 42,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
+    },
+    optionTextContainer: {
+        flexDirection: 'column',
+    },
+    optionTitle: {
+        fontSize: 17,
+        color: '#000',
+    },
+    optionSubtitle: {
+        fontSize: 14,
+        color: '#888',
+        marginTop: 2,
+    },
     confirm: { width: 50, height: 50, },
     alignCenter: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
 });

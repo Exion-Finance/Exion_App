@@ -3,6 +3,8 @@ import React from 'react';
 import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 // import { Asset } from 'react-native-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { PrimaryFontMedium } from './PrimaryFontMedium';
+import { PrimaryFontText } from './PrimaryFontText';
 
 type Props = {
   asset?: string | null;
@@ -25,8 +27,8 @@ export default function KYCImageBox({ asset, placeholder = 'No image selected', 
         </>
       ) : (
         <View style={styles.placeholder}>
-          <Text style={styles.placeholderText}>{placeholder}</Text>
-          <Text style={styles.tapText}>Tap to take or select image</Text>
+          <PrimaryFontMedium style={styles.placeholderText}>{placeholder}</PrimaryFontMedium>
+          <PrimaryFontText style={styles.tapText}>Tap to take or select image</PrimaryFontText>
         </View>
       )}
     </TouchableOpacity>
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   placeholderText: { color: '#777', marginBottom: 8 },
-  tapText: { color: '#AAA', fontSize: 13 },
+  tapText: { color: '#AAA', fontSize: 14 },
   image: { width: '100%', height: '100%' },
   removeBtn: {
     position: 'absolute',

@@ -16,9 +16,9 @@ export async function openCamera(): Promise<string | null> {
     // Launch camera
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 0.8,
-      aspect: [4, 3],
+      // aspect: [4, 3],
     });
 
     if (result.canceled) return null;
@@ -46,9 +46,9 @@ export async function openGallery(): Promise<string | null> {
     // Launch gallery picker
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 0.8,
-      aspect: [4, 3],
+      // aspect: [4, 3],
     });
 
     if (result.canceled) return null;
