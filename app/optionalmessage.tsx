@@ -98,6 +98,7 @@ export default function OptionalMessage() {
                 setResponseReceived(true);
                 // bottomSheetRef.current?.snapToIndex(1)
                 setTransactionDescription("Transaction sent successfully🎉")
+                await refreshWalletData(dispatch)
             }
             else if (response.error) {
                 console.log("errror in send<<-->>", response.error)
@@ -137,7 +138,7 @@ export default function OptionalMessage() {
     };
 
     const handleButtonClick = async () => {
-        await refreshWalletData(dispatch)
+        // await refreshWalletData(dispatch)
         bottomSheetRef.current?.close();
         route.dismissAll();
         route.replace("/(tabs)")

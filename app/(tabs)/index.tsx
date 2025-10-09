@@ -221,7 +221,7 @@ export default function TabOneScreen() {
       };
       setTokens(cachedTokens);
     }
-  }, []);
+  }, [token_balance]);
 
   useEffect(() => {
     (async () => {

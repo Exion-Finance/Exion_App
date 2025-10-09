@@ -75,6 +75,7 @@ const fetchBalance = async (dispatch: AppDispatch) => {
         const response = await getBalances();
         if (response.balance) {
             dispatch(setTokenBalance(response));
+            // dispatch(setTokenBalance(response));
             return response.balance;
         }
         else if (response.error) {
