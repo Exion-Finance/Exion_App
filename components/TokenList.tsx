@@ -38,6 +38,7 @@ export default function TokenList({ response, closeSheet }: TokenListProps) {
     const handleTokenSelect = (id: number) => {
         if(!kycVerified){
             route.push('/kycstartscreen')
+            setTimeout(() => closeSheet!(), 700)
             return;
         }
         route.push({ pathname: "/fundingmethod", params: { id} });

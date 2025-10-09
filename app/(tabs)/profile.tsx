@@ -74,26 +74,6 @@ export default function Profile() {
         <StatusBar style={'dark'} />
         <NavBar title='Profile' onBackPress={() => route.back()} />
 
-        {/* <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 20 }]}>
-          <Image source={userIcon} style={styles.userIcon} />
-          <View>
-            <View style={styles.flexRowJustifyBetween}>
-              <PrimaryFontBold style={{ fontSize: 19 }}>{user_profile?.userName || "--"}</PrimaryFontBold>
-
-              <TouchableOpacity
-                style={styles.verifyButton}
-                // activeOpacity={0.8}
-                onPress={() => route.push('/kycstartscreen')}
-              >
-                <PrimaryFontBold style={styles.verifyText}>Verify KYC</PrimaryFontBold>
-                <Image source={tickIcon} style={styles.verifyIcon} />
-              </TouchableOpacity>
-
-            </View>
-            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{user_profile?.email || "--"}</PrimaryFontText>
-          </View>
-        </View> */}
-
         <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 20 }]}>
           <Image source={userIcon} style={styles.userIcon} />
 
