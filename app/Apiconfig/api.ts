@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { PESACHAIN_URL, baseURL } from "@/constants/urls";
-import { SendTokenv1Type } from "@/types/datatypes"
-import { publicAPI, authAPI } from "../context/AxiosProvider";
+import { SendTokenv1Type, KycPayload } from "@/types/datatypes"
+import { publicAPI, authAPI, authAPIV2 } from "../context/AxiosProvider";
+import * as FileSystem from 'expo-file-system';
 
 export const getBalances = async () => {
     try {
@@ -113,7 +114,7 @@ export const RedeemPromo = async (token: string, tokenId: number = 1, promoCode:
 
 
 
-export const transactionHistory = async ( pagination?: number) => {
+export const transactionHistory = async (pagination?: number) => {
     try {
         // Pass pagination as a query parameter
         const response = await authAPI.get(`/tx/txhistory`, {
@@ -146,7 +147,7 @@ export const fetchUser = async (token: string) => {
 }
 
 export const fetchExchangeRate = async (currencyCode: string) => {
-    const response = await authAPI.get(`/exchange-rate/${currencyCode}` )
+    const response = await authAPI.get(`/exchange-rate/${currencyCode}`)
     return response;
 }
 
@@ -248,3 +249,225 @@ export const getConversionRates = async () => {
         return { error: true, msg: error.response?.data?.message || "An error occurred" };
     }
 }
+
+export const initiateOnRamp = async (amount: string, tokenName: string, chainId: number, networkCode: string, phoneNumber: string, Currency: string) => {
+    try {
+        const response = await authAPIV2.post('/payments/onramp', { amount, tokenName, chainId, networkCode, phoneNumber, Currency })
+        return response.data;
+    } catch (error: any) {
+        console.log(error)
+        return { error: true, msg: error.response?.data?.message || "Onramp error occurred" };
+    }
+}
+
+
+async function uriToBlob(uri: string): Promise<Blob> {
+    const response = await fetch(uri);
+    return await response.blob();
+}
+
+const getFileType = (uri: string) => {
+    if (uri.endsWith('.png')) return 'image/png';
+    if (uri.endsWith('.jpg') || uri.endsWith('.jpeg')) return 'image/jpeg';
+    if (uri.endsWith('.heic')) return 'image/heic';
+    return 'application/octet-stream';
+};
+
+
+// export async function submitKYC(payload: KycPayload) {
+//     const formData = new FormData();
+
+//     formData.append('fullName', payload.fullName);
+//     formData.append('identityNumber', payload.identityNumber);
+//     formData.append('documentType', payload.documentType);
+//     // formData.append('selfie', {
+//     //     uri: payload.selfie,
+//     //     type: 'image/jpeg',
+//     //     name: 'selfie.jpg',
+//     // } as any);
+//     formData.append('selfie', {
+//         uri: payload.selfie,
+//         type: getFileType(payload.selfie),
+//         name: 'selfie.jpg',
+//     } as any);
+
+//     if (payload.documentType === 'gov_id') {
+//         if (payload.id_front)
+//             // formData.append('id_front', {
+//             //     uri: payload.id_front,
+//             //     type: 'image/jpeg',
+//             //     name: 'id_front.jpg',
+//             // } as any);
+//             formData.append('id_front', {
+//                 uri: payload.id_front,
+//                 type: getFileType(payload.id_front),
+//                 name: 'id_front.jpg',
+//             } as any);
+//         if (payload.id_back)
+//             // formData.append('id_back', {
+//             //     uri: payload.id_back,
+//             //     type: 'image/jpeg',
+//             //     name: 'id_back.jpg',
+//             // } as any);
+//             formData.append('id_back', {
+//                 uri: payload.id_back,
+//                 type: getFileType(payload.id_back),
+//                 name: 'id_back.jpg',
+//             } as any);
+//     }
+
+//     if (payload.documentType === 'passport' && payload.passport) {
+//         // formData.append('passport', {
+//         //     uri: payload.passport,
+//         //     type: 'image/jpeg',
+//         //     name: 'passport.jpg',
+//         // } as any);
+//         formData.append('passport', {
+//             uri: payload.passport,
+//             type: getFileType(payload.passport),
+//             name: 'passport.jpg',
+//         } as any);
+//     }
+
+//     if (payload.documentType === 'driver_license' && payload.driver_license) {
+//         // formData.append('driver_license', {
+//         //     uri: payload.driver_license,
+//         //     type: 'image/jpeg',
+//         //     name: 'driver_license.jpg',
+//         // } as any);
+//         formData.append('driver_license', {
+//             uri: payload.driver_license,
+//             type: getFileType(payload.driver_license),
+//             name: 'driver_license.jpg',
+//         } as any);
+//     }
+
+//     console.log('FormData fields:');
+//     (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
+
+//     const response = await authAPIV2.post('/kyc/submit', formData, {
+//         headers: { 'Content-Type': 'multipart/form-data' },
+//     });
+//     console.log('/kyc/submit', response)
+
+//     return response.data;
+// }
+
+// export async function submitKYC(payload: KycPayload) {
+//     const formData = new FormData();
+  
+//     formData.append('fullName', payload.fullName.trim());
+//     formData.append('identityNumber', payload.identityNumber.trim());
+//     formData.append('documentType', payload.documentType);
+  
+//     const selfieBlob = await uriToBlob(payload.selfie);
+//     formData.append('selfie', selfieBlob, 'selfie.jpg');
+  
+//     if (payload.documentType === 'gov_id') {
+//       if (payload.id_front) {
+//         const frontBlob = await uriToBlob(payload.id_front);
+//         formData.append('id_front', frontBlob, 'id_front.jpg');
+//       }
+//       if (payload.id_back) {
+//         const backBlob = await uriToBlob(payload.id_back);
+//         formData.append('id_back', backBlob, 'id_back.jpg');
+//       }
+//     }
+  
+//     if (payload.documentType === 'passport' && payload.passport) {
+//       const passportBlob = await uriToBlob(payload.passport);
+//       formData.append('passport', passportBlob, 'passport.jpg');
+//     }
+  
+//     if (payload.documentType === 'driver_license' && payload.driver_license) {
+//       const licenseBlob = await uriToBlob(payload.driver_license);
+//       formData.append('driver_license', licenseBlob, 'driver_license.jpg');
+//     }
+//     console.log('FormData fields:');
+//     (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
+  
+//     console.log('Submitting multipart form...');
+//     const response = await authAPIV2.post('/kyc/submit', formData);
+//     return response.data;
+//   }
+
+// export async function submitKYC(payload: KycPayload) {
+//     const base64Selfie = await FileSystem.readAsStringAsync(payload.selfie, { encoding: FileSystem.EncodingType.Base64 });
+  
+//     const data: any = {
+//       fullName: payload.fullName,
+//       identityNumber: payload.identityNumber,
+//       documentType: payload.documentType,
+//       selfie: `data:image/jpeg;base64,${base64Selfie}`,
+//     };
+  
+//     if (payload.documentType === 'gov_id') {
+//       if (payload.id_front) {
+//         const front = await FileSystem.readAsStringAsync(payload.id_front, { encoding: FileSystem.EncodingType.Base64 });
+//         data.id_front = `data:image/jpeg;base64,${front}`;
+//       }
+//       if (payload.id_back) {
+//         const back = await FileSystem.readAsStringAsync(payload.id_back, { encoding: FileSystem.EncodingType.Base64 });
+//         data.id_back = `data:image/jpeg;base64,${back}`;
+//       }
+//     }
+  
+//     if (payload.documentType === 'passport' && payload.passport) {
+//       const pass = await FileSystem.readAsStringAsync(payload.passport, { encoding: FileSystem.EncodingType.Base64 });
+//       data.passport = `data:image/jpeg;base64,${pass}`;
+//     }
+  
+//     console.log('Submitting Base64 payload...', data);
+//     const response = await authAPIV2.post('/kyc/submit', data);
+//     return response.data;
+//   }
+
+async function toBase64FromUri(uri: string) {
+    try {
+      // move to a safe readable path
+      const fileName = uri.split('/').pop() || 'temp.jpg';
+      const dest = `${FileSystem.documentDirectory}${fileName}`;
+  
+      // ensure file exists and copy it into the app’s documentDirectory
+      await FileSystem.copyAsync({ from: uri, to: dest });
+  
+      // now safely read it as base64
+      return await FileSystem.readAsStringAsync(dest, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    } catch (err) {
+      console.error('Error converting image to Base64:', err);
+      throw err;
+    }
+  }
+  
+  export async function submitKYC(payload: KycPayload) {
+    const base64Selfie = await toBase64FromUri(payload.selfie);
+  
+    const data: any = {
+      fullName: payload.fullName,
+      identityNumber: payload.identityNumber,
+      documentType: payload.documentType,
+      selfie: `data:image/jpeg;base64,${base64Selfie}`,
+    };
+  
+    if (payload.documentType === 'gov_id') {
+      if (payload.id_front) {
+        const front = await toBase64FromUri(payload.id_front);
+        data.id_front = `data:image/jpeg;base64,${front}`;
+      }
+      if (payload.id_back) {
+        const back = await toBase64FromUri(payload.id_back);
+        data.id_back = `data:image/jpeg;base64,${back}`;
+      }
+    }
+  
+    if (payload.documentType === 'passport' && payload.passport) {
+      const pass = await toBase64FromUri(payload.passport);
+      data.passport = `data:image/jpeg;base64,${pass}`;
+    }
+  
+    console.log('Submitting Base64 payload...');
+    const response = await authAPIV2.post('/kyc/submit', data);
+    return response.data;
+  }

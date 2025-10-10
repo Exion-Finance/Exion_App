@@ -18,6 +18,7 @@ import Loading from '@/components/Loading';
 import { useAuth } from "./context/AuthContext";
 import { refreshWalletData } from '@/utils/refreshWalletData';
 import { useDispatch } from 'react-redux';
+import { initiateOnRamp } from './Apiconfig/api';
 
 export default function FundingAmount() {
     const { authState } = useAuth()
@@ -27,10 +28,11 @@ export default function FundingAmount() {
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [token, setToken] = useState<string>("")
     const [makepayment, setMakePayment] = useState<boolean>(false)
+    const [initiating, setInitiating] = useState<boolean>(false)
     const [processsing, setProcessing] = useState<boolean>(false)
     const [processedSuccessfully, setProcessedSuccessfully] = useState<boolean>(false)
     // const params = useLocalSearchParams();
-    const { id, phoneNumber } = useLocalSearchParams();
+    const { id, phoneNumber, tokenName } = useLocalSearchParams();
 
     const route = useRouter()
     const dispatch = useDispatch();
@@ -93,16 +95,33 @@ export default function FundingAmount() {
     };
 
     const processOnRamp = async () => {
-        setTimeout(() => {
-            setProcessing(true)
-            // bottomSheetRef.current?.close()
-        }, 1000)
-        setTimeout(() => {
-            setProcessedSuccessfully(true)
-        }, 4000)
+        try {
+            setInitiating(true)
+            const tokenNameStr = (Array.isArray(tokenName) ? tokenName[0] : tokenName ?? '').toUpperCase();
+            // const tokenNameStr: string = "USDT"
+            const phoneNumberStr = (Array.isArray(phoneNumber) ? phoneNumber[0] : phoneNumber ?? '').replace(/^\+/, '');
+            // const phoneNumberStr: string = "254792271915"
+            const chainId: number = 1
+            const networkCode: string = "Mpesa"
+            const currency: string = "KES"
+            console.log("payload", tokenNameStr, phoneNumberStr, amount, chainId, networkCode, currency)
+            const onrampResponse = await initiateOnRamp(amount, tokenNameStr, chainId, networkCode, phoneNumberStr, currency)
+            console.log("onrampResponse--->", onrampResponse)
+            // setTimeout(() => {
+            //     setProcessing(true)
+            //     // bottomSheetRef.current?.close()
+            // }, 1000)
+            // setTimeout(() => {
+            //     setProcessedSuccessfully(true)
+            // }, 4000)
+        } catch (error) {
+            console.log("Onramp error--->", error)
+        } finally {
+            setInitiating(false)
+        }
     }
 
-    const handleDone = async() => {
+    const handleDone = async () => {
         await refreshWalletData(dispatch)
         bottomSheetRef.current?.close();
         route.dismissAll();
@@ -214,12 +233,12 @@ export default function FundingAmount() {
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.button, { backgroundColor: makepayment ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
+                                style={[styles.button, { backgroundColor: initiating ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
                                 onPress={processOnRamp}
-                                disabled={makepayment}
+                                disabled={initiating}
                             >
                                 <PrimaryFontBold style={styles.text}>
-                                    {makepayment ? (
+                                    {initiating ? (
                                         <Loading color="#fff" description="Processing" />
                                     ) : (
                                         "Confirm"

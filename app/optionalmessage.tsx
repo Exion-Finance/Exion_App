@@ -98,7 +98,8 @@ export default function OptionalMessage() {
                 setResponseReceived(true);
                 // bottomSheetRef.current?.snapToIndex(1)
                 setTransactionDescription("Transaction sent successfully🎉")
-                await refreshWalletData(dispatch)
+                const transactionType: string = "onchain"
+                await refreshWalletData(dispatch, transactionType)
             }
             else if (response.error) {
                 console.log("errror in send<<-->>", response.error)

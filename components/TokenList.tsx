@@ -25,23 +25,24 @@ const tokenId: Record<string, number> = {
 };
 interface TokenListProps {
     response: ResponseBalance;
+    kycVerified: boolean | undefined;
     closeSheet?: () => void;
 }
 
 
 
-export default function TokenList({ response, closeSheet }: TokenListProps) {
+export default function TokenList({ response, closeSheet, kycVerified }: TokenListProps) {
     const route = useRouter()
 
-    const kycVerified: boolean = false
+    // const kycVerified: boolean = true
 
-    const handleTokenSelect = (id: number) => {
+    const handleTokenSelect = (id: number, tokenName: string) => {
         if(!kycVerified){
             route.push('/kycstartscreen')
             setTimeout(() => closeSheet!(), 700)
             return;
         }
-        route.push({ pathname: "/fundingmethod", params: { id} });
+        route.push({ pathname: "/fundingmethod", params: { id, tokenName} });
         setTimeout(() => closeSheet!(), 700)
     }
     // console.log("Tokens from props-->", response)
@@ -56,6 +57,7 @@ export default function TokenList({ response, closeSheet }: TokenListProps) {
             id: tokenId[tokenKey],
         };
     });
+    // console.log("Tokens -->", tokens)
 
     const formatNumberToFixed = (value: string | number) => {
         const num = Number(value);
@@ -72,7 +74,7 @@ export default function TokenList({ response, closeSheet }: TokenListProps) {
             data={tokens}
             keyExtractor={(item) => item.tokenName}
             renderItem={({ item }) => (
-                <TouchableOpacity style={[styles.container, reusableStyle.paddingContainer]} onPress={() => handleTokenSelect(item.id)}>
+                <TouchableOpacity style={[styles.container, reusableStyle.paddingContainer]} onPress={() => handleTokenSelect(item.id, item.tokenName)}>
                     <Image source={item.logo} style={styles.logo} />
                     <View style={styles.textContainer}>
                         <PrimaryFontMedium style={styles.tokenName}>{item.tokenName.toUpperCase()}</PrimaryFontMedium>

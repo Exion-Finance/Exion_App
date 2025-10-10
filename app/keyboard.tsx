@@ -30,6 +30,7 @@ import Loading from "@/components/Loading";
 import { selectTokenBalances, setTokenBalance, selectUserProfile, selectExchangeRate } from './state/slices';
 import { useDispatch, useSelector } from 'react-redux';
 import PinAuth from '@/components/PinAuth';
+import { refreshWalletData } from '@/utils/refreshWalletData';
 
 
 
@@ -196,6 +197,8 @@ const CustomKeyboard = () => {
             setTxChannel(checkTx.data.destinationChannel)
             setAmount(checkTx.data.transactionAmount)
             setTransactionState("Transaction sent🎉")
+            const transactionType: string = "offchain"
+            await refreshWalletData(dispatch, transactionType)
           } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
@@ -269,6 +272,8 @@ const CustomKeyboard = () => {
             setTxChannel("Buy Goods");
             setAmount(checkTx.data.transactionAmount);
             setTransactionState("Transaction sent🎉");
+            const transactionType: string = "offchain"
+            await refreshWalletData(dispatch, transactionType)
           } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
@@ -332,6 +337,8 @@ const CustomKeyboard = () => {
             setTxChannel("Paybill");
             setAmount(checkTx.data.transactionAmount);
             setTransactionState("Transaction sent🎉");
+            const transactionType: string = "offchain"
+            await refreshWalletData(dispatch, transactionType)
           } else if (!checkTx.data.success && retryCount < 5) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);

@@ -95,7 +95,7 @@ export default function TabOneScreen() {
   const mobile_transactions = useSelector(selectMobileTransactions)
   const token_balance = useSelector(selectTokenBalances)
   const user_profile = useSelector(selectUserProfile)
-  // console.log("exchange_rate from redux...>", exchange_rate)
+  // console.log("user_profile from redux...>", user_profile)
 
   // const initialSnapPoints = useMemo(() => ['25%', 'CONTENT_HEIGHT'], []);
   const initialSnapPoints = ['CONTENT_HEIGHT'];
@@ -626,7 +626,7 @@ export default function TabOneScreen() {
           </View>
 
 
-          <TokenList response={tokens} closeSheet={() => bottomSheetRef.current?.close()}/>
+          <TokenList response={tokens} kycVerified={user_profile?.isKYCVerified} closeSheet={() => bottomSheetRef.current?.close()}/>
           {/* <TokenList routeProp='/fundingmethod'/> */}
         </BottomSheetView>
       </BottomSheet>

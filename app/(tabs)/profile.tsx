@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
 import Loading from "@/components/Loading";
 import tickIcon from '@/assets/icons/verified.png';
-// import { authAPI, publicAPI } from "../context/AxiosProvider";
+import { authAPI } from "../context/AxiosProvider";
 import Feather from '@expo/vector-icons/Feather';
 
 export default function Profile() {
@@ -68,6 +68,10 @@ export default function Profile() {
     }
   }
 
+  const pressVerify = async () => {
+    route.push('/kycstartscreen')
+  }
+
   return (
     <ScrollView style={{ backgroundColor: '#f8f8f8' }}>
       <View style={styles.container}>
@@ -85,9 +89,9 @@ export default function Profile() {
 
               <TouchableOpacity
                 style={styles.verifyButton}
-                onPress={() => route.push('/kycstartscreen')}
+                onPress={user_profile?.isKYCVerified ? () => console.log("Verified") : pressVerify }
               >
-                <PrimaryFontBold style={styles.verifyText}>Get Verified</PrimaryFontBold>
+                <PrimaryFontBold style={styles.verifyText}>{user_profile?.isKYCVerified ? "Verified" : "Get Verified"}</PrimaryFontBold>
                 <Image source={tickIcon} style={styles.verifyIcon} />
               </TouchableOpacity>
             </View>

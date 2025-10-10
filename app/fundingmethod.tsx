@@ -18,7 +18,8 @@ import { useSelector } from 'react-redux';
 export default function FundingMethod() {
     const route = useRouter()
     const params = useLocalSearchParams();
-    const { id  } = params;
+    const { id, tokenName  } = params;
+    console.log("tokenName in funding", tokenName)
     const user_profile = useSelector(selectUserProfile)
     const name = "Mpesa"
     //const phoneNumber = "+254792271915"
@@ -28,7 +29,7 @@ export default function FundingMethod() {
 
     const handlePress = () =>{
         //route.push('/fundingamount')
-        route.push({ pathname: "/fundingamount", params: { id, phoneNumber} });
+        route.push({ pathname: "/fundingamount", params: { id, phoneNumber, tokenName} });
     }
     useEffect(()=>{
         const token = async () => {
@@ -61,7 +62,7 @@ export default function FundingMethod() {
 
                         <View>
                             <PrimaryFontMedium style={{ fontSize: 19 }}>{name}</PrimaryFontMedium>
-                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber}</PrimaryFontText>
+                            <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{phoneNumber || "No contact"}</PrimaryFontText>
                         </View>
                     </View>
 

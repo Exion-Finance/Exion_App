@@ -15,7 +15,7 @@ import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@
 import KYCImageBox from '@/components/KYCImageBox';
 import SelfieCamera from '@/components/SelfieCamera';
 import { openCamera, openGallery } from '@/utils/imagePickerService';
-// import { Asset } from 'react-native-image-picker';
+import { submitKYC } from './Apiconfig/api';
 import { Ionicons } from '@expo/vector-icons';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
@@ -47,13 +47,14 @@ export default function KYCFlowScreen() {
 
 
     const [step, setStep] = useState<number>(1);
-    const [documentType, setDocumentType] = useState<'gov_id' | 'passport' | null>('gov_id');
+    const [documentType, setDocumentType] = useState<'gov_id' | 'passport' | 'driver_license'>('gov_id');
     const [fullName, setFullName] = useState<string>('');
     const [identificationNumber, setIdentificationNumber] = useState<string>('');
     const [frontImage, setFrontImage] = useState<string | null>(null);
     const [backImage, setBackImage] = useState<string | null>(null);
     const [selfie, setSelfie] = useState<string | null>(null);
     const [isSelfieMode, setIsSelfieMode] = useState<boolean>(false);
+    const [submittingKyc, setSubmittingKyc] = useState<boolean>(false);
     // const [selfie, setSelfie] = useState<string | null>(null);
 
 
@@ -145,29 +146,36 @@ export default function KYCFlowScreen() {
     }
 
     async function submit() {
-        // final validation
-        if (!fullName || !identificationNumber || !frontImage || !selfie) {
-            return Alert.alert('Please complete all steps');
+        try {
+            if (!fullName || !identificationNumber || !selfie) {
+                return Alert.alert('Please complete all steps');
+            }
+
+            setSubmittingKyc(true)
+
+            const payload = {
+                fullName,
+                identityNumber: identificationNumber,
+                documentType,
+                selfie,
+                id_front: documentType === 'gov_id' ? frontImage || undefined : undefined,
+                id_back: documentType === 'gov_id' ? backImage || undefined : undefined,
+                passport: documentType === 'passport' ? frontImage || undefined : undefined,
+            };
+
+            console.log('Submitting KYC payload...', payload);
+
+            const response = await submitKYC(payload);
+            console.log('KYC API Response:', response);
+
+            Alert.alert('Success', 'KYC submitted successfully!');
+            route.push('/(tabs)');
+        } catch (error: any) {
+            console.error('KYC submission failed:', error);
+            Alert.alert('Error', 'Failed to submit KYC. Please try again.');
+        } finally{
+            setSubmittingKyc(false)
         }
-        // For gov_id ensure backImage exists
-        if (documentType === 'gov_id' && !backImage) return Alert.alert('Please add back image');
-
-        // Build payload
-        const payload = {
-            documentType,
-            fullName,
-            identificationNumber,
-            frontImage,
-            backImage,
-            selfie,
-        };
-
-        // TODO: send payload to API
-        console.log('KY C payload', payload);
-        Alert.alert('Submitted', 'KYC submitted successfully');
-
-        // navigate back or to index
-        route.push('/(tabs)'); // adapt to your route
     }
 
     // UI for the center part based on step
@@ -335,8 +343,8 @@ export default function KYCFlowScreen() {
                         <PrimaryFontBold style={{ color: '#00C48F', fontSize: 16 }}>{step === 1 ? 'Cancel' : 'Back'}</PrimaryFontBold>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.bottomRight} onPress={goNext}>
-                        <PrimaryFontBold style={{ color: '#fff', fontSize: 16 }}>{step === totalSteps ? 'Submit' : 'Next'}</PrimaryFontBold>
+                    <TouchableOpacity style={styles.bottomRight} onPress={goNext} disabled={submittingKyc}>
+                        <PrimaryFontBold style={{ color: '#fff', fontSize: 16 }}>{step === totalSteps ? 'Submit' : submittingKyc ? 'Submitting...' : 'Next'}</PrimaryFontBold>
                     </TouchableOpacity>
                 </View>
 
@@ -428,13 +436,13 @@ const styles = StyleSheet.create({
         marginRight: 14,
     },
     optionIconBox: {
-      backgroundColor: '#eee',
-      borderRadius: 10,
-      width: 42,
-      height: 42,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 14,
+        backgroundColor: '#eee',
+        borderRadius: 10,
+        width: 42,
+        height: 42,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 14,
     },
     optionTextContainer: {
         flexDirection: 'column',

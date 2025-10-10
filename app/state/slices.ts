@@ -65,7 +65,7 @@ export const balanceSlice = createSlice({
   reducers: {
     //update userbalance
     updateBalance: (state, action) => {
-      console.log("update balance payload-->", action.payload)
+      // console.log("update balance payload-->", action.payload)
       state.value = action.payload;
     }
 
@@ -102,7 +102,7 @@ const mobileTransactionSlice = createSlice({
   initialState: initialMobileTransactionState,
   reducers: {
     addMobileTransactions(state, action: PayloadAction<Section[]>) {
-      console.log("mobile tx payload-->")
+      // console.log("mobile tx payload-->")
       return action.payload
     },
     mergeMobileTransactions(state, action: PayloadAction<Section[]>) {
@@ -136,7 +136,7 @@ const userSlice = createSlice({
   initialState: initialProfileState,
   reducers: {
     setUserProfile(state, action: PayloadAction<UserProfile>) {
-      // console.log("Data sent to redux", action.payload)
+      // console.log("profile Data sent to redux", action.payload)
       state.profile = action.payload;
     },
     clearUserProfile(state) {

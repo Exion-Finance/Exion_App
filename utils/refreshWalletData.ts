@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 import { getBalances, fetchMobileTransactions, fetchExchangeRate, transactionHistory } from '@/app/Apiconfig/api';
 import { MobileTransaction, Section, Transaction, TransactionData } from '@/types/datatypes';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateBalance, addMobileTransactions, setTokenBalance } from '@/app/state/slices';
+import { updateBalance, addMobileTransactions, setTokenBalance, setOnchainTx } from '@/app/state/slices';
 import type { AppDispatch } from '@/app/state/store';
 
 interface TotalAmounts {
@@ -87,24 +87,54 @@ const fetchBalance = async (dispatch: AppDispatch) => {
     }
 }
 
-export const refreshWalletData = async (dispatch: AppDispatch) => {
-    try {
-        console.log('Refreshing wallet data...');
+export const refreshWalletData = async (dispatch: AppDispatch, transactionType: string) => {
 
-        // 1️⃣ Fetch updated transactions
-        const pageSize = 500;
-        const tx = await fetchMobileTransactions(pageSize);
 
-        if (tx?.data) {
-            console.log('Transactions refreshed successfully.');
+    if (transactionType === "offchain") {
+        try {
+            console.log('Refreshing wallet data...');
+            const pageSize = 500;
+            const tx = await fetchMobileTransactions(pageSize);
 
-            const fullSections = makeSections(tx.data);
-            // const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
+            if (tx?.data) {
+                console.log('Transactions refreshed successfully.');
 
-            // Update Redux with new transactions
-            dispatch(addMobileTransactions(fullSections));
+                const fullSections = makeSections(tx.data);
 
-            // 2️⃣ Fetch updated balance
+                // Update Redux with new transactions
+                dispatch(addMobileTransactions(fullSections));
+
+                const balance: BalanceData = await fetchBalance(dispatch);
+                if (balance) {
+                    console.log('Balance refreshed successfully.');
+                    const totalBalance = Object.values(balance).reduce<TotalAmounts>(
+                        (acc, currency) => {
+                            acc.usd += parseFloat(currency.usd);
+                            acc.kes += parseFloat(currency.kes);
+                            return acc;
+                        },
+                        { usd: 0, kes: 0 }
+                    );
+
+                    // Update Redux with new balance
+                    dispatch(updateBalance(totalBalance));
+                }
+
+                return { success: true };
+            } else if (tx?.error) {
+                console.log('Error fetching transactions:', tx.error);
+                // Alert.alert('Oops😕', 'Failed to refresh transactions');
+                return { success: false };
+            }
+        } catch (e: any) {
+            // console.error('Error in refreshWalletData:', e);
+            console.log('Oops😕 Something went wrong while refreshing wallet data.');
+            return { success: false };
+        }
+    }
+    else if (transactionType === "onchain") {
+        try {
+            console.log("Fetching balance after tx...")
             const balance: BalanceData = await fetchBalance(dispatch);
             if (balance) {
                 console.log('Balance refreshed successfully.');
@@ -116,20 +146,28 @@ export const refreshWalletData = async (dispatch: AppDispatch) => {
                     },
                     { usd: 0, kes: 0 }
                 );
-
                 // Update Redux with new balance
                 dispatch(updateBalance(totalBalance));
-            }
 
-            return { success: true };
-        } else if (tx?.error) {
-            console.log('Error fetching transactions:', tx.error);
-            Alert.alert('Oops😕', 'Failed to refresh transactions');
+                console.log("Fetching onchain tx after tx...")
+                const onchainTx: TransactionData = await transactionHistory()
+                if (onchainTx) {
+                    console.log("Onchain transactions received")
+                    const flattenedTransactions: Transaction[] = Object.values(onchainTx.data).flat();
+                    dispatch(setOnchainTx(flattenedTransactions))
+                    // console.log("flattenedTransactions-->", flattenedTransactions)
+                }
+                return { success: true };
+            }
+            else if (!balance) {
+                console.log('Oops😕 Failed to refresh transactions');
+                return { success: false };
+            }
+        } catch (error) {
+            console.log(error)
             return { success: false };
         }
-    } catch (e: any) {
-        console.error('Error in refreshWalletData:', e);
-        Alert.alert('Oops😕', 'Something went wrong while refreshing wallet data.');
-        return { success: false };
     }
+
+
 };

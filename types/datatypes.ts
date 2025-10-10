@@ -30,6 +30,7 @@ export interface UserProfile {
   userName: string;
   wallet: WalletAddress;
   pin: boolean;
+  isKYCVerified: boolean;
 }
 
 
@@ -79,36 +80,6 @@ export interface FavoriteAddress {
   userName: string;
   id: string;
 }
-
-// export interface Transaction {
-//   value: string;
-//   amount?: string;
-//   blockHash: string;
-//   blockNumber: string;
-//   confirmations: string;
-//   contractAddress: string;
-//   cumulativeGasUsed: string;
-//   from: string;
-//   gas: string;
-//   gasPrice: string;
-//   gasUsed: string;
-//   hash: string;
-//   input: string;
-//   logIndex: string;
-//   // nonce: string;
-//   timeStamp: string;
-//   to: string;
-//   toAddress?: string;
-//   tokenDecimal: string;
-//   tokenName: string;
-//   tokenSymbol: string;
-//   transactionIndex: string;
-//   transactionType: string;
-//   date: string | null;
-//   username?: string;
-//   usd: string | number;
-//   kes: number
-// };
 
 export interface Transaction {
   asset: string;
@@ -186,3 +157,14 @@ export interface Section {
 export type MobileTransactionData = {
   [date: string]: MobileTransaction[];
 };
+
+export interface KycPayload {
+  documentType: 'gov_id' | 'passport' | 'driver_license';
+  fullName: string;
+  identityNumber: string;
+  selfie: string;
+  id_front?: string;
+  id_back?: string;
+  passport?: string;
+  driver_license?: string;
+}
