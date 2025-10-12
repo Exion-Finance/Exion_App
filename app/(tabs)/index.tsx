@@ -72,7 +72,6 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 export default function TabOneScreen() {
   const route = useRouter()
   const { authState } = useAuth()
-  const { refresh } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
@@ -210,7 +209,7 @@ export default function TabOneScreen() {
       setMobileTransactions(firstThree)
       setIsLoading(false)
     }
-  }, [])
+  }, [mobile_transactions])
 
   useEffect(() => {
     if (token_balance) {
@@ -307,42 +306,6 @@ export default function TabOneScreen() {
 
     loadTx()
   }, [authToken])
-
-  //Refresh transactions after payment
-  useEffect(() => {
-    const loadTx = async () => {
-      console.log("Refresh mobile tx...")
-      try {
-        const pageSize: number = 500;
-        const tx = await fetchMobileTransactions(pageSize)
-        if (tx.data) {
-          console.log("Refresh mobile transactions received")
-          const fullSections = makeSections(tx.data)
-          const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
-          setMobileTransactions(firstThree)
-          dispatch(addMobileTransactions(fullSections))
-          const balance = await fetchBalance()
-          if (balance) {
-            updateWalletBalance(balance)
-          }
-          return;
-        }
-        else if (tx.error) {
-          console.log("errror in tx<<-->>", tx.error)
-          return;
-        }
-        // else console.log("tx else in refetch res", tx)/
-      } catch (e: any) {
-        Alert.alert("Oops😕", 'Failed to load transactions')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (refresh === "true") {
-      loadTx();
-    }
-  }, [refresh]);
 
   //Helpers to parse & group mobile transactions by date
   const parseTxDate = (s: string): Date => {

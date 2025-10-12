@@ -26,7 +26,7 @@ export async function openCamera(): Promise<string | null> {
     // Return the image URI
     return result.assets[0].uri;
   } catch (e) {
-    console.error('openCamera error', e);
+    console.log('openCamera error', e);
     return null;
   }
 }
@@ -56,7 +56,7 @@ export async function openGallery(): Promise<string | null> {
     // Return the image URI
     return result.assets[0].uri;
   } catch (e) {
-    console.error('openGallery error', e);
+    console.log('openGallery error', e);
     return null;
   }
 }

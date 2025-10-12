@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal, StatusBar as RNStatusBar, Platform, Pressable, Alert, ToastAndroid } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, StatusBar as RNStatusBar, Platform, Pressable, Alert, ToastAndroid, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 // import { BlurView } from 'expo-blur';
@@ -31,6 +31,8 @@ import { selectTokenBalances, setTokenBalance, selectUserProfile, selectExchange
 import { useDispatch, useSelector } from 'react-redux';
 import PinAuth from '@/components/PinAuth';
 import { refreshWalletData } from '@/utils/refreshWalletData';
+import pending from '@/assets/images/pending.png'
+import PendingBadge from '@/components/PendingCard';
 
 
 
@@ -69,8 +71,9 @@ const CustomKeyboard = () => {
   const [send, setSend] = useState<boolean>(false)
   const [fees, setFees] = useState<TotalFeeResponse>()
   const [transactionCode, setTransactionCode] = useState<string>("Qwerty")
-  const [transactionState, setTransactionState] = useState<string>("Initiating transaction...")
+  const [transactionState, setTransactionState] = useState<string>("Initiating transaction")
   const [transactionLoading, setTransactionLoading] = useState<boolean>()
+  const [transactionNotFound, setTransactionNotFound] = useState<boolean>(false)
   const [userName, seUserName] = useState<string>("")
   const [txCode, setTxCode] = useState<string>("")
   const [txChannel, setTxChannel] = useState<string>("")
@@ -180,7 +183,7 @@ const CustomKeyboard = () => {
       // console.log('send money response is', res)
 
       if (res.message === "Processing" && !res.error) {
-        setTransactionState("Processing...")
+        setTransactionState("Processing")
         const merchantRequestID: string = res.response.OriginatorConversationID;
 
         const checkStatus = async (retryCount = 0) => {
@@ -199,12 +202,13 @@ const CustomKeyboard = () => {
             setTransactionState("Transaction sent🎉")
             const transactionType: string = "offchain"
             await refreshWalletData(dispatch, transactionType)
-          } else if (!checkTx.data.success && retryCount < 5) {
+          } else if (!checkTx.data.success && retryCount < 4) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
-            bottomSheetRef2.current?.close();
-            Alert.alert("Oops😕", `${checkTx.data.message}`)
+            // bottomSheetRef2.current?.close();
+            // Alert.alert("Oops😕", `${checkTx.data.message}`)
+            setTransactionNotFound(true)
           }
         };
 
@@ -258,7 +262,7 @@ const CustomKeyboard = () => {
       }
 
       if (res.message === "Processing" && res.response.status) {
-        setTransactionState("Processing...");
+        setTransactionState("Processing");
         const merchantRequestID: string = res.response.OriginatorConversationID;
 
         const checkStatus = async (retryCount = 0) => {
@@ -274,12 +278,13 @@ const CustomKeyboard = () => {
             setTransactionState("Transaction sent🎉");
             const transactionType: string = "offchain"
             await refreshWalletData(dispatch, transactionType)
-          } else if (!checkTx.data.success && retryCount < 5) {
+          } else if (!checkTx.data.success && retryCount < 4) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
-            bottomSheetRef2.current?.close();
-            Alert.alert("Oops😕", `${checkTx.data.message}`);
+            // bottomSheetRef2.current?.close();
+            // Alert.alert("Oops😕", `${checkTx.data.message}`);
+            setTransactionNotFound(true)
           }
         };
 
@@ -323,7 +328,7 @@ const CustomKeyboard = () => {
       }
 
       if (res.message === "Processing" && res.response.status) {
-        setTransactionState("Processing...");
+        setTransactionState("Processing");
         const merchantRequestID: string = res.response.OriginatorConversationID;
 
         const checkStatus = async (retryCount = 0) => {
@@ -339,12 +344,13 @@ const CustomKeyboard = () => {
             setTransactionState("Transaction sent🎉");
             const transactionType: string = "offchain"
             await refreshWalletData(dispatch, transactionType)
-          } else if (!checkTx.data.success && retryCount < 5) {
+          } else if (!checkTx.data.success && retryCount < 4) {
             console.log("Not found, going for second retry")
             setTimeout(() => checkStatus(retryCount + 1), 2000);
           } else if (!checkTx.data.success) {
-            bottomSheetRef2.current?.close();
-            Alert.alert("Oops😕", `${checkTx.data.message}`);
+            // bottomSheetRef2.current?.close();
+            // Alert.alert("Oops😕", `${checkTx.data.message}`);
+            setTransactionNotFound(true)
           }
         };
 
@@ -365,11 +371,15 @@ const CustomKeyboard = () => {
 
 
 
-  const handleDone = () => {
+  const handleDone = async (refresh?: boolean) => {
     bottomSheetRef2.current?.close();
     route.dismissAll();
-    // route.replace("/(tabs)")
-    route.replace({ pathname: "/(tabs)", params: { refresh: "true" } });
+    route.replace("/(tabs)");
+    if (refresh) {
+      // console.log("done from pending")
+      const transactionType: string = "offchain"
+      await refreshWalletData(dispatch, transactionType)
+    }
   }
 
   const handleButtonClick = async () => {
@@ -530,13 +540,13 @@ const CustomKeyboard = () => {
 
   const handleBackspace = async () => {
     // Remove the last character from the input value
-    setInputValue(prev => prev.slice(0, -1));
-    setError(false)
-    // await calculateTransactionFee("100")
+    // setInputValue(prev => prev.slice(0, -1));
+    // setError(false)
+
+    bottomSheetRef2.current?.expand();
   };
   // console.log("Active Token", activeToken)
   // console.log("Tokens-->", tokens)
-
 
   const bottomSheetRef1 = useRef<BottomSheet>(null);
   const bottomSheetRef2 = useRef<BottomSheet>(null);
@@ -642,8 +652,8 @@ const CustomKeyboard = () => {
   useEffect(() => {
     const updateTransactionState = () => {
       if (
-        transactionState === "Initiating transaction..." ||
-        transactionState === "Processing..."
+        transactionState === "Initiating transaction" ||
+        transactionState === "Processing"
       ) {
         setTransactionLoading(true);
       } else if (
@@ -776,45 +786,65 @@ const CustomKeyboard = () => {
             style={{ paddingBottom: 18, alignItems: 'center' }}
             onLayout={handleContentLayout2}
           >
-            <LottieAnimation
-              loop={transactionLoading ? true : true}
-              animationSource={transactionLoading ? require('@/assets/animations/loading.json') : require('@/assets/animations/done.json')}
-              animationStyle={{ width: transactionLoading ? "60%" : "94%", height: transactionLoading ? 160 : 250, marginTop: transactionLoading ? 0 : -30 }}
-            />
+            {transactionNotFound ?
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <Image source={pending} style={{ width: 140, height: 140, marginTop: 8 }} />
+                <PrimaryFontBold style={{ width: '100%', textAlign: 'center', fontSize: 22, color: '#333', marginTop: 0 }}>Pending transaction</PrimaryFontBold>
+                <PrimaryFontText style={{ width: '90%', textAlign: 'center', fontSize: 16, color: 'gray', marginTop: 8 }}>Your transaction is taking a while to settle. We'll notify you once it's done</PrimaryFontText>
+                <PendingBadge style={{ marginVertical: 18 }} />
+                <View style={reusableStyle.paddingContainer}>
+                  <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={() => handleDone(true)}>
+                    <PrimaryFontBold style={styles.text}>Close</PrimaryFontBold>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              :
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <LottieAnimation
+                  loop={transactionLoading ? true : true}
+                  animationSource={transactionLoading ? require('@/assets/animations/hourglass.json') : require('@/assets/animations/done.json')}
+                  animationStyle={{ width: transactionLoading ? "100%" : "94%", height: transactionLoading ? 160 : 250, marginTop: transactionLoading ? -5 : -30 }}
+                />
 
-            <SecondaryFontText
-              style={[reusableStyle.paddingContainer,
-              { fontSize: 22, marginTop: transactionLoading ? 7 : -70, marginBottom: 15, textAlign: 'center', color: '#00563E' }]}
-            >
-              {transactionState}
-            </SecondaryFontText>
+                <PrimaryFontBold
+                  style={[reusableStyle.paddingContainer,
+                  { fontSize: 22, marginTop: transactionLoading ? -5 : -70, textAlign: 'center', color: '#333' }]}
+                >
+                  {transactionState}
+                </PrimaryFontBold>
 
-            {transactionLoading ? null :
-              <View style={[reusableStyle.rowJustifyBetween, styles.txRow]}>
-                <View style={styles.flexRow}>
-                  <View style={{ marginLeft: 10 }}>
+                {transactionLoading ?
+                  <PrimaryFontMedium style={[styles.moreDesc, { fontSize: 16, marginTop: 8, marginBottom: 10 }]}>
+                    Please wait while we process your payment...
+                  </PrimaryFontMedium> : null}
 
-                    <PrimaryFontText style={styles.name}>{txChannel == "Buy Goods" ? "TILL:" : txChannel == "Paybill" ? "PAYBILL:" : null} {userName.toUpperCase()}</PrimaryFontText>
+                {transactionLoading ? null :
+                  <View style={[reusableStyle.rowJustifyBetween, styles.txRow]}>
+                    <View style={styles.flexRow}>
+                      <View style={{ marginLeft: 0 }}>
 
-                    <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-                      <PrimaryFontMedium style={styles.confirmationCode}>{txCode} </PrimaryFontMedium>
-                      <MaterialIcons name="content-copy" size={16} color="#00C48F" />
+                        <PrimaryFontText style={styles.name}>{txChannel == "Buy Goods" ? "TILL:" : txChannel == "Paybill" ? "PAYBILL:" : null} {userName.toUpperCase() || "John Doe"}</PrimaryFontText>
+
+                        <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
+                          <PrimaryFontMedium style={styles.confirmationCode}>{txCode || "TSWQ78997SY"} </PrimaryFontMedium>
+                          <MaterialIcons name="content-copy" size={16} color="#00C48F" />
+                        </TouchableOpacity>
+
+                      </View>
+                    </View>
+
+                    <View style={styles.amountBlock}>
+                      <PrimaryFontMedium style={styles.amount}>Ksh {amount.toFixed(2)}</PrimaryFontMedium>
+                      <PrimaryFontMedium style={styles.time}>{txChannel || "Mpesa"}</PrimaryFontMedium>
+                    </View>
+                  </View>}
+
+                {transactionLoading ? null :
+                  <View style={reusableStyle.paddingContainer}>
+                    <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={() => handleDone(false)}>
+                      <PrimaryFontBold style={styles.text}>Done</PrimaryFontBold>
                     </TouchableOpacity>
-
-                  </View>
-                </View>
-
-                <View style={styles.amountBlock}>
-                  <PrimaryFontMedium style={styles.amount}>Ksh {amount.toFixed(2)}</PrimaryFontMedium>
-                  <PrimaryFontMedium style={styles.time}>{txChannel}</PrimaryFontMedium>
-                </View>
-              </View>}
-
-            {transactionLoading ? null :
-              <View style={reusableStyle.paddingContainer}>
-                <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={handleDone}>
-                  <PrimaryFontBold style={styles.text}>Done</PrimaryFontBold>
-                </TouchableOpacity>
+                  </View>}
               </View>}
           </BottomSheetView>
         </BottomSheet>
@@ -912,8 +942,8 @@ const styles = StyleSheet.create({
   txRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 23,
-    marginTop: 20,
+    marginVertical: 24,
+    // marginTop: 28,
     paddingHorizontal: 18,
     width: '100%',
   },
@@ -1003,6 +1033,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 20,
     marginBottom: 15
+  },
+  moreDesc: {
+    color: 'gray',
+    fontSize: 16,
+    marginTop: 4,
+    width: '90%',
+    textAlign: 'center',
+    // borderWidth: 1
   }
 });
 
