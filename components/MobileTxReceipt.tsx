@@ -298,12 +298,16 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
                         <View style={styles.row}>
                             <PrimaryFontMedium style={styles.label}>Transaction Code:</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.value}>{transaction.thirdPartyTransactionCode ?? "Undefined"}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.thirdPartyTransactionCode ?? "N/A"}</PrimaryFontMedium>
                         </View>
 
                         <View style={styles.row}>
                             <PrimaryFontMedium style={styles.label}>Transaction Hash:</PrimaryFontMedium>
-                            <PrimaryFontMedium style={styles.value}>{transaction.txHash?.slice(0, 5)}...{transaction.txHash?.slice(-4)}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>
+                                {transaction.txHash && transaction.txHash.length > 2
+                                    ? `${transaction.txHash.slice(0, 5)}...${transaction.txHash.slice(-4)}`
+                                    : 'N/A'}
+                            </PrimaryFontMedium>
                         </View>
 
                         <View style={styles.row}>
