@@ -158,3 +158,7 @@ export const txanother1 = {
   "message": "User payment history retrieved successfully",
   "success": true
 }
+
+// LOG  selfie {"name": "selfie.jpg", "type": "image/jpeg", "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Fexion-e02f9627-3b30-43c0-98db-866e56c4542b/Camera/547d7530-ba4a-414b-9326-6e949741c4e1.jpg"}
+// LOG  id_front {"name": "id_front.jpg", "type": "image/jpeg", "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Fexion-e02f9627-3b30-43c0-98db-866e56c4542b/ImagePicker/a6938b93-f969-4b87-978f-88dedc817b76.jpeg"}
+// LOG  id_back {"name": "id_back.jpg", "type": "image/jpeg", "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Fexion-e02f9627-3b30-43c0-98db-866e56c4542b/ImagePicker/28e26cd8-65d3-4e39-8ee5-1cafc5406712.jpeg"}
