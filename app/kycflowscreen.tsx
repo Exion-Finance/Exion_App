@@ -146,36 +146,36 @@ export default function KYCFlowScreen() {
     }
 
     async function submit() {
-        try {
-            if (!fullName || !identificationNumber || !selfie) {
-                return Alert.alert('Please complete all steps');
-            }
 
-            setSubmittingKyc(true)
+        if (!fullName || !identificationNumber || !selfie) {
+            return Alert.alert('Please complete all steps');
+        }
 
-            const payload = {
-                fullName,
-                identityNumber: identificationNumber,
-                documentType,
-                selfie,
-                id_front: documentType === 'NATIONAL_ID' ? frontImage || undefined : undefined,
-                id_back: documentType === 'NATIONAL_ID' ? backImage || undefined : undefined,
-                passport: documentType === 'PASSPORT' ? frontImage || undefined : undefined,
-            };
+        setSubmittingKyc(true)
 
-            console.log('Submitting KYC payload...', payload);
+        const payload = {
+            fullName,
+            identityNumber: identificationNumber,
+            documentType,
+            selfie,
+            id_front: documentType === 'NATIONAL_ID' ? frontImage || undefined : undefined,
+            id_back: documentType === 'NATIONAL_ID' ? backImage || undefined : undefined,
+            passport: documentType === 'PASSPORT' ? frontImage || undefined : undefined,
+        };
 
-            const response = await submitKYC(payload);
-            console.log('KYC API Response Success');
+        console.log('Submitting KYC payload...');
 
+        const response = await submitKYC(payload);
+        console.log('KYC API Response Success', response);
+        if (response.success) {
+            setSubmittingKyc(false)
             Alert.alert('Success🎉', 'KYC submitted successfully!');
             route.dismissAll();
             route.push('/(tabs)');
-        } catch (error: any) {
-            console.error('KYC submission failed:', error);
-            Alert.alert('Error🌵', 'Failed to submit KYC. Please try again.');
-        } finally{
+        }
+        else {
             setSubmittingKyc(false)
+            Alert.alert('Failed🌵', `${response.message || "Failed to submit KYC. Please try again."}`);
         }
     }
 
@@ -345,7 +345,7 @@ export default function KYCFlowScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.bottomRight} onPress={goNext} disabled={submittingKyc}>
-                        <PrimaryFontBold style={{ color: '#fff', fontSize: 16 }}>{step === totalSteps ? 'Submit' : submittingKyc ? 'Submitting...' : 'Next'}</PrimaryFontBold>
+                        <PrimaryFontBold style={{ color: '#fff', fontSize: 16 }}>{step === totalSteps && submittingKyc ? 'Submitting...' : step === totalSteps ? 'Submit' : 'Next'}</PrimaryFontBold>
                     </TouchableOpacity>
                 </View>
 
