@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         position: 'relative',
         width:'100%',
-        marginTop: statusBarHeight
+        marginTop: statusBarHeight,
     },
     iconContainer: {
         position: 'absolute',

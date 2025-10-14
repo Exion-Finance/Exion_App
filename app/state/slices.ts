@@ -23,6 +23,16 @@ interface OnchainState {
   data: Transaction[] | null;
 }
 
+export interface ExchangeRate {
+  buyingRate: string;
+  sellingRate: string;
+  name: string;
+}
+
+interface ExchangeState {
+  data: ExchangeRate | null;
+}
+
 
 const initialState = {
   value: {
@@ -44,6 +54,9 @@ const initialProfileState: UserState = {
 const initialFavoritesState: FavoritesState = {
   addresses: [],
 };
+const initialExchangeRateState: ExchangeState = {
+  data: null,
+};
 
 
 export const balanceSlice = createSlice({
@@ -52,6 +65,7 @@ export const balanceSlice = createSlice({
   reducers: {
     //update userbalance
     updateBalance: (state, action) => {
+      // console.log("update balance payload-->", action.payload)
       state.value = action.payload;
     }
 
@@ -88,6 +102,7 @@ const mobileTransactionSlice = createSlice({
   initialState: initialMobileTransactionState,
   reducers: {
     addMobileTransactions(state, action: PayloadAction<Section[]>) {
+      // console.log("mobile tx payload-->")
       return action.payload
     },
     mergeMobileTransactions(state, action: PayloadAction<Section[]>) {
@@ -121,7 +136,7 @@ const userSlice = createSlice({
   initialState: initialProfileState,
   reducers: {
     setUserProfile(state, action: PayloadAction<UserProfile>) {
-      // console.log("Data sent to redux", action.payload)
+      // console.log("profile Data sent to redux", action.payload)
       state.profile = action.payload;
     },
     clearUserProfile(state) {
@@ -156,6 +171,21 @@ export const favoritesSlice = createSlice({
   },
 });
 
+//Exchange rate slice
+const exchangeSlice = createSlice({
+  name: "exchange",
+  initialState: initialExchangeRateState,
+  reducers: {
+    setExchangeRate(state, action: PayloadAction<ExchangeRate>) {
+      // console.log("exchange payload", action.payload)
+      state.data = action.payload;
+    },
+    clearExchangeRate(state) {
+      state.data = null;
+    },
+  },
+});
+
 
 export const { updateBalance } = balanceSlice.actions;
 export const { addTransaction, setOnchainTx } = transactionSlice.actions;
@@ -163,6 +193,7 @@ export const { addMobileTransactions, clearMobileTransactions, mergeMobileTransa
 export const { setTokenBalance, clearTokenBalance } = tokenBalanceSlice.actions;
 export const { setUserProfile, clearUserProfile } = userSlice.actions;
 export const { setFavorites, addFavorite, removeFavorite } = favoritesSlice.actions;
+export const { setExchangeRate, clearExchangeRate } = exchangeSlice.actions;
 
 export const selectUserBalance = (state: { balance: { value: TotalAmounts } }) => state.balance.value;
 // export const selectTransactions = (state: { transactions: OnchainState }) => state.transactions.data;
@@ -176,6 +207,7 @@ export const selectTokenBalances = (state: { tokenBalances: BalanceState; }): To
 export const selectFavorites = (state: {
   favorites: FavoritesState;
 }) => state.favorites.addresses;
+export const selectExchangeRate = (state: { exchange: ExchangeState }) => state.exchange.data;
 
 const rawMobileTx = (state: { mobileTransactions: Section[] }) => state.mobileTransactions
 
@@ -198,5 +230,6 @@ const rootReducer = {
   tokenBalances: tokenBalanceSlice.reducer,
   user: userSlice.reducer,
   favorites: favoritesSlice.reducer,
+  exchange: exchangeSlice.reducer
 }
 export default rootReducer;

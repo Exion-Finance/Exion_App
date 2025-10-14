@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { PESACHAIN_URL, baseURL } from "@/constants/urls";
-import { SendTokenv1Type } from "@/types/datatypes"
-import { publicAPI, authAPI } from "../context/AxiosProvider";
+import { SendTokenv1Type, KycPayload } from "@/types/datatypes"
+import { publicAPI, authAPI, authAPIV2 } from "../context/AxiosProvider";
+import * as FileSystem from 'expo-file-system';
 
 export const getBalances = async () => {
     try {
@@ -47,7 +48,7 @@ export const AddFund = async (token: string, tokenId: number, amount: number) =>
 //send Money
 export const SendMoney = async (amount: number, tokenName: string, chainId: number, phoneNumber: string, channel: string) => {
     try {
-        const response = await authAPI.post(`${PESACHAIN_URL}/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
+        const response = await authAPIV2.post(`/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
         return response.data;
     } catch (error: any) {
         console.log("send money error-->", error)
@@ -58,7 +59,7 @@ export const SendMoney = async (amount: number, tokenName: string, chainId: numb
 //Buy goods
 export const BuyGoods = async (amount: number, tokenName: string, chainId: number, tillNumber: string, networkCode: string) => {
     try {
-        const response = await authAPI.post(`/payments/till`, { amount, tokenName, chainId, tillNumber, networkCode });
+        const response = await authAPIV2.post(`/payments/till`, { amount, tokenName, chainId, tillNumber, networkCode });
         return response.data;
     } catch (e: any) {
         console.log("buy goods error-->", e)
@@ -69,7 +70,7 @@ export const BuyGoods = async (amount: number, tokenName: string, chainId: numbe
 //Pay Bill
 export const PayBill = async (amount: number, tokenName: string, chainId: number, businessNumber: string, accountNo: string, networkCode: string) => {
     try {
-        const response = await authAPI.post(`/payments/paybill`, { amount, tokenName, chainId, businessNumber, accountNo, networkCode });
+        const response = await authAPIV2.post(`/payments/paybill`, { amount, tokenName, chainId, businessNumber, accountNo, networkCode });
         return response.data;
     } catch (e: any) {
         console.log("paybill error-->", e)
@@ -79,7 +80,7 @@ export const PayBill = async (amount: number, tokenName: string, chainId: number
 
 export const CheckTransactionStatus = async (merchantRequestID: string) => {
     try {
-        const response = await axios.post(`${PESACHAIN_URL}/payments/transaction-details`, { merchantRequestID });
+        const response = await authAPI.post(`/payments/transaction-details`, { merchantRequestID });
         return response.data;
     } catch (e: any) {
         return { error: true, msg: e.response.data.message }
@@ -113,7 +114,7 @@ export const RedeemPromo = async (token: string, tokenId: number = 1, promoCode:
 
 
 
-export const transactionHistory = async ( pagination?: number) => {
+export const transactionHistory = async (pagination?: number) => {
     try {
         // Pass pagination as a query parameter
         const response = await authAPI.get(`/tx/txhistory`, {
@@ -146,7 +147,7 @@ export const fetchUser = async (token: string) => {
 }
 
 export const fetchExchangeRate = async (currencyCode: string) => {
-    const response = await authAPI.get(`/exchange-rate/${currencyCode}` )
+    const response = await authAPI.get(`/exchange-rate/${currencyCode}`)
     return response;
 }
 
@@ -247,4 +248,83 @@ export const getConversionRates = async () => {
         console.log(error)
         return { error: true, msg: error.response?.data?.message || "An error occurred" };
     }
+}
+
+export const initiateOnRamp = async (amount: string, tokenName: string, chainId: number, networkCode: string, phoneNumber: string, Currency: string) => {
+    try {
+        const response = await authAPIV2.post('/payments/onramp', { amount, tokenName, chainId, networkCode, phoneNumber, Currency })
+        return response.data;
+    } catch (error: any) {
+        console.log(error)
+        return { error: true, msg: error.response?.data?.message || "Onramp error occurred" };
+    }
+}
+
+
+async function uriToBlob(uri: string): Promise<Blob> {
+    const response = await fetch(uri);
+    return await response.blob();
+}
+
+const getFileType = (uri: string) => {
+    if (uri.endsWith('.png')) return 'image/png';
+    if (uri.endsWith('.jpg') || uri.endsWith('.jpeg')) return 'image/jpeg';
+    if (uri.endsWith('.heic')) return 'image/heic';
+    return 'application/octet-stream';
+};
+
+
+export async function submitKYC(payload: KycPayload) {
+    const formData = new FormData();
+
+    formData.append('fullName', payload.fullName.trim());
+    formData.append('identityNumber', payload.identityNumber.trim());
+    formData.append('documentType', payload.documentType);
+
+    formData.append('selfie', {
+        uri: payload.selfie,
+        type: 'image/jpeg',
+        name: 'selfie.jpg',
+    } as any);
+
+    if (payload.documentType === 'gov_id') {
+        if (payload.id_front)
+            formData.append('id_front', {
+                uri: payload.id_front,
+                type: 'image/jpeg',
+                name: 'id_front.jpg',
+            } as any);
+        if (payload.id_back)
+            formData.append('id_back', {
+                uri: payload.id_back,
+                type: 'image/jpeg',
+                name: 'id_back.jpg',
+            } as any);
+    }
+
+    if (payload.documentType === 'passport' && payload.passport) {
+        formData.append('passport', {
+            uri: payload.passport,
+            type: 'image/jpeg',
+            name: 'passport.jpg',
+        } as any);
+    }
+
+    if (payload.documentType === 'driver_license' && payload.driver_license) {
+        formData.append('driver_license', {
+            uri: payload.driver_license,
+            type: 'image/jpeg',
+            name: 'driver_license.jpg',
+        } as any);
+    }
+
+    console.log('FormData fields:', formData);
+    (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
+
+    const response = await authAPIV2.post('/kyc/submit', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    console.log('/kyc/submit', response)
+
+    return response.data;
 }

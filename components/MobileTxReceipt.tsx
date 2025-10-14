@@ -4,10 +4,11 @@ import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { SharedValue } from 'react-native-reanimated';
 import { MobileTransaction } from '@/types/datatypes';
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { Feather, MaterialIcons, FontAwesome6 } from '@expo/vector-icons';
 import { PrimaryFontText } from './PrimaryFontText';
 import { PrimaryFontMedium } from './PrimaryFontMedium';
 import { PrimaryFontBold } from './PrimaryFontBold';
+import PendingBadge from './PendingCard';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
@@ -36,6 +37,28 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
         sheetRef.current?.close();
     }, [sheetRef]);
     // console.log(transaction)
+
+
+
+    // Helper to safely format the transaction date or fallback to a random date
+    const getSafeDate = (s?: string | null): string => {
+        if (!s || s.length < 8) {
+            // create a fake but valid date
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mi = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+            return `${yyyy}${mm}${dd}${hh}${mi}${ss}`;
+        }
+        return s;
+    };
+
+    // Then before you render or format anything:
+    const safeDate = getSafeDate(transaction?.transactionDate);
+
 
     // Helper to format time from "YYYYMMDDHHmmss" → "h:mm a"
     const formatTime = (s: string) => {
@@ -67,15 +90,15 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
             type,
         } = transaction;
 
-        const formattedDate = `${transactionDate.slice(6, 8)}/${transactionDate.slice(4, 6)
-            }/${transactionDate.slice(0, 4)}`;
+        const formattedDate = `${safeDate.slice(6, 8)}/${safeDate.slice(4, 6)
+            }/${safeDate.slice(0, 4)}`;
         const formattedTime = (() => {
             const d = new Date(Date.UTC
-                (+transactionDate.slice(0, 4),
-                    +transactionDate.slice(4, 6) - 1,
-                    +transactionDate.slice(6, 8),
-                    +transactionDate.slice(8, 10),
-                    +transactionDate.slice(10, 12))
+                (+safeDate.slice(0, 4),
+                    +safeDate.slice(4, 6) - 1,
+                    +safeDate.slice(6, 8),
+                    +safeDate.slice(8, 10),
+                    +safeDate.slice(10, 12))
             );
             const h = d.getHours() % 12 || 12;
             const ampm = d.getHours() < 12 ? 'am' : 'pm';
@@ -104,7 +127,9 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
                     ? 'Buy Goods'
                     : type === 'PAYBILL'
                         ? 'Pay Bill'
-                        : 'Mpesa';
+                        : type === 'OnRAMP'
+                            ? 'Deposit'
+                            : 'Mpesa';
 
         return `
       <html>
@@ -155,7 +180,7 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
         <div class="row">
           <span class="label">Transaction Hash:</span>
-          <span class="value">${txHash.slice(0, 5)} ...${txHash.slice(-4)}</span>
+          <span class="value">${txHash?.slice(0, 5)}...${txHash?.slice(-4)}</span>
         </div>
 
         <div class="row">
@@ -200,7 +225,7 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
             <BottomSheet ref={sheetRef} index={-1} snapPoints={animatedSnapPoints} handleHeight={animatedHandleHeight} contentHeight={animatedContentHeight} >
                 <BottomSheetView onLayout={handleContentLayout}>
                     <View style={styles.emptyContainer}>
-                    <Text>No transaction selected</Text>
+                        <Text>No transaction selected</Text>
                     </View>
                 </BottomSheetView>
             </BottomSheet>
@@ -227,78 +252,82 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
             backgroundStyle={{ backgroundColor: '#f8f8f8' }}
         >
             <BottomSheetView onLayout={handleContentLayout}>
-            <View style={styles.contentContainer}>
-                <View style={styles.dataTable}>
-                    <View style={styles.headerContainer}>
-                        <Image
-                            source={require('@/assets/logos/exion-logo-dark.png')}
-                            style={styles.logo}
-                            resizeMode="contain"
-                        />
+                <View style={styles.contentContainer}>
+                    <View style={styles.dataTable}>
+                        <View style={styles.headerContainer}>
+                            <Image
+                                source={require('@/assets/logos/exion-logo-dark.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
 
-                        <PrimaryFontText style={styles.headerTitle}>Receipt</PrimaryFontText>
+                            <PrimaryFontText style={styles.headerTitle}>Receipt</PrimaryFontText>
 
-                        <TouchableOpacity onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                            <Feather name="x" size={24} color="#00C48F" />
+                            <TouchableOpacity onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                <Feather name="x" size={24} color="#00C48F" />
+                            </TouchableOpacity>
+                        </View>
+
+
+                        <View style={styles.status}>
+                            {transaction.status === "PENDING" ?
+                                <FontAwesome6 name="hourglass-half" size={40} color="#00C48F" />
+                                :
+                                <MaterialIcons name="check-circle" size={47} color="#00C48F" />
+                            }
+                            <PrimaryFontBold style={styles.amount}>Ksh {formatNumber(transaction.transactionAmount.toFixed(0))}</PrimaryFontBold>
+                            <PrimaryFontMedium style={styles.complete}>{transaction.status === "COMPLETE" ? <PendingBadge text={"Complete"} /> : transaction.status === "PENDING" ? <PendingBadge textStyle={{ color: 'gray' }} dotColor='#b2b2b2' /> : <PendingBadge text={"Complete"} />}</PrimaryFontMedium>
+                        </View>
+
+                        <View style={[styles.row, { display: transaction.status === 'PENDING' && transaction.type === 'MPESA' || transaction.type === 'OnRAMP' ? 'none' : 'flex' }]}>
+                            <PrimaryFontMedium style={styles.label}>Sent To:</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.recipientName?.toUpperCase() || transaction.recipientAccountNumber || "Undefined"}</PrimaryFontMedium>
+                        </View>
+
+                        <View style={[styles.row, { display: transaction.type === 'TILL' || transaction.type === 'PAYBILL' ? 'none' : 'flex' }]}>
+                            <PrimaryFontMedium style={styles.label}>{transaction.type === 'MPESA' ? "Phone Number:" : "Short Code:"}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.recipientAccountNumber}</PrimaryFontMedium>
+                        </View>
+
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Transaction Type:</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.type === 'MPESA' ? "Send Money" :
+                                transaction.type === 'TILL' ? "Buy Goods" : transaction.type === 'PAYBILL' ? "Pay Bill" : transaction.type === 'OnRAMP' ? "Deposit" : "Mpesa"}
+                            </PrimaryFontMedium>
+                        </View>
+
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Transaction Code:</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.thirdPartyTransactionCode ?? "Undefined"}</PrimaryFontMedium>
+                        </View>
+
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Transaction Hash:</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>{transaction.txHash?.slice(0, 5)}...{transaction.txHash?.slice(-4)}</PrimaryFontMedium>
+                        </View>
+
+                        <View style={styles.row}>
+                            <PrimaryFontMedium style={styles.label}>Date:</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.value}>
+                                {safeDate.slice(6, 8)}/
+                                {safeDate.slice(4, 6)}/
+                                {safeDate.slice(0, 4)}  {formatTime(safeDate)}
+                            </PrimaryFontMedium>
+                        </View>
+                    </View>
+
+
+                    <View style={styles.container}>
+                        <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleDownload}>
+                            <Feather name="download" size={16} color="#00C48F" style={styles.icon} />
+                            <PrimaryFontBold style={[styles.buttonText, styles.downloadText]}>Download</PrimaryFontBold>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[styles.button, styles.shareButton]} onPress={handleShare}>
+                            <Feather name="share" size={16} color="#FFFFFF" style={styles.icon} />
+                            <PrimaryFontBold style={[styles.buttonText, styles.shareText]}>Share</PrimaryFontBold>
                         </TouchableOpacity>
                     </View>
-
-
-                    <View style={styles.status}>
-                        <MaterialIcons name="check-circle" size={47} color="#00C48F" />
-                        <PrimaryFontBold style={styles.amount}>Ksh {formatNumber(transaction.transactionAmount.toFixed(0))}</PrimaryFontBold>
-                        <PrimaryFontMedium style={styles.complete}>COMPLETED</PrimaryFontMedium>
-                    </View>
-
-                    <View style={styles.row}>
-                        <PrimaryFontMedium style={styles.label}>Sent To:</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>{transaction.recipientName.toUpperCase() || transaction.recipientAccountNumber}</PrimaryFontMedium>
-                    </View>
-
-                    <View style={[styles.row, { display: transaction.type === 'TILL' || transaction.type === 'PAYBILL' ? 'none' : 'flex' }]}>
-                        <PrimaryFontMedium style={styles.label}>{transaction.type === 'MPESA' ? "Phone Number:" : "Short Code:"}</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>{transaction.recipientAccountNumber}</PrimaryFontMedium>
-                    </View>
-
-                    <View style={styles.row}>
-                        <PrimaryFontMedium style={styles.label}>Transaction Type:</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>{transaction.type === 'MPESA' ? "Send Money" :
-                            transaction.type === 'TILL' ? "Buy Goods" : transaction.type === 'PAYBILL' ? "Pay Bill" : "Mpesa"}
-                        </PrimaryFontMedium>
-                    </View>
-
-                    <View style={styles.row}>
-                        <PrimaryFontMedium style={styles.label}>Transaction Code:</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>{transaction.thirdPartyTransactionCode}</PrimaryFontMedium>
-                    </View>
-
-                    <View style={styles.row}>
-                        <PrimaryFontMedium style={styles.label}>Transaction Hash:</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>{transaction.txHash.slice(0, 5)} ...{transaction.txHash.slice(-4)}</PrimaryFontMedium>
-                    </View>
-
-                    <View style={styles.row}>
-                        <PrimaryFontMedium style={styles.label}>Date:</PrimaryFontMedium>
-                        <PrimaryFontMedium style={styles.value}>
-                            {transaction.transactionDate.slice(6, 8)}/
-                            {transaction.transactionDate.slice(4, 6)}/
-                            {transaction.transactionDate.slice(0, 4)}  {formatTime(transaction.transactionDate)}
-                        </PrimaryFontMedium>
-                    </View>
-                </View>
-
-
-                <View style={styles.container}>
-                    <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleDownload}>
-                        <Feather name="download" size={16} color="#00C48F" style={styles.icon} />
-                        <PrimaryFontBold style={[styles.buttonText, styles.downloadText]}>Download</PrimaryFontBold>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={[styles.button, styles.shareButton]} onPress={handleShare}>
-                        <Feather name="share" size={16} color="#FFFFFF" style={styles.icon} />
-                        <PrimaryFontBold style={[styles.buttonText, styles.shareText]}>Share</PrimaryFontBold>
-                    </TouchableOpacity>
-                </View>
                 </View>
             </BottomSheetView>
         </BottomSheet>
@@ -357,8 +386,8 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        marginTop: 45,
-        marginBottom: 45,
+        marginTop: 36,
+        marginBottom: 36,
     },
     value: {
         // marginTop: 4,
@@ -379,7 +408,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: 10,
+        marginTop: 8,
         backgroundColor: '#f8f8f8',
         width: '100%'
     },
