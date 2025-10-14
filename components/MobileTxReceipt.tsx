@@ -270,13 +270,13 @@ const BottomSheetComponent: React.FC<BottomSheetComponentProps> = ({
 
 
                         <View style={styles.status}>
-                            {transaction.status === "PENDING" ?
+                            {transaction.status === "PENDING" && !transaction.thirdPartyTransactionCode ?
                                 <FontAwesome6 name="hourglass-half" size={40} color="#00C48F" />
                                 :
                                 <MaterialIcons name="check-circle" size={47} color="#00C48F" />
                             }
                             <PrimaryFontBold style={styles.amount}>Ksh {formatNumber(transaction.transactionAmount.toFixed(0))}</PrimaryFontBold>
-                            <PrimaryFontMedium style={styles.complete}>{transaction.status === "COMPLETE" ? <PendingBadge text={"Complete"} /> : transaction.status === "PENDING" ? <PendingBadge textStyle={{ color: 'gray' }} dotColor='#b2b2b2' /> : <PendingBadge text={"Complete"} />}</PrimaryFontMedium>
+                            <PrimaryFontMedium style={styles.complete}>{transaction.status === "COMPLETE" ? <PendingBadge text={"Complete"} /> : transaction.status === "PENDING" && !transaction.thirdPartyTransactionCode ? <PendingBadge textStyle={{ color: 'gray' }} dotColor='#b2b2b2' /> : <PendingBadge text={"Complete"} />}</PrimaryFontMedium>
                         </View>
 
                         <View style={[styles.row, { display: transaction.status === 'PENDING' && transaction.type === 'MPESA' || transaction.type === 'OnRAMP' ? 'none' : 'flex' }]}>

@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E4EDB5',
 
     },
-    avatar: { width: '74%', height: '74%' },
+    avatar: { width: '84%', height: '84%' },
     verifyIcon: { width: 32, height: 32, position: 'absolute', right: 2, bottom: -1 },
     title: { fontSize: 22, marginTop: 18 },
     subtitle: { color: '#888', textAlign: 'center', marginTop: 8, fontSize: 17 },

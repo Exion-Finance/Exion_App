@@ -218,7 +218,7 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
                         <View style={styles.amountBlock}>
                             <PrimaryFontMedium style={[styles.amount, { color: item.type === "OnRAMP" ? '#5EAF5E' : '#343131' }]}>{item.type === "OnRAMP" ? `+ Ksh ${formatNumber(item.transactionAmount.toFixed(2))}` : `- Ksh ${formatNumber(item.transactionAmount.toFixed(2))}`}</PrimaryFontMedium>
-                            <PrimaryFontText style={styles.time}>{item.status === "PENDING"  && !item.thirdPartyTransactionCode ? <PendingBadge textStyle={{ fontSize: 13, color: 'gray' }} dotColor='#b2b2b2' /> : formatTime(item.transactionDate)}</PrimaryFontText>
+                            <PrimaryFontText style={styles.time}>{item.status === "PENDING" && !item.thirdPartyTransactionCode ? <PendingBadge textStyle={{ fontSize: 13, color: 'gray' }} dotColor='#b2b2b2' /> : formatTime(item.transactionDate)}</PrimaryFontText>
                         </View>
                     </TouchableOpacity>
                 )
