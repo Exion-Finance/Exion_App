@@ -160,7 +160,7 @@ export type MobileTransactionData = {
 };
 
 export interface KycPayload {
-  documentType: 'gov_id' | 'passport' | 'driver_license';
+  documentType: 'NATIONAL_ID' | 'PASSPORT' | 'DRIVER_LICENSE';
   fullName: string;
   identityNumber: string;
   selfie: string;
