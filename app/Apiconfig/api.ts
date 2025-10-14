@@ -321,8 +321,7 @@ export async function submitKYC(payload: KycPayload) {
     console.log('FormData fields:', formData);
     (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
 
-    const response = await authAPIV2.post('/kyc/submit', {
-        body: formData,
+    const response = await authAPIV2.post('/kyc/submit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     console.log('/kyc/submit', response)

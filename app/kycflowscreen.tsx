@@ -86,7 +86,7 @@ export default function KYCFlowScreen() {
             setAssetForSlot(activeSlot, uri);
         } catch (err: any) {
             console.error('camera err', err);
-            Alert.alert('Error', 'Could not take picture');
+            Alert.alert('Error🌵', 'Could not take picture');
         }
     }
 
@@ -98,7 +98,7 @@ export default function KYCFlowScreen() {
             setAssetForSlot(activeSlot, uri);
         } catch (err: any) {
             console.error('gallery err', err);
-            Alert.alert('Error', 'Could not pick image');
+            Alert.alert('Error🌵', 'Could not pick image');
         }
     }
 
@@ -163,17 +163,17 @@ export default function KYCFlowScreen() {
                 passport: documentType === 'PASSPORT' ? frontImage || undefined : undefined,
             };
 
-            // console.log('Submitting KYC payload...', payload);
+            console.log('Submitting KYC payload...', payload);
 
             const response = await submitKYC(payload);
             console.log('KYC API Response Success');
 
-            Alert.alert('Success', 'KYC submitted successfully!');
+            Alert.alert('Success🎉', 'KYC submitted successfully!');
             route.dismissAll();
             route.push('/(tabs)');
         } catch (error: any) {
             console.error('KYC submission failed:', error);
-            Alert.alert('Error', 'Failed to submit KYC. Please try again.');
+            Alert.alert('Error🌵', 'Failed to submit KYC. Please try again.');
         } finally{
             setSubmittingKyc(false)
         }
