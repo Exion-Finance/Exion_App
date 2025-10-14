@@ -140,13 +140,14 @@ export interface MobileTransaction {
   id: string
   type: string | null
   recipientName: string
-  destinationChannel: string  // e.g. "M-PESA"
-  transactionDate: string     // "YYYYMMDDHHmmss"
+  destinationChannel?: string
+  transactionDate: string
   transactionAmount: number
   txHash: string
   thirdPartyTransactionCode: string
   recipientAccountNumber: string
   sasaPayTransactionCode: string
+  status: string
 }
 
 export interface Section {

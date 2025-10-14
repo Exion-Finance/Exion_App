@@ -7,9 +7,7 @@ import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { PrimaryFontText } from '@/components/PrimaryFontText';
 import { SecondaryFontText } from '@/components/SecondaryFontText';
-import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import TransactionTypeIcon from '@/components/TransactionTypeIcon';
-import { useSharedValue } from 'react-native-reanimated';
 import LottieAnimation from '@/components/LottieAnimation';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -17,6 +15,8 @@ import * as Clipboard from 'expo-clipboard';
 import Dropdown from '@/assets/icons/Dropdown';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
+import { useSharedValue } from 'react-native-reanimated';
 import TokenListPayment, { Token } from '@/components/MakePaymentTokenList';
 import reusableStyle from '@/constants/ReusableStyles'
 import { getBalances } from './Apiconfig/api';

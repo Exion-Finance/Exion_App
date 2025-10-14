@@ -8,6 +8,7 @@ import Empty from '@/assets/images/Empty.png'
 import reusableStyles from '@/constants/ReusableStyles';
 import Feather from '@expo/vector-icons/Feather';
 import TransactionTypeIcon from './TransactionTypeIcon';
+import PendingBadge from './PendingCard';
 
 interface Props {
     sections: Section[];
@@ -18,28 +19,65 @@ interface Props {
 
 export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRefresh, onSelectTransaction }) => {
 
-    const formatTime = (s: string) => {
-        const year = +s.slice(0, 4);
-        const month = +s.slice(4, 6) - 1;
-        const day = +s.slice(6, 8);
-        const hour = +s.slice(8, 10);
-        const min = +s.slice(10, 12);
+    // const formatTime = (s: string) => {
+    //     const year = +s.slice(0, 4);
+    //     const month = +s.slice(4, 6) - 1;
+    //     const day = +s.slice(6, 8);
+    //     const hour = +s.slice(8, 10);
+    //     const min = +s.slice(10, 12);
 
-        // Create the date in UTC
-        const d = new Date(Date.UTC(year, month, day, hour, min));
+    //     // Create the date in UTC
+    //     const d = new Date(Date.UTC(year, month, day, hour, min));
 
-        const localHour = d.getHours() % 12 || 12;
-        const ampm = d.getHours() < 12 ? 'am' : 'pm';
-        const minute = d.getMinutes().toString().padStart(2, '0');
+    //     const localHour = d.getHours() % 12 || 12;
+    //     const ampm = d.getHours() < 12 ? 'am' : 'pm';
+    //     const minute = d.getMinutes().toString().padStart(2, '0');
 
-        return `${localHour}:${minute}${ampm}`;
+    //     return `${localHour}:${minute}${ampm}`;
+    // };
+
+    const formatTime = (s?: string | null) => {
+        try {
+            // If s is invalid, use a fallback (current time)
+            if (!s || s.length < 12) {
+                const now = new Date();
+                const hour = now.getHours() % 12 || 12;
+                const minute = now.getMinutes().toString().padStart(2, '0');
+                const ampm = now.getHours() < 12 ? 'am' : 'pm';
+                return `${hour}:${minute}${ampm}`;
+            }
+
+            const year = +s.slice(0, 4);
+            const month = +s.slice(4, 6) - 1;
+            const day = +s.slice(6, 8);
+            const hour = +s.slice(8, 10);
+            const min = +s.slice(10, 12);
+
+            const d = new Date(Date.UTC(year, month, day, hour, min));
+            if (isNaN(d.getTime())) {
+                // fallback if invalid date
+                const now = new Date();
+                const hour = now.getHours() % 12 || 12;
+                const minute = now.getMinutes().toString().padStart(2, '0');
+                const ampm = now.getHours() < 12 ? 'am' : 'pm';
+                return `${hour}:${minute}${ampm}`;
+            }
+
+            const localHour = d.getHours() % 12 || 12;
+            const ampm = d.getHours() < 12 ? 'am' : 'pm';
+            const minute = d.getMinutes().toString().padStart(2, '0');
+
+            return `${localHour}:${minute}${ampm}`;
+        } catch (e) {
+            // Catch any unexpected errors and safely fallback
+            const now = new Date();
+            const hour = now.getHours() % 12 || 12;
+            const minute = now.getMinutes().toString().padStart(2, '0');
+            const ampm = now.getHours() < 12 ? 'am' : 'pm';
+            return `${hour}:${minute}${ampm}`;
+        }
     };
 
-    // const bottomSheetRef = useRef<BottomSheet>(null);
-
-    // const openBottomSheet = () => {
-    //     bottomSheetRef.current?.expand(); // or .snapToIndex(1)
-    // };
 
     // console.log(JSON.stringify(sections, null, 2));
     if (sections && sections.length === 0) {
@@ -68,17 +106,14 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
         switch (item.type) {
             case "TILL":
-                username = item.recipientAccountNumber;
+                if (item.status === "PENDING" && !item.thirdPartyTransactionCode) {
+                    username = "Mobile Money";
+                }
+                else {
+                    username = item.recipientAccountNumber;
+                }
                 transactionType = "Buy Goods";
                 break;
-
-            // case "MPESA":
-            //     const nameParts = item.recipientName.trim().split(" ");
-            //     const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
-            //     const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
-            //     username = `${first} ${last}`;
-            //     transactionType = "Send Money";
-            //     break;
 
             case "MPESA":
                 if (item.recipientName && typeof item.recipientName === 'string' && item.recipientName.trim() !== "") {
@@ -90,7 +125,10 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                         ? nameParts[nameParts.length - 1].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].slice(1).toLowerCase()
                         : "";
                     username = `${first} ${last}`.trim();
-                } else {
+                } else if (item.status === "PENDING" && !item.thirdPartyTransactionCode) {
+                    username = "Mobile Money";
+                }
+                else {
                     username = item.recipientAccountNumber ?? "Unknown";
                 }
                 transactionType = "Send Money";
@@ -98,24 +136,19 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
 
 
             case "PAYBILL":
-                username = item.recipientAccountNumber;
+                if (item.status === "PENDING" && !item.thirdPartyTransactionCode) {
+                    username = "Mobile Money";
+                }
+                else {
+                    username = item.recipientAccountNumber;
+                }
                 transactionType = "Paybill";
                 break;
 
-            // default:
-            //     if (item.type === null) {
-            //         if (item.recipientName && item.recipientName.trim() !== "") {
-            //             const nameParts = item.recipientName.trim().split(" ");
-            //             const first = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1).toLowerCase();
-            //             const last = nameParts[nameParts.length - 1]?.charAt(0).toUpperCase() + nameParts[nameParts.length - 1]?.slice(1).toLowerCase();
-            //             username = `${first} ${last}`;
-            //             transactionType = "Send Money";
-            //         } else {
-            //             username = item.recipientAccountNumber;
-            //             transactionType = "Mpesa";
-            //         }
-            //     }
-            //     break;
+            case "OnRAMP":
+                username = "Deposit";
+                transactionType = "Received";
+                break;
 
             default:
                 if (item.type === null) {
@@ -172,7 +205,11 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                 return (
                     <TouchableOpacity style={[reusableStyles.rowJustifyBetween, styles.row]} onPress={() => onSelectTransaction(item)}>
                         <View style={styles.flexRow}>
-                            <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
+                            {item.type === "OnRAMP" ? (
+                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#Eee' }} icon={<Feather name="arrow-down" size={14} color="#1E8A5E" />} />
+                            ) : (
+                                <TransactionTypeIcon containerStyle={{ backgroundColor: '#FFE3E3' }} icon={<Feather name="arrow-up" size={13} color="#EA2604" />} />
+                            )}
                             <View style={{ marginLeft: 10 }}>
                                 <PrimaryFontText style={styles.name}>{username}</PrimaryFontText>
                                 <PrimaryFontText style={styles.channel}>{transactionType}</PrimaryFontText>
@@ -180,8 +217,8 @@ export const MobileTransactions: React.FC<Props> = ({ sections, refreshing, onRe
                         </View>
 
                         <View style={styles.amountBlock}>
-                            <PrimaryFontMedium style={styles.amount}>- Ksh{formatNumber(item.transactionAmount.toFixed(2))}</PrimaryFontMedium>
-                            <PrimaryFontText style={styles.time}>{formatTime(item.transactionDate)}</PrimaryFontText>
+                            <PrimaryFontMedium style={[styles.amount, { color: item.type === "OnRAMP" ? '#5EAF5E' : '#343131' }]}>{item.type === "OnRAMP" ? `+ Ksh ${formatNumber(item.transactionAmount.toFixed(2))}` : `- Ksh ${formatNumber(item.transactionAmount.toFixed(2))}`}</PrimaryFontMedium>
+                            <PrimaryFontText style={styles.time}>{item.status === "PENDING"  && !item.thirdPartyTransactionCode ? <PendingBadge textStyle={{ fontSize: 13, color: 'gray' }} dotColor='#b2b2b2' /> : formatTime(item.transactionDate)}</PrimaryFontText>
                         </View>
                     </TouchableOpacity>
                 )
@@ -222,8 +259,8 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end'
     },
     amount: {
-        fontSize: 16,
-        color: '#343131',
+        fontSize: 16.5,
+        // color: '#343131',
         // marginTop: 0
     },
     time: {

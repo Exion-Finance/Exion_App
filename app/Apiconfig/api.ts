@@ -48,7 +48,7 @@ export const AddFund = async (token: string, tokenId: number, amount: number) =>
 //send Money
 export const SendMoney = async (amount: number, tokenName: string, chainId: number, phoneNumber: string, channel: string) => {
     try {
-        const response = await authAPI.post(`${PESACHAIN_URL}/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
+        const response = await authAPIV2.post(`/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
         return response.data;
     } catch (error: any) {
         console.log("send money error-->", error)
@@ -59,7 +59,7 @@ export const SendMoney = async (amount: number, tokenName: string, chainId: numb
 //Buy goods
 export const BuyGoods = async (amount: number, tokenName: string, chainId: number, tillNumber: string, networkCode: string) => {
     try {
-        const response = await authAPI.post(`/payments/till`, { amount, tokenName, chainId, tillNumber, networkCode });
+        const response = await authAPIV2.post(`/payments/till`, { amount, tokenName, chainId, tillNumber, networkCode });
         return response.data;
     } catch (e: any) {
         console.log("buy goods error-->", e)
@@ -70,7 +70,7 @@ export const BuyGoods = async (amount: number, tokenName: string, chainId: numbe
 //Pay Bill
 export const PayBill = async (amount: number, tokenName: string, chainId: number, businessNumber: string, accountNo: string, networkCode: string) => {
     try {
-        const response = await authAPI.post(`/payments/paybill`, { amount, tokenName, chainId, businessNumber, accountNo, networkCode });
+        const response = await authAPIV2.post(`/payments/paybill`, { amount, tokenName, chainId, businessNumber, accountNo, networkCode });
         return response.data;
     } catch (e: any) {
         console.log("paybill error-->", e)
@@ -80,7 +80,7 @@ export const PayBill = async (amount: number, tokenName: string, chainId: number
 
 export const CheckTransactionStatus = async (merchantRequestID: string) => {
     try {
-        const response = await axios.post(`${PESACHAIN_URL}/payments/transaction-details`, { merchantRequestID });
+        const response = await authAPI.post(`/payments/transaction-details`, { merchantRequestID });
         return response.data;
     } catch (e: any) {
         return { error: true, msg: e.response.data.message }

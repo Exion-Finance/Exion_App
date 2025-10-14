@@ -42,6 +42,7 @@ import {
   setExchangeRate,
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
+// import { mobileTxExample, txanother1 } from '@/assets/countrycodes';
 
 
 export type CurrencyData = {
@@ -112,6 +113,7 @@ export default function TabOneScreen() {
   const animatedTokenIndex = useSharedValue(-1);
 
   const handleSelectTransaction = (tx: MobileTransaction) => {
+    // console.log("selected tx--->", tx)
     setSelectedTx(tx);
     bottomSheetTxRef.current?.expand();
   };
@@ -283,10 +285,12 @@ export default function TabOneScreen() {
       try {
         const pageSize: number = 500;
         const tx = await fetchMobileTransactions(pageSize)
-
+        // const tx = txanother1
+        console.log("Mobile transactions--->")
         if (tx.data) {
           console.log("Mobile transactions received")
           const fullSections = makeSections(tx.data)
+          // console.log("Full sections--->", fullSections)
           const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
           setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
@@ -308,13 +312,15 @@ export default function TabOneScreen() {
   }, [authToken])
 
   //Helpers to parse & group mobile transactions by date
-  const parseTxDate = (s: string): Date => {
+  const parseTxDate = (s: string | null): Date => {
+    if (!s) return new Date();
     const year = +s.slice(0, 4)
     const month = +s.slice(4, 6) - 1
     const day = +s.slice(6, 8)
     const hour = +s.slice(8, 10)
     const min = +s.slice(10, 12)
     const sec = +s.slice(12, 14)
+    // console.log("The things", year, month, day, hour)
     return new Date(year, month, day, hour, min, sec)
   }
 

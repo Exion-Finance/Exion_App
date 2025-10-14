@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import reusableStyle from '@/constants/ReusableStyles'
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
+import { PrimaryFontText } from '@/components/PrimaryFontText';
 import LottieAnimation from '@/components/LottieAnimation';
 import reusableStyles from '@/constants/ReusableStyles';
 import confirm from '@/assets/icons/confirm.png'
@@ -18,7 +19,9 @@ import Loading from '@/components/Loading';
 import { useAuth } from "./context/AuthContext";
 import { refreshWalletData } from '@/utils/refreshWalletData';
 import { useDispatch } from 'react-redux';
-import { initiateOnRamp } from './Apiconfig/api';
+import { initiateOnRamp, CheckTransactionStatus } from './Apiconfig/api';
+import PendingBadge from '@/components/PendingCard';
+import pending from '@/assets/images/pending.png'
 
 export default function FundingAmount() {
     const { authState } = useAuth()
@@ -27,10 +30,12 @@ export default function FundingAmount() {
     const [error, setError] = useState<boolean>(false);
     const [errorDescription, setErrorDescription] = useState<string>('');
     const [token, setToken] = useState<string>("")
+    const [dollarOnRampAmount, setDollarOnRampAmount] = useState<string>("")
     const [makepayment, setMakePayment] = useState<boolean>(false)
     const [initiating, setInitiating] = useState<boolean>(false)
     const [processsing, setProcessing] = useState<boolean>(false)
     const [processedSuccessfully, setProcessedSuccessfully] = useState<boolean>(false)
+    const [transactionNotFound, setTransactionNotFound] = useState<boolean>(false)
     // const params = useLocalSearchParams();
     const { id, phoneNumber, tokenName } = useLocalSearchParams();
 
@@ -94,6 +99,31 @@ export default function FundingAmount() {
 
     };
 
+    const chechTxStatus = async (retryCount: number, MerchantRequestID: string) => {
+        try {
+            const checkTx = await CheckTransactionStatus(MerchantRequestID);
+            console.log("Check tx status-->", checkTx)
+            if (retryCount < 4 && checkTx.data.status === "PENDING") {
+                setTimeout(() => chechTxStatus(retryCount + 1, MerchantRequestID), 5000);
+            }
+            else if (retryCount < 4 && checkTx.data.status === "CANCELLED") {
+                setProcessing(false)
+            }
+            else if (retryCount < 4 && checkTx.data.status === "COMPLETE") {
+                setProcessedSuccessfully(true)
+                setDollarOnRampAmount(checkTx.data.tokenAmount)
+                const transactionType: string = "offchain"
+                await refreshWalletData(dispatch, transactionType)
+                // setProcessing(false)
+            }
+            else if (retryCount === 4 && checkTx.data.status === "PENDING") {
+                setTransactionNotFound(true)
+            }
+        } catch (error) {
+            console.log("Check tx status error", error)
+        }
+    }
+
     const processOnRamp = async () => {
         try {
             setInitiating(true)
@@ -104,16 +134,17 @@ export default function FundingAmount() {
             const chainId: number = 1
             const networkCode: string = "Mpesa"
             const currency: string = "KES"
+
             console.log("payload", tokenNameStr, phoneNumberStr, amount, chainId, networkCode, currency)
             const onrampResponse = await initiateOnRamp(amount, tokenNameStr, chainId, networkCode, phoneNumberStr, currency)
-            console.log("onrampResponse--->", onrampResponse)
-            // setTimeout(() => {
-            //     setProcessing(true)
-            //     // bottomSheetRef.current?.close()
-            // }, 1000)
-            // setTimeout(() => {
-            //     setProcessedSuccessfully(true)
-            // }, 4000)
+            // console.log("onrampResponse--->", onrampResponse)
+
+            if (onrampResponse.data.ResponseDescription === "Success. STK PUSH SENT") {
+                const MerchantRequestID = onrampResponse.data.MerchantRequestID
+                console.log("merchantRequestID-->", MerchantRequestID)
+                setProcessing(true)
+                setTimeout(() => chechTxStatus(0, MerchantRequestID), 15000)
+            }
         } catch (error) {
             console.log("Onramp error--->", error)
         } finally {
@@ -122,10 +153,19 @@ export default function FundingAmount() {
     }
 
     const handleDone = async () => {
-        await refreshWalletData(dispatch)
+        // const transactionType: string = "offchain"
+        // await refreshWalletData(dispatch, transactionType)
         bottomSheetRef.current?.close();
         route.dismissAll();
         route.replace("/(tabs)")
+    }
+
+    const handleDoneNotFound = async () => {
+        bottomSheetRef.current?.close();
+        route.dismissAll();
+        route.replace("/(tabs)");
+        const transactionType: string = "offchain"
+        await refreshWalletData(dispatch, transactionType)
     }
 
     useEffect(() => {
@@ -221,7 +261,7 @@ export default function FundingAmount() {
                             <View style={styles.infoBox}>
                                 <View style={styles.row}>
                                     <PrimaryFontMedium style={styles.label}>Phone number</PrimaryFontMedium>
-                                    <PrimaryFontBold style={styles.value}>{phoneNumber}</PrimaryFontBold>
+                                    <PrimaryFontBold style={styles.value}>{phoneNumber || "No contact"}</PrimaryFontBold>
                                 </View>
 
                                 <View style={styles.divider} />
@@ -265,7 +305,7 @@ export default function FundingAmount() {
 
                                 <View style={styles.amountRow}>
                                     <View style={styles.line} />
-                                    <PrimaryFontBold style={styles.onrampAmount}>+ $177.35</PrimaryFontBold>
+                                    <PrimaryFontBold style={styles.onrampAmount}>+ ${Number(dollarOnRampAmount).toFixed(2) || "---"}</PrimaryFontBold>
                                     <View style={styles.line} />
                                 </View>
 
@@ -280,21 +320,34 @@ export default function FundingAmount() {
                                 </TouchableOpacity>
                             </View>
                             :
-                            <View style={[reusableStyle.paddingContainer, styles.loadingHeader]}>
-                                <LottieAnimation
-                                    loop={true}
-                                    animationSource={require('@/assets/animations/hourglass.json')}
-                                    animationStyle={{ width: "100%", height: 160 }}
-                                />
+                            transactionNotFound ?
+                                <View style={{ width: '100%', alignItems: 'center' }}>
+                                    <Image source={pending} style={{ width: 140, height: 140, marginTop: 8 }} />
+                                    <PrimaryFontBold style={{ width: '100%', textAlign: 'center', fontSize: 22, color: '#333', marginTop: 0 }}>Pending transaction</PrimaryFontBold>
+                                    <PrimaryFontText style={{ width: '90%', textAlign: 'center', fontSize: 16, color: 'gray', marginTop: 8 }}>Your transaction is taking longer than expected to complete. We'll notify you once it's done</PrimaryFontText>
+                                    <PendingBadge style={{ marginVertical: 18 }} />
+                                    <View style={reusableStyle.paddingContainer}>
+                                        <TouchableOpacity style={[styles.notfoundbutton, { width: '100%' }]} onPress={() => handleDoneNotFound()}>
+                                            <PrimaryFontBold style={styles.text}>Close</PrimaryFontBold>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                :
+                                <View style={[reusableStyle.paddingContainer, styles.loadingHeader]}>
+                                    <LottieAnimation
+                                        loop={true}
+                                        animationSource={require('@/assets/animations/hourglass.json')}
+                                        animationStyle={{ width: "100%", height: 160 }}
+                                    />
 
-                                <PrimaryFontBold style={{ fontSize: 22, marginTop: -5 }}>
-                                    Processing payment
-                                </PrimaryFontBold>
+                                    <PrimaryFontBold style={{ fontSize: 22, marginTop: -5 }}>
+                                        Processing payment
+                                    </PrimaryFontBold>
 
-                                <PrimaryFontMedium style={[styles.rate, { fontSize: 18, marginTop: 8 }]}>
-                                    Please wait as we process your payment...
-                                </PrimaryFontMedium>
-                            </View>
+                                    <PrimaryFontMedium style={[styles.rate, { fontSize: 18, marginTop: 8 }]}>
+                                        Please wait as we process your payment...
+                                    </PrimaryFontMedium>
+                                </View>
                     }
 
                 </BottomSheetView>
@@ -317,6 +370,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%'
+    },
+    notfoundbutton: {
+        backgroundColor: '#00C48F',
+        padding: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        paddingVertical: 18,
+        width: '60%',
+        marginTop: 5,
+        marginBottom: 10,
     },
     text: {
         display: 'flex',

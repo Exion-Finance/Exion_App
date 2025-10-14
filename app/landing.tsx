@@ -18,21 +18,21 @@ const { width } = Dimensions.get('window');
 const slides = [
     {
         id: '1',
-        image: require('@/assets/images/landing1.png'),
-        title: 'Make Payments',
-        description: 'Use your stablecoins to pay for anything anywhere.'
+        image: require('@/assets/images/landing2.png'),
+        title: 'Crypto Payments',
+        description: 'Make payments for your day to day utilities directly from your wallet.'
     },
     {
         id: '2',
-        image: require('@/assets/images/landing2.png'),
-        title: 'Spend Locally',
-        description: 'Pay stablecoins directly to local payment channels.'
+        image: require('@/assets/images/landing1.png'),
+        title: 'Simple Spending',
+        description: 'Complete your payments in three simple steps or less and continue your day.'
     },
     {
         id: '3',
         image: require('@/assets/images/landing3.png'),
         title: 'Send Across Africa',
-        description: 'Send and receive money instantly with the speed of stablecoins.'
+        description: 'Send & receive money instantly with the speed of stablecoins at close to no cost.'
     }
 ];
 
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         color: '#BAB6B6',
         textAlign: 'center',
         lineHeight: 24,
-        width: '90%'
+        width: '100%',
     },
     dotsContainer: {
         flexDirection: 'row',
