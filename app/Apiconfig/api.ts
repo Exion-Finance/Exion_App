@@ -287,7 +287,7 @@ export async function submitKYC(payload: KycPayload) {
         name: 'selfie.jpg',
     } as any);
 
-    if (payload.documentType === 'gov_id') {
+    if (payload.documentType === 'NATIONAL_ID') {
         if (payload.id_front)
             formData.append('id_front', {
                 uri: payload.id_front,
@@ -302,7 +302,7 @@ export async function submitKYC(payload: KycPayload) {
             } as any);
     }
 
-    if (payload.documentType === 'passport' && payload.passport) {
+    if (payload.documentType === 'PASSPORT' && payload.passport) {
         formData.append('passport', {
             uri: payload.passport,
             type: 'image/jpeg',
@@ -310,7 +310,7 @@ export async function submitKYC(payload: KycPayload) {
         } as any);
     }
 
-    if (payload.documentType === 'driver_license' && payload.driver_license) {
+    if (payload.documentType === 'DRIVER_LICENSE' && payload.driver_license) {
         formData.append('driver_license', {
             uri: payload.driver_license,
             type: 'image/jpeg',

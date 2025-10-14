@@ -47,7 +47,7 @@ export default function KYCFlowScreen() {
 
 
     const [step, setStep] = useState<number>(1);
-    const [documentType, setDocumentType] = useState<'gov_id' | 'passport' | 'driver_license'>('gov_id');
+    const [documentType, setDocumentType] = useState<'NATIONAL_ID' | 'PASSPORT' | 'DRIVER_LICENSE'>('NATIONAL_ID');
     const [fullName, setFullName] = useState<string>('');
     const [identificationNumber, setIdentificationNumber] = useState<string>('');
     const [frontImage, setFrontImage] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export default function KYCFlowScreen() {
     const animatedIndex1 = useSharedValue(-1);
     const [activeSlot, setActiveSlot] = useState<'front' | 'back' | 'selfie' | null>(null);
 
-    const totalSteps = documentType === 'passport' ? TOTAL_STEPS_FOR_PASSPORT : TOTAL_STEPS_FOR_GOV_ID;
+    const totalSteps = documentType === 'PASSPORT' ? TOTAL_STEPS_FOR_PASSPORT : TOTAL_STEPS_FOR_GOV_ID;
     const progressPercent = Math.round((step / totalSteps) * 100);
 
     // Open bottom sheet to choose camera/gallery
@@ -128,8 +128,8 @@ export default function KYCFlowScreen() {
             if (!frontImage) return Alert.alert('Please add the front image');
         } else if (step === 3) {
             // For gov id step 3 is back image; for passport step 3 might be selfie
-            if (documentType === 'gov_id' && !backImage) return Alert.alert('Please add the back image');
-            if (documentType === 'passport' && !selfie) return Alert.alert('Please take a selfie');
+            if (documentType === 'NATIONAL_ID' && !backImage) return Alert.alert('Please add the back image');
+            if (documentType === 'PASSPORT' && !selfie) return Alert.alert('Please take a selfie');
         }
 
         // move to next or submit
@@ -158,17 +158,18 @@ export default function KYCFlowScreen() {
                 identityNumber: identificationNumber,
                 documentType,
                 selfie,
-                id_front: documentType === 'gov_id' ? frontImage || undefined : undefined,
-                id_back: documentType === 'gov_id' ? backImage || undefined : undefined,
-                passport: documentType === 'passport' ? frontImage || undefined : undefined,
+                id_front: documentType === 'NATIONAL_ID' ? frontImage || undefined : undefined,
+                id_back: documentType === 'NATIONAL_ID' ? backImage || undefined : undefined,
+                passport: documentType === 'PASSPORT' ? frontImage || undefined : undefined,
             };
 
-            console.log('Submitting KYC payload...', payload);
+            // console.log('Submitting KYC payload...', payload);
 
             const response = await submitKYC(payload);
-            console.log('KYC API Response:', response);
+            console.log('KYC API Response Success');
 
             Alert.alert('Success', 'KYC submitted successfully!');
+            route.dismissAll();
             route.push('/(tabs)');
         } catch (error: any) {
             console.error('KYC submission failed:', error);
@@ -191,15 +192,15 @@ export default function KYCFlowScreen() {
 
                     <View style={styles.docRow}>
                         <TouchableOpacity
-                            style={[styles.docCard, documentType === 'gov_id' && styles.docCardActive, { flexGrow: 1, marginRight: 10 }]}
-                            onPress={() => setDocumentType('gov_id')}
+                            style={[styles.docCard, documentType === 'NATIONAL_ID' && styles.docCardActive, { flexGrow: 1, marginRight: 10 }]}
+                            onPress={() => setDocumentType('NATIONAL_ID')}
                         >
                             <PrimaryFontMedium style={styles.cardTitle}>Government issued ID</PrimaryFontMedium>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.docCard, documentType === 'passport' && styles.docCardActive, { flexGrow: 1 }]}
-                            onPress={() => setDocumentType('passport')}
+                            style={[styles.docCard, documentType === 'PASSPORT' && styles.docCardActive, { flexGrow: 1 }]}
+                            onPress={() => setDocumentType('PASSPORT')}
                         >
                             <PrimaryFontMedium style={styles.cardTitle}>Passport</PrimaryFontMedium>
                         </TouchableOpacity>
@@ -236,10 +237,10 @@ export default function KYCFlowScreen() {
                         <Image source={idFront} style={{ width: 64, height: 64 }} />
                     </View>
                     <PrimaryFontBold style={styles.heading}>
-                        {documentType === 'passport' ? 'Passport' : 'Front ID'}
+                        {documentType === 'PASSPORT' ? 'Passport' : 'Front ID'}
                     </PrimaryFontBold>
                     <PrimaryFontMedium style={styles.grayText}>
-                        {documentType === 'passport' ? 'Snap a clear photo of passport main page' : 'Take clear photo of front of ID'}
+                        {documentType === 'PASSPORT' ? 'Snap a clear photo of passport main page' : 'Take clear photo of front of ID'}
                     </PrimaryFontMedium>
 
                     <View style={{ marginTop: 12 }}>
@@ -255,7 +256,7 @@ export default function KYCFlowScreen() {
         }
 
         // step 3
-        if (step === 3 && documentType === 'gov_id') {
+        if (step === 3 && documentType === 'NATIONAL_ID') {
             // back id
             return (
                 <View>
@@ -278,7 +279,7 @@ export default function KYCFlowScreen() {
         }
 
         // step 3 when passport OR step 4 for gov_id -> selfie step
-        const selfieLabel = step === 3 && documentType === 'passport' ? 'Final Step' : 'Final Step';
+        const selfieLabel = step === 3 && documentType === 'PASSPORT' ? 'Final Step' : 'Final Step';
         return (
             <View>
                 <View style={[styles.circleImagePlaceholder, styles.alignCenter]} >
@@ -302,7 +303,7 @@ export default function KYCFlowScreen() {
                     <View style={styles.confirmCard}>
                         <PrimaryFontBold style={styles.confirmTitle}>Confirm details</PrimaryFontBold>
                         <PrimaryFontMedium style={{ marginTop: 5 }}>Full name: <PrimaryFontBold>{fullName}</PrimaryFontBold></PrimaryFontMedium>
-                        <PrimaryFontMedium style={{ marginTop: 5 }}>Document: <PrimaryFontBold>{documentType === 'gov_id' ? "Government ID" : "Passport"}</PrimaryFontBold></PrimaryFontMedium>
+                        <PrimaryFontMedium style={{ marginTop: 5 }}>Document: <PrimaryFontBold>{documentType === 'NATIONAL_ID' ? "Government ID" : "Passport"}</PrimaryFontBold></PrimaryFontMedium>
                         <PrimaryFontMedium style={{ marginTop: 5 }}>ID number: <PrimaryFontBold>{identificationNumber}</PrimaryFontBold></PrimaryFontMedium>
                     </View>
 
