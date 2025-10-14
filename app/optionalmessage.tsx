@@ -11,7 +11,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import BottomSheetBackdrop from '@/components/BottomSheetBackdrop';
 import { useSharedValue } from 'react-native-reanimated';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
-import { tokens } from '@/utill/tokens';
+import { tokens } from '@/utils/tokens';
 import * as SecureStore from "expo-secure-store"
 import { TOKEN_KEY, useAuth } from './context/AuthContext';
 import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
@@ -23,6 +23,8 @@ import { calculateFee, SendMoneyV1 } from './Apiconfig/api';
 import PinAuth from '@/components/PinAuth';
 import { selectUserProfile } from './state/slices';
 import { useSelector } from 'react-redux';
+import { refreshWalletData } from '@/utils/refreshWalletData';
+import { useDispatch } from 'react-redux';
 
 export default function OptionalMessage() {
 
@@ -43,8 +45,7 @@ export default function OptionalMessage() {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const animatedIndex = useSharedValue(-1);
 
-    // Define the snap points (height) for the Bottom Sheet
-    const snapPoints = useMemo(() => ['40%', '50%'], []);
+    const dispatch = useDispatch()
 
     const initialSnapPoints = ['CONTENT_HEIGHT'];
 
@@ -97,6 +98,8 @@ export default function OptionalMessage() {
                 setResponseReceived(true);
                 // bottomSheetRef.current?.snapToIndex(1)
                 setTransactionDescription("Transaction sent successfully🎉")
+                const transactionType: string = "onchain"
+                await refreshWalletData(dispatch, transactionType)
             }
             else if (response.error) {
                 console.log("errror in send<<-->>", response.error)
@@ -135,7 +138,8 @@ export default function OptionalMessage() {
         }
     };
 
-    const handleButtonClick = () => {
+    const handleButtonClick = async () => {
+        // await refreshWalletData(dispatch)
         bottomSheetRef.current?.close();
         route.dismissAll();
         route.replace("/(tabs)")
@@ -260,7 +264,7 @@ export default function OptionalMessage() {
                             :
                             require('@/assets/animations/loading.json')}
                             animationStyle={{ width: "100%", height: responseReceived ? 285 : 150, marginTop: responseReceived ? -30 : 20 }}
-                            loop={responseReceived ? false : true}
+                            loop={responseReceived ? true : true}
                         />
                         <SecondaryFontText
                             style={[reusableStyle.paddingContainer,

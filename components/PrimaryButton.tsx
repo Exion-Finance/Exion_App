@@ -29,10 +29,10 @@ const styles = StyleSheet.create({
     container: {
         // backgroundColor: '#00C48F',
         padding: 10,
-        borderRadius: 9,
+        borderRadius: 10,
         alignItems: 'center',
         paddingVertical: 18,
-        width: '92%'
+        width: '92%',
     },
     text: {
         color: '#fff',

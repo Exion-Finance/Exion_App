@@ -7,6 +7,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Feather from '@expo/vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import userIcon from '@/assets/images/user.png'
+import dollars from '@/assets/icons/dollars.png'
 import morning from '@/assets/icons/morning.png'
 import noon from '@/assets/icons/noon.png'
 import moon from '@/assets/icons/moon.png'
@@ -37,9 +38,11 @@ import {
   selectTokenBalances,
   selectUserProfile,
   setFavorites,
-  setOnchainTx
+  setOnchainTx,
+  setExchangeRate,
 } from '../state/slices';
 import { useDispatch, useSelector } from 'react-redux';
+// import { mobileTxExample, txanother1 } from '@/assets/countrycodes';
 
 
 export type CurrencyData = {
@@ -70,7 +73,6 @@ const statusBarHeight = Platform.OS === 'android' ? (RNStatusBar.currentHeight ?
 export default function TabOneScreen() {
   const route = useRouter()
   const { authState } = useAuth()
-  const { refresh } = useLocalSearchParams();
   const [tokens, setTokens] = useState<ResponseBalance>({ balance: {}, message: "" })
   const [authToken, setAuthToken] = useState<string>("");
   const [isHidden, setIsHidden] = useState<boolean>(false);
@@ -79,7 +81,7 @@ export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [selectedTx, setSelectedTx] = useState<MobileTransaction | null>(null);
   const [tokensBalance, setTokensBalance] = useState<BalanceData>();
-  const [buyingRate, setBuyingRate] = useState<string | null>(null)
+  // const [buyingRate, setBuyingRate] = useState<string | null>(null)
 
   const toggleVisibility = async () => {
     const newValue = !isHidden;
@@ -111,6 +113,7 @@ export default function TabOneScreen() {
   const animatedTokenIndex = useSharedValue(-1);
 
   const handleSelectTransaction = (tx: MobileTransaction) => {
+    // console.log("selected tx--->", tx)
     setSelectedTx(tx);
     bottomSheetTxRef.current?.expand();
   };
@@ -129,7 +132,8 @@ export default function TabOneScreen() {
         const rates = await fetchExchangeRate(currencyCode)
         if (rates.data.success) {
           // console.log("rates-->", rates.data)
-          setBuyingRate(rates.data.data.buyingRate)
+          // setBuyingRate(rates.data.data.buyingRate)
+          dispatch(setExchangeRate(rates.data.data))
         }
 
         //Update balance after payment
@@ -207,7 +211,7 @@ export default function TabOneScreen() {
       setMobileTransactions(firstThree)
       setIsLoading(false)
     }
-  }, [])
+  }, [mobile_transactions])
 
   useEffect(() => {
     if (token_balance) {
@@ -218,7 +222,7 @@ export default function TabOneScreen() {
       };
       setTokens(cachedTokens);
     }
-  }, []);
+  }, [token_balance]);
 
   useEffect(() => {
     (async () => {
@@ -243,32 +247,19 @@ export default function TabOneScreen() {
     token()
   }, [authState])
 
-  // useEffect(() => {
-  //   const exchangeRate = async () => {
-  //     if (!isLoading) {
-  //       const currencyCode: string = "USD"
-  //       const rates = await fetchExchangeRate(currencyCode)
-  //       if (rates.data.success) {
-  //         // console.log(rates.data)
-  //         setBuyingRate(rates.data.data.buyingRate)
-  //         return;
-  //       }
-  //     }
-  //   }
-  //   exchangeRate()
-  // }, [isLoading])
-
-  // console.log("<---Parsed authtoken object index---->", authToken)
-
   const getGreetingAndImage = () => {
     const currentHour = new Date().getHours();
-
-    if (currentHour >= 0 && currentHour < 12) {
+  
+    if (currentHour >= 0 && currentHour < 5) {
+      return { greeting: 'Good night', image: moon };
+    } else if (currentHour >= 5 && currentHour < 12) {
       return { greeting: 'Good morning', image: morning };
-    } else if (currentHour >= 12 && currentHour < 18) {
+    } else if (currentHour >= 12 && currentHour < 17) {
       return { greeting: 'Good afternoon', image: noon };
-    } else {
+    } else if (currentHour >= 17 && currentHour < 20) {
       return { greeting: 'Good evening', image: moon };
+    } else {
+      return { greeting: 'Good night', image: moon };
     }
   };
 
@@ -294,10 +285,12 @@ export default function TabOneScreen() {
       try {
         const pageSize: number = 500;
         const tx = await fetchMobileTransactions(pageSize)
-
+        // const tx = txanother1
+        console.log("Mobile transactions--->")
         if (tx.data) {
           console.log("Mobile transactions received")
           const fullSections = makeSections(tx.data)
+          // console.log("Full sections--->", fullSections)
           const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
           setMobileTransactions(firstThree)
           dispatch(addMobileTransactions(fullSections))
@@ -318,50 +311,16 @@ export default function TabOneScreen() {
     loadTx()
   }, [authToken])
 
-  //Refresh transactions after payment
-  useEffect(() => {
-    const loadTx = async () => {
-      console.log("Refresh mobile tx...")
-      try {
-        const pageSize: number = 500;
-        const tx = await fetchMobileTransactions(pageSize)
-        if (tx.data) {
-          console.log("Refresh mobile transactions received")
-          const fullSections = makeSections(tx.data)
-          const firstThree = sliceSectionsToFirstNTransactions(fullSections, 3);
-          setMobileTransactions(firstThree)
-          dispatch(addMobileTransactions(fullSections))
-          const balance = await fetchBalance()
-          if(balance) {
-            updateWalletBalance(balance)
-          }
-          return;
-        }
-        else if (tx.error) {
-          console.log("errror in tx<<-->>", tx.error)
-          return;
-        }
-        // else console.log("tx else in refetch res", tx)/
-      } catch (e: any) {
-        Alert.alert("Oops😕", 'Failed to load transactions')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (refresh === "true") {
-      loadTx();
-    }
-  }, [refresh]);
-
   //Helpers to parse & group mobile transactions by date
-  const parseTxDate = (s: string): Date => {
+  const parseTxDate = (s: string | null): Date => {
+    if (!s) return new Date();
     const year = +s.slice(0, 4)
     const month = +s.slice(4, 6) - 1
     const day = +s.slice(6, 8)
     const hour = +s.slice(8, 10)
     const min = +s.slice(10, 12)
     const sec = +s.slice(12, 14)
+    // console.log("The things", year, month, day, hour)
     return new Date(year, month, day, hour, min, sec)
   }
 
@@ -534,8 +493,8 @@ export default function TabOneScreen() {
 
               </View>
               <SecondaryButton
-                textOnButton="Wallet"
-                icon={<FontAwesome6 name="coins" size={15} color="#052330" />}
+                textOnButton="Fund"
+                icon={<Feather name="plus" size={15} color="#052330" />}
                 containerStyle={{ backgroundColor: 'white', marginTop: 15 }}
                 textStyle={{ fontSize: 16, color: "#052330" }}
                 onPress={() => bottomSheetRef.current?.expand()}
@@ -621,21 +580,22 @@ export default function TabOneScreen() {
         backgroundStyle={{ backgroundColor: '#fff' }}
       >
         <BottomSheetView
-          style={{ paddingBottom: 18 }}
+          style={{ paddingBottom: 8 }}
           onLayout={handleContentLayout}
         >
           <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
-            <PrimaryFontBold style={{ fontSize: 22 }}>
-              Tokens
+            <Image source={dollars} style={styles.dollars} />
+            <PrimaryFontBold style={{ fontSize: 22, marginTop: 5 }}>
+              Add funds
             </PrimaryFontBold>
 
             <PrimaryFontMedium style={styles.rate}>
-              {buyingRate ? `$1 ≈ ${buyingRate} KSh` : "Loading.."}
+              Select the token you want to buy instantly with mobile money
             </PrimaryFontMedium>
           </View>
 
 
-          <TokenList response={tokens} />
+          <TokenList response={tokens} kycVerified={user_profile?.isKYCVerified} closeSheet={() => bottomSheetRef.current?.close()}/>
           {/* <TokenList routeProp='/fundingmethod'/> */}
         </BottomSheetView>
       </BottomSheet>
@@ -684,19 +644,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rate: {
-    backgroundColor: '#f3f5f9',
-    padding: 7,
-    color: '#79828E',
-    borderRadius: 15,
-    paddingHorizontal: 13,
-    fontSize: 13
+    color: 'gray',
+    fontSize: 16,
+    marginTop: 4,
+    width: '100%',
+    textAlign: 'center'
   },
   tokenListHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 15
+    // justifyContent: 'space-between',
+    marginTop: 12,
+    marginBottom: 12
   },
   qrButton: {
     alignItems: 'center',
@@ -711,5 +670,9 @@ const styles = StyleSheet.create({
     width: 45,
     height: 50,
     // backgroundColor: '#00C48F',
+  },
+  dollars: {
+    width: 50,
+    height: 50,
   }
 });

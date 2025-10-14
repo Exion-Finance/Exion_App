@@ -85,7 +85,8 @@ export default function Transactions() {
     }, [])
 
     //Helpers to parse & group mobile transactions by date
-    const parseTxDate = (s: string): Date => {
+    const parseTxDate = (s: string | null): Date => {
+        if (!s) return new Date();
         const year = +s.slice(0, 4)
         const month = +s.slice(4, 6) - 1
         const day = +s.slice(6, 8)
@@ -158,6 +159,7 @@ export default function Transactions() {
     }, [])
 
     const handleSelectTransaction = (tx: MobileTransaction) => {
+        // console.log("selected tx--->", tx)
         setSelectedTx(tx);
         bottomSheetTxRef.current?.expand();
     };

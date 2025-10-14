@@ -41,12 +41,19 @@ const favoriteAddresses = {
   whitelist: ["value"]
 }
 
+const exchangeRate = {
+  key: "exchange",
+  storage: AsyncStorage,
+  whitelist: ["value"]
+}
+
 const persistedBalanceReducer = persistReducer(balancePersitConfig, rootReducer.balance)
 const persistedUserTransactionsReducer = persistReducer(userTransactions, rootReducer.transactions)
 const persistedMobileTransactionsReducer = persistReducer(mobileTransactions, rootReducer.mobileTransactions)
 const persistedTokenBalancesReducer = persistReducer(tokenBalances, rootReducer.tokenBalances)
 const persistedUserProfileReducer = persistReducer(userProfile, rootReducer.user)
 const persistedFavoriteAddressesReducer = persistReducer(favoriteAddresses, rootReducer.favorites)
+const persistedExchangeRateReducer = persistReducer(exchangeRate, rootReducer.exchange)
 
 const store = configureStore({
   reducer: {
@@ -55,7 +62,8 @@ const store = configureStore({
     mobileTransactions: persistedMobileTransactionsReducer,
     tokenBalances: persistedTokenBalancesReducer,
     user: persistedUserProfileReducer,
-    favorites: persistedFavoriteAddressesReducer
+    favorites: persistedFavoriteAddressesReducer,
+    exchange: persistedExchangeRateReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -65,5 +73,8 @@ const store = configureStore({
     }),
 });
 const persistor = persistStore(store);
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export { store, persistor };
