@@ -275,56 +275,65 @@ const getFileType = (uri: string) => {
 
 
 export async function submitKYC(payload: KycPayload) {
-    const formData = new FormData();
+    try {
+        const formData = new FormData();
 
-    formData.append('fullName', payload.fullName.trim());
-    formData.append('identityNumber', payload.identityNumber.trim());
-    formData.append('documentType', payload.documentType);
+        formData.append('fullName', payload.fullName.trim());
+        formData.append('identityNumber', payload.identityNumber.trim());
+        formData.append('documentType', payload.documentType);
 
-    formData.append('selfie', {
-        uri: payload.selfie,
-        type: 'image/jpeg',
-        name: 'selfie.jpg',
-    } as any);
-
-    if (payload.documentType === 'NATIONAL_ID') {
-        if (payload.id_front)
-            formData.append('id_front', {
-                uri: payload.id_front,
-                type: 'image/jpeg',
-                name: 'id_front.jpg',
-            } as any);
-        if (payload.id_back)
-            formData.append('id_back', {
-                uri: payload.id_back,
-                type: 'image/jpeg',
-                name: 'id_back.jpg',
-            } as any);
-    }
-
-    if (payload.documentType === 'PASSPORT' && payload.passport) {
-        formData.append('passport', {
-            uri: payload.passport,
+        formData.append('selfie', {
+            uri: payload.selfie,
             type: 'image/jpeg',
-            name: 'passport.jpg',
+            name: 'selfie.jpg',
         } as any);
+
+        if (payload.documentType === 'NATIONAL_ID') {
+            if (payload.id_front)
+                formData.append('id_front', {
+                    uri: payload.id_front,
+                    type: 'image/jpeg',
+                    name: 'id_front.jpg',
+                } as any);
+            if (payload.id_back)
+                formData.append('id_back', {
+                    uri: payload.id_back,
+                    type: 'image/jpeg',
+                    name: 'id_back.jpg',
+                } as any);
+        }
+
+        if (payload.documentType === 'PASSPORT' && payload.passport) {
+            formData.append('passport_front', {
+                uri: payload.passport,
+                type: 'image/jpeg',
+                name: 'passport.jpg',
+            } as any);
+        }
+
+        if (payload.documentType === 'DRIVER_LICENSE' && payload.driver_license) {
+            formData.append('driver_license', {
+                uri: payload.driver_license,
+                type: 'image/jpeg',
+                name: 'driver_license.jpg',
+            } as any);
+        }
+
+        // console.log('FormData fields:', formData);
+        // (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
+
+        const response = await authAPIV2.post('/kyc/submit', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }, 
+        });
+        console.log('/kyc/submit', response.data)
+
+        return response.data;
+    } catch (error: any) {
+        if (error.response) {
+            console.error('KYC submission failed with status:', error.response.status);
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+        // throw error;
     }
-
-    if (payload.documentType === 'DRIVER_LICENSE' && payload.driver_license) {
-        formData.append('driver_license', {
-            uri: payload.driver_license,
-            type: 'image/jpeg',
-            name: 'driver_license.jpg',
-        } as any);
-    }
-
-    console.log('FormData fields:', formData);
-    (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
-
-    const response = await authAPIV2.post('/kyc/submit', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    console.log('/kyc/submit', response)
-
-    return response.data;
 }
