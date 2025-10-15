@@ -38,6 +38,7 @@ export default function FundingAmount() {
     const [transactionNotFound, setTransactionNotFound] = useState<boolean>(false)
     // const params = useLocalSearchParams();
     const { id, phoneNumber, tokenName } = useLocalSearchParams();
+    const tokenNameStr = (Array.isArray(tokenName) ? tokenName[0] : tokenName ?? '').toUpperCase();
 
     const route = useRouter()
     const dispatch = useDispatch();
@@ -305,7 +306,12 @@ export default function FundingAmount() {
 
                                 <View style={styles.amountRow}>
                                     <View style={styles.line} />
-                                    <PrimaryFontBold style={styles.onrampAmount}>+ ${Number(dollarOnRampAmount).toFixed(2) || "---"}</PrimaryFontBold>
+                                    <PrimaryFontBold style={styles.onrampAmount}>
+                                        {tokenNameStr === "CKES"
+                                            ? `+ ${Number(dollarOnRampAmount).toFixed(2) || "---"} CKES`
+                                            : `+$${Number(dollarOnRampAmount).toFixed(2) || "---"}`}
+                                    </PrimaryFontBold>
+
                                     <View style={styles.line} />
                                 </View>
 

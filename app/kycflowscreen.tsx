@@ -163,7 +163,7 @@ export default function KYCFlowScreen() {
             passport: documentType === 'PASSPORT' ? frontImage || undefined : undefined,
         };
 
-        console.log('Submitting KYC payload...');
+        console.log('Submitting KYC payload...');complete
 
         const response = await submitKYC(payload);
         console.log('KYC API Response Success', response);
