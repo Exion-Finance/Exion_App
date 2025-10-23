@@ -24,9 +24,11 @@ export default function Signup() {
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>('');
     const [username, setUsername] = useState<string>('');
+    const [referralCode, setReferralCode] = useState<string>('');
     const [emailError, setEmailError] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState<boolean>(false);
     const [usernameError, setUsernameError] = useState<boolean>(false);
+    const [referralCodeError, setReferralCodeError] = useState<boolean>(false);
     const [otpError, setOtpError] = useState<boolean>(false);
     const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null);
     const [isUsernameEmail, setIsUsernameEmail] = useState<boolean>(false);
@@ -35,6 +37,7 @@ export default function Signup() {
     const [isEmailFocused, setIsEmailFocused] = useState<boolean>(false);
     const [isUsernameFocused, setIsUsernameFocused] = useState<boolean>(false);
     const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
+    const [isReferralCodeFocused, setIsReferralCodeFocused] = useState<boolean>(false);
 
 
     const handleContinueRegistration = async () => {
@@ -76,12 +79,14 @@ export default function Signup() {
                     username,
                     password,
                     email,
+                    code: referralCode,
                     source: 'signup',
                     textOnButton: 'Verify OTP',
                     loadingText: 'Verifying..',
                     title: 'Verify Email',
                     description: `Please enter the OTP sent to ${email} to finish setting up your account`
                 }
+                // console.log("user", user)
                 const res = await sendSignUpEmailOtp(email)
                 if (res.data.success) {
                     route.push({
@@ -172,6 +177,24 @@ export default function Signup() {
                             />
                             <FormErrorText error={usernameError} errorDescription={errorDescription} />
 
+                            <PrimaryFontMedium style={styles.label}>Referral code(Optional)</PrimaryFontMedium>
+                            <TextInput
+                                style={[styles.input, { borderColor: isReferralCodeFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isReferralCodeFocused ? 2 : 1 }]}
+                                placeholder="EXF6SD"
+                                placeholderTextColor="#C3C2C2"
+                                keyboardType="default"
+                                onChangeText={(text) => {
+                                    setReferralCode(text);
+                                    setPasswordError(false);
+                                    setUsernameError(false);
+                                    setOtpError(false)
+                                }}
+                                onFocus={() => setIsReferralCodeFocused(true)}
+                                onBlur={() => setIsReferralCodeFocused(false)}
+                                value={referralCode}
+                            />
+                            <FormErrorText error={referralCodeError} errorDescription={errorDescription} />
+
                             <PrimaryFontMedium style={styles.label}>Password</PrimaryFontMedium>
                             <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
                                 <TextInput
@@ -253,15 +276,12 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        // marginTop: 10
-        // borderWidth: 2,
-        // borderColor: 'red'
     },
     formContainer: {
         height: '60%',
         padding: 18,
         width: '100%',
-        paddingTop: 40
+        paddingTop: 28
     },
     label: {
         fontSize: 16,

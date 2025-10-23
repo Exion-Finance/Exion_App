@@ -89,7 +89,7 @@ export default function Profile() {
 
               <TouchableOpacity
                 style={styles.verifyButton}
-                onPress={user_profile?.isKYCVerified ? () => console.log("Verified") : pressVerify }
+                onPress={user_profile?.isKYCVerified ? () => console.log("Verified") : pressVerify}
               >
                 <PrimaryFontBold style={styles.verifyText}>{user_profile?.isKYCVerified ? "Verified" : "Get Verified"}</PrimaryFontBold>
                 <Image source={tickIcon} style={styles.verifyIcon} />
@@ -116,11 +116,11 @@ export default function Profile() {
             />
 
             <ProfileOption
-              option="Reset password"
-              icon={<Feather name="lock" size={20} color="#00C48F" />}
+              option="Invite friend"
+              icon={<Feather name="share-2" size={20} color="#00C48F" />}
               containerStyle={{ backgroundColor: '#f8f8f8' }}
               textStyle={{ fontSize: 19 }}
-              route='/resetpasswordprofile'
+              route='/invite'
             />
 
             <ProfileOption

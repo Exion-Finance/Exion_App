@@ -40,8 +40,8 @@ export default function GroupedTransactions({ transactions, refreshing, onRefres
         return groupOnChainTransactions(transactions);
     }, [transactions]);
 
-    // console.log("---Transactions---")
-    // console.log(transactions)
+    console.log("---Transactions---")
+    console.log(transactions)
 
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {

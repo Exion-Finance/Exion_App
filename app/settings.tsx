@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, StatusBar as RNStatusBar, Platform, TouchableOpacity } from 'react-native';
+import { View, ScrollView, StyleSheet, ImageBackground, StatusBar as RNStatusBar, Platform, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -18,7 +18,7 @@ const SettingsScreen: React.FC = () => {
     const year = new Date().getFullYear();
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <StatusBar style={'light'} />
             <View>
                 <ImageBackground style={styles.editProfileHeader} source={settingsBackground}>
@@ -31,7 +31,7 @@ const SettingsScreen: React.FC = () => {
                 <View style={styles.optionsWrapper}>
                     <PrimaryFontMedium style={{ marginBottom: 10, fontSize: 15, color: '#888' }}>Legal</PrimaryFontMedium>
                     <SettingOption
-                        icon={<Feather name="lock" size={18} color="#444" />}
+                        icon={<Feather name="shield" size={18} color="#444" />}
                         description="Privacy Policy"
                         onPress={() => {
                             router.push({
@@ -52,6 +52,15 @@ const SettingsScreen: React.FC = () => {
                                     uri: 'https://exion.finance/terms-of-use'
                                 }
                             });
+                        }}
+                    />
+
+                    <PrimaryFontMedium style={{ marginBottom: 10, marginTop: 25, fontSize: 15, color: '#888' }}>Security</PrimaryFontMedium>
+                    <SettingOption
+                        icon={<Feather name="lock" size={18} color="#444" />}
+                        description="Reset password"
+                        onPress={() => {
+                            router.push('/resetpasswordprofile')
                         }}
                     />
 
@@ -85,7 +94,7 @@ const SettingsScreen: React.FC = () => {
             <View style={styles.footer}>
                 <PrimaryFontText style={styles.footerText}>© Copyright {year} - Exion Finance</PrimaryFontText>
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -95,7 +104,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'space-between',
+        // justifyContent: 'space-between',
         paddingBottom: 20,
         backgroundColor: '#f8f8f8',
     },
@@ -114,6 +123,7 @@ const styles = StyleSheet.create({
     footer: {
         alignItems: 'center',
         paddingVertical: 12,
+        marginVertical: 32
     },
     footerText: {
         fontSize: 12,
