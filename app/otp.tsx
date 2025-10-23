@@ -22,6 +22,7 @@ interface User {
     password?: string;
     title: string;
     email?: string;
+    code?: string;
     description: string;
     source: string;
     textOnButton: string;
@@ -52,26 +53,26 @@ export default function OTP({ }) {
         console.error('Failed to parse user:', error);
     }
 
-    const handleChange = async(text: string, index: number) => {
+    const handleChange = async (text: string, index: number) => {
         setEmptyOtpError(false);
-      
+
         const newOtp = [...otp];
         newOtp[index] = text;
         setOtp(newOtp);
-      
+
         // Move to the next input if available
         if (text && index < 5) {
-          setActiveIndex(index + 1);
-          inputRefs.current[index + 1]?.focus();
+            setActiveIndex(index + 1);
+            inputRefs.current[index + 1]?.focus();
         }
-      
+
         // Check if all 6 digits are filled
         const filledOtp = newOtp.join('');
         if (filledOtp.length === 6) {
-          await handleOtpSubmit(newOtp)
+            await handleOtpSubmit(newOtp)
         }
-      };
-      
+    };
+
 
     const handlePaste = async () => {
         const clipboardText = await Clipboard.getStringAsync();
@@ -90,7 +91,7 @@ export default function OTP({ }) {
             inputRefs.current[index - 1]?.focus();
         }
     };
-      
+
 
     useEffect(() => {
         if (counter > 0) {
@@ -124,41 +125,93 @@ export default function OTP({ }) {
         // console.log(filteredOtp)
 
 
+        // if (parsedUser?.source === "verifyphonenumber") {
+        //     setButtonClicked(true)
+
+        //     if (!parsedUser?.username || !parsedUser.email || !parsedUser.password) {
+        //         throw new Error("Missing required user fields");
+        //     }
+
+        //     const res = await onRegister!(
+        //         parsedUser.phoneNumber,
+        //         parsedUser.password,
+        //         parsedUser.email,
+        //         parsedUser.username,
+        //         filteredOtp
+        //     )
+        //     if (res.error) {
+        //         setEmptyOtpError(true)
+        //         setErrorDescription(res.message)
+        //         setButtonClicked(false)
+        //         return;
+        //     }
+        //     else if (res.status == 201) {
+        //         // console.log("Else called meaning no res.error")
+        //         // console.log("Register user response->", res.data)
+        //         const login = await onLogin!(parsedUser.email, parsedUser.password)
+        //         if (login && login.data) {
+        //             setButtonClicked(false)
+        //             Alert.alert("Success🎉", "Your account has been created successfully")
+        //             setTimeout(() => {
+        //                 route.dismissAll();
+        //                 route.replace('/(tabs)')
+        //             }, 2000)
+        //         }
+        //     }
+        //     setButtonClicked(false)
+        // }
         if (parsedUser?.source === "verifyphonenumber") {
-            setButtonClicked(true)
+            setButtonClicked(true);
 
             if (!parsedUser?.username || !parsedUser.email || !parsedUser.password) {
                 throw new Error("Missing required user fields");
             }
 
-            const res = await onRegister!(
-                parsedUser.phoneNumber,
-                parsedUser.password,
-                parsedUser.email,
-                parsedUser.username,
-                filteredOtp
-            )
-            if (res.error) {
-                setEmptyOtpError(true)
-                setErrorDescription(res.message)
-                setButtonClicked(false)
-                return;
+            const { phoneNumber, password, email, username, code } = parsedUser;
+
+            // Build the payload conditionally
+            const payload: any = {
+                phoneNumber,
+                username,
+                email,
+                password,
+                otp: filteredOtp,
+            };
+
+            // Add code only if it's not an empty string or undefined
+            if (code && code.trim() !== "") {
+                payload.code = code;
             }
-            else if (res.status == 201) {
-                // console.log("Else called meaning no res.error")
-                // console.log("Register user response->", res.data)
-                const login = await onLogin!(parsedUser.email, parsedUser.password)
+
+            const res = await onRegister!(
+                payload.phoneNumber,
+                payload.password,
+                payload.email,
+                payload.username,
+                payload.otp,
+                payload.code
+            );
+
+            if (res.error) {
+                setEmptyOtpError(true);
+                setErrorDescription(res.message);
+                setButtonClicked(false);
+                return;
+            } else if (res.status === 201) {
+                const login = await onLogin!(email, password);
                 if (login && login.data) {
-                    setButtonClicked(false)
-                    Alert.alert("Success🎉", "Your account has been created successfully")
+                    setButtonClicked(false);
+                    Alert.alert("Success🎉", "Your account has been created successfully");
                     setTimeout(() => {
                         route.dismissAll();
-                        route.replace('/(tabs)')
-                    }, 2000)
+                        route.replace('/(tabs)');
+                    }, 2000);
                 }
             }
-            setButtonClicked(false)
+
+            setButtonClicked(false);
         }
+
         else if (parsedUser?.source === "emailaddress") {
             try {
                 setButtonClicked(true)
@@ -212,6 +265,7 @@ export default function OTP({ }) {
                     const user = {
                         email: parsedUser?.email,
                         username: parsedUser?.username,
+                        code: parsedUser?.code,
                         password: parsedUser?.password,
                     }
                     route.push({

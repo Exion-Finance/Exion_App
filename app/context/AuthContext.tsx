@@ -17,7 +17,7 @@ interface AuthProps {
     onLogout?: (refreshToken: string) => Promise<void>;
     onClearData?: () => Promise<void>;
     onLoadToken?: () => Promise<boolean>;
-    onRegister?: (phoneNumber: string, password: string, email: string, username: string, otp: string) => Promise<any>;
+    onRegister?: (phoneNumber: string, password: string, email: string, username: string, otp: string, code?: string) => Promise<any>;
     getAccessToken?: () => string | null;
 }
 
@@ -126,9 +126,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // }, [loadToken]);
 
 
-    const register = async (phoneNumber: string, password: string, email: string, username: string, otp: string) => {
+    const register = async (phoneNumber: string, password: string, email: string, username: string, otp: string, code?: string) => {
         try {
-            return await axios.post(`${PESACHAIN_URL}/auth/create`, { phoneNumber, username, email, password, otp });
+            const body: any = { phoneNumber, username, email, password, otp };
+
+            if (code && code.trim() !== "") {
+                body.code = code;
+            }
+
+            return await axios.post(`${PESACHAIN_URL}/auth/create`, body);
         } catch (error: any) {
             return { error: true, message: error.response?.data?.message || "Registration failed" };
         }

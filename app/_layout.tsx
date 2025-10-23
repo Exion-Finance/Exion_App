@@ -98,6 +98,7 @@ function AppInitializer() {
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
       <Stack.Screen name="kycstartscreen" options={{ headerTitle: 'Get verified', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
       <Stack.Screen name="kycflowscreen" options={{ headerTitle: 'KYC Verification', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
+      <Stack.Screen name="invite" options={{ headerTitle: 'Refer & Earn', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18} }} />
       <Stack.Screen name="resetpassword" options={{ headerTitle: 'Reset Password', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
     </Stack>
   );

@@ -23,6 +23,7 @@ export interface WalletAddress {
 export interface UserProfile {
   accountStatus: string;
   createdAt: string;
+  customId: string;
   email: string;
   id: string;
   phoneNumber: string;
