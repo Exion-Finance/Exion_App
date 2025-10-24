@@ -28,7 +28,7 @@ export function useTokenValidation() {
                 const res = await authAPI.get('/user/profile');
                 // console.log("tokenvalid response", res.data)
                 if (res.data.success) {
-                    console.log("Here-->", res.data.data)
+                    // console.log("Here-->", res.data.data)
                     dispatch(setUserProfile(res.data.data));
                     setAuthState!({ token, authenticated: true})
                     if (mounted) setIsValid(true);
