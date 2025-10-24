@@ -24,7 +24,7 @@ const { width } = Dimensions.get('window');
 export default function Invite() {
 
     const user_profile = useSelector(selectUserProfile)
-    const playStoreLink = 'https://play.google.com/store/apps/details?id=com.exion';
+    const playStoreLink = 'https://play.google.com/store/apps/details?id=com.exion.app';
     const message = `Hi, join me on Exion! Use my referral code ${user_profile?.customId} and download here: ${playStoreLink}`;
 
     const handleCopy = async () => {
