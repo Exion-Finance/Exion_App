@@ -540,10 +540,8 @@ const CustomKeyboard = () => {
 
   const handleBackspace = async () => {
     // Remove the last character from the input value
-    // setInputValue(prev => prev.slice(0, -1));
-    // setError(false)
-
-    bottomSheetRef2.current?.expand();
+    setInputValue(prev => prev.slice(0, -1));
+    setError(false)
   };
   // console.log("Active Token", activeToken)
   // console.log("Tokens-->", tokens)
