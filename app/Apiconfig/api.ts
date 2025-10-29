@@ -51,6 +51,9 @@ export const SendMoney = async (amount: number, tokenName: string, chainId: numb
         const response = await authAPIV2.post(`/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
         return response.data;
     } catch (error: any) {
+        if(error.response){
+            console.error('Response data:', error.response.data);
+        }
         console.log("send money error-->", error)
         return { error: true, msg: error.response.data.message }
     }
@@ -168,8 +171,29 @@ export const updateUser = async ({ email, otp, username, phoneNumber }: {
 }
 
 //send otp
-export const sendOtpWhatsapp = async (phoneNumber: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier: phoneNumber });
+export const sendOtpWhatsapp = async (phoneNumber: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier: phoneNumber });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
+};
+
+//send otp
+export const sendOtpAltWhatsapp = async (phoneNumber: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/verification/send-whatsapp-otp`, { phoneNumber });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
 };
 export const sendEmailOtpForPasswordReset = async (email: string): Promise<AxiosResponse> => {
     return await axios.post(`${PESACHAIN_URL}/verification/passwordResetOTP`, { identifier: email });
@@ -323,7 +347,7 @@ export async function submitKYC(payload: KycPayload) {
         // (formData as any)._parts?.forEach((p: any) => console.log(p[0], p[1]));
 
         const response = await authAPIV2.post('/kyc/submit', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }, 
+            headers: { 'Content-Type': 'multipart/form-data' },
         });
         console.log('/kyc/submit', response.data)
 
