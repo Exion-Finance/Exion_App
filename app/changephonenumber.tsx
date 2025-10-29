@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput, Modal, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, Modal, FlatList, ActivityIndicator } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
-import Feather from '@expo/vector-icons/Feather';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Loading from '@/components/Loading';
-import { sendOtpWhatsapp } from "./Apiconfig/api";
+import { sendOtpWhatsapp, sendOtpAltWhatsapp } from "./Apiconfig/api";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { Country, countryData } from '@/assets/countrycodes';
@@ -31,6 +31,7 @@ export default function changePhoneNumber() {
     const [selectedCountry, setSelectedCountry] = useState(countries[24]);
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [isPhoneFocused, setIsPhoneFocused] = useState<boolean>(false);
+    const [isSendingWhatsapp, setIsSendingWhatsapp] = useState<boolean>(false)
 
     const route = useRouter()
 
@@ -41,7 +42,7 @@ export default function changePhoneNumber() {
 
     const formatPhoneNumber = (phoneNumber: string, countryCode: string) => {
         // Remove whitespace and ensure phone number is a string
-        const cleanedNumber = phoneNumber.trim();
+        const cleanedNumber = phoneNumber.trim().replace(/\s+/g, "");
 
         // Check for empty phone number
         if (!cleanedNumber || cleanedNumber.trim() === "") {
@@ -67,15 +68,68 @@ export default function changePhoneNumber() {
             return `${countryCode}${cleanedNumber}`;
         }
 
-        // Handle cases starting with "011"
-        if (cleanedNumber.startsWith("011") && cleanedNumber.length === 10) {
+        // Handle cases starting with "1"
+        if (cleanedNumber.startsWith("1") && cleanedNumber.length === 9) {
             return `${countryCode}${cleanedNumber}`;
+        }
+
+        // Handle cases starting with "01"
+        if (cleanedNumber.startsWith("01") && cleanedNumber.length === 10) {
+            return `${countryCode}${cleanedNumber.slice(1)}`;
         }
 
         // Default case for other formats
         return `${countryCode}${cleanedNumber}`;
     };
 
+    const handleSendOTPWhatsapp = async () => {
+        try {
+            if (!phoneNumber) {
+                setError(true)
+                setErrorDescription("Phone number cannot be empty")
+                return;
+            }
+
+            setIsSendingWhatsapp(true)
+            const phone_number = formatPhoneNumber(phoneNumber, selectedCountry.countryCode)
+            if (phone_number) {
+                const masked = phone_number.slice(0, 4) + '***' + phone_number.slice(-3);
+                const user = {
+                    phoneNumber: phone_number,
+                    source: 'changephonenumber',
+                    textOnButton: 'Verify',
+                    loadingText: 'Verifying...',
+                    title: 'Verify contact',
+                    description: `To ensure your account\'s security, we\'ve sent a secure OTP to ${masked}. Enter it here to finish editing your contact.`
+                }
+
+                const res = await sendOtpAltWhatsapp(phone_number)
+                // console.log("Whatsapp res", res)
+
+                if (res.message === "OTP sent successfully") {
+                    route.push({
+                        pathname: '/otp',
+                        params: {
+                            user: JSON.stringify(user)
+                        }
+                    });
+                    setIsSendingWhatsapp(false)
+                }
+                else {
+                    setButtonClicked(false)
+                    setIsSendingWhatsapp(false)
+                    setError(true)
+                    setErrorDescription(`${res.message || "OTP not sent"}`)
+                }
+            }
+            else setButtonClicked(false)
+        } catch (error: any) {
+            setError(true)
+            setIsSendingWhatsapp(false)
+            setErrorDescription("Something went wrong, try again")
+            setButtonClicked(false)
+        }
+    }
 
     const handleSubmit = async () => {
         try {
@@ -93,16 +147,16 @@ export default function changePhoneNumber() {
                 const user = {
                     phoneNumber: phone_number,
                     source: 'changephonenumber',
-                    textOnButton: 'Change Number',
+                    textOnButton: 'Verify',
                     loadingText: 'Verifying...',
                     title: 'Verify contact',
                     description: `To ensure your account\'s security, we\'ve sent a secure OTP to ${masked}. Enter it here to finish editing your contact.`
                 }
 
                 const res = await sendOtpWhatsapp(phone_number)
-                // console.log(res.data)
+                // console.log(res)
 
-                if (res.status === 200) {
+                if (res.message === "OTP sent successfully") {
                     route.push({
                         pathname: '/otp',
                         params: {
@@ -114,15 +168,15 @@ export default function changePhoneNumber() {
                 else {
                     setButtonClicked(false)
                     setError(true)
-                    setErrorDescription("Something went wrong, try again")
+                    setErrorDescription(`${res.message || "OTP not sent"}`)
                 }
             }
             else setButtonClicked(false)
 
         } catch (error: any) {
             setError(true)
-            setErrorDescription("User already exists")
-
+            setIsSendingWhatsapp(false)
+            setErrorDescription("Something went wrong, try again")
             setButtonClicked(false)
         }
     };
@@ -159,14 +213,22 @@ export default function changePhoneNumber() {
                     </View>
                     <FormErrorText error={error} errorDescription={errorDescription} />
 
-                    <View style={styles.disclaimerContainer}>
+                    {/* <View style={styles.disclaimerContainer}>
                         <Feather name="info" size={15} color="grey" />
                         <PrimaryFontText style={{ color: "grey" }}>  You will receive an OTP via WhatsApp</PrimaryFontText>
-                    </View>
+                    </View> */}
+
+                    {!isSendingWhatsapp ?
+                        <TouchableOpacity style={styles.disclaimerContainer} onPress={handleSendOTPWhatsapp}>
+                            <FontAwesome5 name="whatsapp" size={16} color="grey" />
+                            <PrimaryFontText style={{ color: "grey" }}>  Send OTP via WhatsApp</PrimaryFontText>
+                        </TouchableOpacity>
+                        :
+                        <ActivityIndicator size="small" color='#00C48F' />}
                 </View>
 
 
-                <TouchableOpacity style={[styles.button, { backgroundColor: buttonClicked ? "#36EFBD" : "#00C48F" }]} onPress={handleSubmit} disabled={buttonClicked}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: buttonClicked ? "#36EFBD" : "#00C48F" }]} onPress={handleSubmit} disabled={buttonClicked || isSendingWhatsapp}>
                     <PrimaryFontBold style={styles.text}>
                         {buttonClicked ? <Loading color='#fff' description="Please wait..." /> : "Continue"}
                     </PrimaryFontBold>

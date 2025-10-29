@@ -11,6 +11,7 @@ import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { useRouter } from 'expo-router';
 import { verifyAccount } from './Apiconfig/api';
+import { getNetworkChannel } from '@/utils/getNetworkChannel';
 
 export default function SendMoney() {
     const [phoneNumber, setPhoneNumber] = useState<string>('');
@@ -67,7 +68,8 @@ export default function SendMoney() {
 
         setVerifying(true);
         try {
-            const channel = 'Mpesa';
+            // const channel = 'Mpesa';
+            const channel = getNetworkChannel(intlNumber)
             const result = await verifyAccount(channel, intlNumber);
             // console.log(result.data);
 

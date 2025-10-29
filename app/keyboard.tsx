@@ -23,7 +23,7 @@ import { getBalances } from './Apiconfig/api';
 import { ResponseBalance, CurrencyData } from './(tabs)';
 import { SendMoney, calculateFee, CheckTransactionStatus, BuyGoods, PayBill, getConversionRates } from './Apiconfig/api';
 import { TotalFeeResponse } from '@/types/datatypes';
-import { tokens as tkn } from '@/utils/tokens';
+import { getNetworkChannel } from '@/utils/getNetworkChannel';
 import { useFingerprintAuthentication } from '@/components/FingerPrint';
 import { normalizePhoneNumber } from './hooks/normalizePhone';
 import Loading from "@/components/Loading";
@@ -70,6 +70,7 @@ const CustomKeyboard = () => {
   const [jwtTokens, setJwtToken] = useState<string>("")
   const [send, setSend] = useState<boolean>(false)
   const [fees, setFees] = useState<TotalFeeResponse>()
+  const [netChannel, setNetChannel] = useState<string>("Mpesa")
   const [transactionCode, setTransactionCode] = useState<string>("Qwerty")
   const [transactionState, setTransactionState] = useState<string>("Initiating transaction")
   const [transactionLoading, setTransactionLoading] = useState<boolean>()
@@ -168,6 +169,12 @@ const CustomKeyboard = () => {
   }, []);
   // console.log("hasPin", hasPin)
 
+  const getChannel = () => {
+    const phonenumber = normalizePhoneNumber(phoneNumber as string)
+    const channel = getNetworkChannel(phonenumber)
+    return channel;
+  }
+
   const handleSendMoney = async () => {
     console.log("Send Moneyy.....")
     setSend(true)
@@ -177,10 +184,11 @@ const CustomKeyboard = () => {
 
       const chainId = 1
       const tokenName = activeToken.token
-      const channel = "Mpesa"
       const phonenumber = normalizePhoneNumber(phoneNumber as string)
+      const channel = getNetworkChannel(phonenumber)
+      console.log('phone number', phonenumber, channel)
+
       const res = await SendMoney(parseFloat(inputValue), tokenName, chainId, phonenumber, channel)
-      // console.log('send money response is', res)
 
       if (res.message === "Processing" && !res.error) {
         setTransactionState("Processing")
@@ -455,6 +463,11 @@ const CustomKeyboard = () => {
         if (Number(inputValue) > 10000) {
           setError(true)
           setErrorDescription('Maximum amount is Ksh 10,000')
+          return;
+        }
+        if(getChannel() === "Airtel" && Number(inputValue) < 100){
+          setError(true)
+          setErrorDescription('Minimum Airtel amount is Ksh 100')
           return;
         }
         const success = await handleFingerprintScan()
