@@ -77,6 +77,7 @@ export default function Login() {
 
     const handleForgotPassword = async () => {
         route.push('/emailaddress')
+        // route.push('/verifyphonenumber')
     };
 
     const title = 'Welcome Back!'

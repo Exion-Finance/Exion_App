@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal, SafeAreaView } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
@@ -372,7 +372,7 @@ export default function EnterWalletAddress() {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style={'dark'} />
             <NavBar title='Wallet Address' onBackPress={() => route.back()} />
 
@@ -493,7 +493,7 @@ export default function EnterWalletAddress() {
                     <View style={styles.warningRow}>
                         <MaterialIcons name="warning" size={18} color="#FFA500" />
                         <PrimaryFontText style={styles.warningText}>
-                            To ensure you don’t lose your funds, ensure the wallet address entered supports the asset you’re sending
+                            To ensure you don’t lose funds, ensure the address entered supports the asset you’re sending (Celo Network)
                         </PrimaryFontText>
                     </View>
 
@@ -553,7 +553,7 @@ export default function EnterWalletAddress() {
                     </View>
                 </Modal>
             </View>
-        </View>
+        </SafeAreaView>
     );
 
 }

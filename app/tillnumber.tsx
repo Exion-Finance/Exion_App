@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import reusableStyles from '@/constants/ReusableStyles';
@@ -38,7 +38,7 @@ export default function TillNumber() {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <NavBar title='Buy goods' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <InputField
@@ -54,7 +54,7 @@ export default function TillNumber() {
                 </Pressable>
             </View>
 
-        </View>
+        </SafeAreaView>
     );
 }
 

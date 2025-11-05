@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
 import validator from "validator";
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
@@ -7,7 +7,7 @@ import FormErrorText from "@/components/FormErrorText";
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { useRouter } from 'expo-router';
 import Loading from '@/components/Loading';
-import { sendOtpEmail } from "./Apiconfig/api";
+import { sendOtpEmail, sendOtpEmailV2 } from "./Apiconfig/api";
 import { PrimaryFontMedium } from "@/components/PrimaryFontMedium";
 import Feather from '@expo/vector-icons/Feather';
 import { PrimaryFontText } from "@/components/PrimaryFontText";
@@ -47,7 +47,7 @@ export default function ChangeEmail() {
                 description: 'To ensure account security, we\'ve sent a secure OTP to the new email. Enter it here to finish making changes.'
             }
 
-            const res = await sendOtpEmail(email)
+            const res = await sendOtpEmailV2(email)
 
             if (res.status === 200) {
                 route.push({
@@ -74,7 +74,7 @@ export default function ChangeEmail() {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <NavBar title='New Email' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
@@ -110,7 +110,7 @@ export default function ChangeEmail() {
                 </TouchableOpacity>
             </View>
 
-        </View>
+        </SafeAreaView>
     );
 }
 

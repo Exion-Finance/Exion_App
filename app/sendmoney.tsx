@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Button } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated, SafeAreaView } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
 import ContactsList from '@/components/Contacts';
 import reusableStyles from '@/constants/ReusableStyles';
@@ -165,7 +165,7 @@ export default function SendMoney() {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <NavBar title='Send money' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
@@ -227,7 +227,7 @@ export default function SendMoney() {
                 {/* <Button title="Submit" onPress={handleSubmit} disabled={verifying} /> */}
             </View>
 
-        </View>
+        </SafeAreaView>
     );
 }
 
