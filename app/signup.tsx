@@ -88,6 +88,7 @@ export default function Signup() {
                 }
                 // console.log("user", user)
                 const res = await sendSignUpEmailOtp(email)
+                console.log("send email res", res.data)
                 if (res.data.success) {
                     route.push({
                         pathname: '/otp',
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'red',
         // borderWidth: 5,
         // borderColor: 'blue',
-        flex: 1
+        flex: 1,
     },
     container: {
         flex: 1,
@@ -255,6 +256,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         width: '100%',
         backgroundColor: '#fff',
+        paddingBottom: 50
         // borderWidth: 3,
         // borderColor: 'blue'
     },

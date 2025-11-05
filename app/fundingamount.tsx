@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import InputField from '@/components/InputPaymentDetails';
 import BottomSheet, { useBottomSheetDynamicSnapPoints, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSharedValue } from 'react-native-reanimated';
@@ -185,7 +185,8 @@ export default function FundingAmount() {
     }, [authState])
 
     return (
-        <GestureHandlerRootView style={styles.container}>
+        <GestureHandlerRootView>
+            <SafeAreaView  style={styles.container}>
             <NavBar title="Amount" onBackPress={() => route.back()} />
 
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
@@ -358,6 +359,7 @@ export default function FundingAmount() {
 
                 </BottomSheetView>
             </BottomSheet>
+            </SafeAreaView>
         </GestureHandlerRootView>
     );
 

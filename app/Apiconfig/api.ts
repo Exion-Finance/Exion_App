@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { PESACHAIN_URL, baseURL } from "@/constants/urls";
+import { PESACHAIN_URL, PESACHAIN_URL_V2 } from "@/constants/urls";
 import { SendTokenv1Type, KycPayload } from "@/types/datatypes"
 import { publicAPI, authAPI, authAPIV2 } from "../context/AxiosProvider";
 import * as FileSystem from 'expo-file-system';
@@ -51,7 +51,7 @@ export const SendMoney = async (amount: number, tokenName: string, chainId: numb
         const response = await authAPIV2.post(`/payments/send-money`, { amount, tokenName, chainId, phoneNumber, channel });
         return response.data;
     } catch (error: any) {
-        if(error.response){
+        if (error.response) {
             console.error('Response data:', error.response.data);
         }
         console.log("send money error-->", error)
@@ -160,18 +160,30 @@ export const updateUser = async ({ email, otp, username, phoneNumber }: {
     username?: string;
     phoneNumber?: string;
 }) => {
+        const payload = { email, otp, username, phoneNumber };
 
-    const payload = { email, otp, username, phoneNumber };
-
-    const cleanPayload = Object.fromEntries(
-        Object.entries(payload).filter(([_, value]) => value !== undefined)
-    );
-    const response = await authAPI.put(`/user/profile`, cleanPayload)
-    return response;
+        const cleanPayload = Object.fromEntries(
+            Object.entries(payload).filter(([_, value]) => value !== undefined)
+        );
+        const response = await authAPIV2.put(`/user/profile`, cleanPayload)
+        return response;
+    
 }
 
 //send otp
 export const sendOtpWhatsapp = async (phoneNumber: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL_V2}/verification/sendotp`, { identifier: phoneNumber });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
+};
+
+export const sendOtpWhatsappV1 = async (phoneNumber: string) => {
     try {
         const response = await axios.post(`${PESACHAIN_URL}/verification/sendotp`, { identifier: phoneNumber });
         return response.data
@@ -185,6 +197,18 @@ export const sendOtpWhatsapp = async (phoneNumber: string) => {
 
 //send otp
 export const sendOtpAltWhatsapp = async (phoneNumber: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL_V2}/verification/send-whatsapp-otp`, { phoneNumber });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
+};
+
+export const sendOtpAltWhatsappV1 = async (phoneNumber: string) => {
     try {
         const response = await axios.post(`${PESACHAIN_URL}/verification/send-whatsapp-otp`, { phoneNumber });
         return response.data
@@ -203,21 +227,49 @@ export const sendOtpEmail = async (identifier: string): Promise<AxiosResponse> =
     return await authAPI.post(`/verification/sendotp`, { identifier });
 };
 
+export const sendOtpEmailV2 = async (identifier: string): Promise<AxiosResponse> => {
+    return await authAPIV2.post(`/verification/sendotp`, { identifier });
+};
+
 export const sendSignUpEmailOtp = async (email: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/sendEmailotp`, { email });
+    return await axios.post(`${PESACHAIN_URL_V2}/verification/sendEmailotp`, { email });
 };
 
 export const sendUpdateEmailOTP = async (email: string): Promise<AxiosResponse> => {
     return await authAPI.post(`/verification/sendProfileOtp`, { identifier: email });
 };
 
+export const sendUpdateEmailOTPV2 = async (email: string): Promise<AxiosResponse> => {
+    return await authAPIV2.post(`/verification/sendProfileOtp`, { identifier: email });
+};
+
+
 export const sendUpdatePhoneNumberOTP = async (phoneNumber: string): Promise<AxiosResponse> => {
     return await authAPI.post(`/verification/sendProfileOtp`, { identifier: phoneNumber });
 };
 
+export const verifyEmailOTPV2 = async (otp: string, email: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL_V2}/verification/verifyOtp`, { email, otp });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
+};
 
-export const verifyEmailOTP = async (otp: string): Promise<AxiosResponse> => {
-    return await axios.post(`${PESACHAIN_URL}/verification/verifyOtp`, { otp });
+export const verifyEmailOTP = async (otp: string) => {
+    try {
+        const response = await axios.post(`${PESACHAIN_URL}/verification/verifyOtp`, { otp });
+        return response.data
+    } catch (error: any) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            return error.response.data;
+        }
+    }
 };
 
 export const verifyEditProfileOTP = async (otp: string): Promise<AxiosResponse> => {

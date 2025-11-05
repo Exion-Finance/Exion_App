@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import NavBar from '@/components/NavBar';
@@ -74,7 +74,7 @@ export default function FundingMethod() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <StatusBar style={'dark'} />
                 <NavBar title={'Choose payment method'} onBackPress={() => route.back()} />
 
@@ -119,7 +119,7 @@ export default function FundingMethod() {
                         <PhoneNumberSheet onContinue={(num) => handlePress(num)} disabled = {clicked}/>
                     </BottomSheetView>
                 </BottomSheet>
-            </View>
+            </SafeAreaView>
         </GestureHandlerRootView>
     );
 }

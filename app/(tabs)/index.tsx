@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -440,7 +440,7 @@ export default function TabOneScreen() {
 
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ImageBackground style={styles.background} source={dashboardBackground}>
         <StatusBar style={'light'} />
         <View style={styles.dashBackground}>
@@ -599,7 +599,7 @@ export default function TabOneScreen() {
           {/* <TokenList routeProp='/fundingmethod'/> */}
         </BottomSheetView>
       </BottomSheet>
-    </View>
+    </SafeAreaView>
 
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { useRouter, useLocalSearchParams, Href } from 'expo-router';
@@ -8,7 +8,7 @@ import NavBar from '@/components/NavBar';
 import Loading from '@/components/Loading';
 import reusableStyles from '@/constants/ReusableStyles';
 import { useAuth } from "./context/AuthContext";
-import { verifyEmailOTP, verifyEditProfileOTP, updateUser } from "./Apiconfig/api";
+import { verifyEmailOTP, verifyEmailOTPV2, verifyEditProfileOTP, updateUser } from "./Apiconfig/api";
 import * as Clipboard from 'expo-clipboard';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { StatusBar } from 'expo-status-bar';
@@ -124,42 +124,6 @@ export default function OTP({ }) {
         }
         // console.log(filteredOtp)
 
-
-        // if (parsedUser?.source === "verifyphonenumber") {
-        //     setButtonClicked(true)
-
-        //     if (!parsedUser?.username || !parsedUser.email || !parsedUser.password) {
-        //         throw new Error("Missing required user fields");
-        //     }
-
-        //     const res = await onRegister!(
-        //         parsedUser.phoneNumber,
-        //         parsedUser.password,
-        //         parsedUser.email,
-        //         parsedUser.username,
-        //         filteredOtp
-        //     )
-        //     if (res.error) {
-        //         setEmptyOtpError(true)
-        //         setErrorDescription(res.message)
-        //         setButtonClicked(false)
-        //         return;
-        //     }
-        //     else if (res.status == 201) {
-        //         // console.log("Else called meaning no res.error")
-        //         // console.log("Register user response->", res.data)
-        //         const login = await onLogin!(parsedUser.email, parsedUser.password)
-        //         if (login && login.data) {
-        //             setButtonClicked(false)
-        //             Alert.alert("Success🎉", "Your account has been created successfully")
-        //             setTimeout(() => {
-        //                 route.dismissAll();
-        //                 route.replace('/(tabs)')
-        //             }, 2000)
-        //         }
-        //     }
-        //     setButtonClicked(false)
-        // }
         if (parsedUser?.source === "verifyphonenumber") {
             setButtonClicked(true);
 
@@ -216,7 +180,7 @@ export default function OTP({ }) {
             try {
                 setButtonClicked(true)
                 const res = await verifyEmailOTP(filteredOtp as string);
-                if (res.data.success) {
+                if (res.success) {
                     setButtonClicked(false)
                     route.push({
                         pathname: '/resetpassword',
@@ -226,6 +190,11 @@ export default function OTP({ }) {
                             source: "emailaddress"
                         }
                     })
+                }
+                else {
+                    setButtonClicked(false)
+                    setEmptyOtpError(true);
+                    setErrorDescription("Please enter a valid OTP.")
                 }
             } catch (error) {
                 console.log(error)
@@ -238,7 +207,7 @@ export default function OTP({ }) {
             try {
                 setButtonClicked(true)
                 const res = await verifyEmailOTP(filteredOtp as string);
-                if (res.data.success) {
+                if (res.success) {
                     setButtonClicked(false)
                     route.push({
                         pathname: '/resetpassword',
@@ -248,6 +217,11 @@ export default function OTP({ }) {
                             source: "resetpasswordprofile"
                         }
                     })
+                }
+                else {
+                    setButtonClicked(false)
+                    setEmptyOtpError(true);
+                    setErrorDescription("Please enter a valid OTP.")
                 }
             } catch (error) {
                 console.log(error)
@@ -259,8 +233,9 @@ export default function OTP({ }) {
         else if (parsedUser?.source === "signup") {
             try {
                 setButtonClicked(true)
-                const res = await verifyEmailOTP(filteredOtp);
-                if (res.data.success) {
+                const res = await verifyEmailOTPV2(filteredOtp, parsedUser?.email ?? "");
+                // console.log(res)
+                if (res.success) {
                     setButtonClicked(false)
                     const user = {
                         email: parsedUser?.email,
@@ -274,6 +249,11 @@ export default function OTP({ }) {
                             user: JSON.stringify(user)
                         }
                     })
+                }
+                else {
+                    setButtonClicked(false)
+                    setEmptyOtpError(true);
+                    setErrorDescription("Please enter a valid OTP.")
                 }
             } catch (error) {
                 setButtonClicked(false)
@@ -373,7 +353,7 @@ export default function OTP({ }) {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style={'dark'} />
             <NavBar title='OTP' onBackPress={() => route.back()} />
             <FormDescription title={parsedUser && parsedUser.title || " "} description={parsedUser && parsedUser.description || " "} />
@@ -416,7 +396,7 @@ export default function OTP({ }) {
                     </PrimaryFontBold>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 

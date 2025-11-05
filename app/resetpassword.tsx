@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -88,7 +88,7 @@ const ResetPassword = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <PrimaryFontText style={styles.instructions}>Please enter the new password 🫣</PrimaryFontText>
 
             <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
@@ -156,7 +156,7 @@ const ResetPassword = () => {
             </TouchableOpacity>
 
 
-        </View>
+        </SafeAreaView>
     );
 };
 
