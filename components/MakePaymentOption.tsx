@@ -33,7 +33,7 @@ export default function MakePaymentOption({
     return (
         <TouchableOpacity style={[styles.container, containerStyle]} onPress={handlePress}>
             <View style={[styles.flexRow, reusableStyle.paddingContainer, { marginTop: 30 }]}>
-                <TransactionTypeIcon containerStyle={{ borderColor: '#D9D9D9', borderWidth: 1, marginRight: 10, backgroundColor: 'white', height: 40, width: 40, borderRadius: 20 }} icon={icon}/>
+                <TransactionTypeIcon containerStyle={{ borderColor: '#D9D9D9', borderWidth: 1, marginRight: 10, backgroundColor: '#f8f8f8', height: 40, width: 40, borderRadius: 20 }} icon={icon}/>
                 <View>
                     <PrimaryFontMedium style={{ fontSize: 19 }}>{option}</PrimaryFontMedium>
                     <PrimaryFontText style={{ fontSize: 15, color: '#79828E', marginTop: 5 }}>{description}</PrimaryFontText>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingVertical: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#f8f8f8',
     },
     text: {
         color: '#79828E',

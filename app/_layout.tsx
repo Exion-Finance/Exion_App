@@ -43,7 +43,6 @@ function AppInitializer() {
 
   useEffect(() => {
     (async () => {
-      // console.log("Token valid inside useff ---->", tokenValid);
       const fontsReady = fontsLoaded || fontError;
 
       if (fontsReady && tokenValid !== null) {
@@ -52,7 +51,6 @@ function AppInitializer() {
           setReady(true);
           setAuthState!({ token: null, authenticated: false });
           await SplashScreen.hideAsync();
-          // router.replace('/landing');
           return;
         }
 

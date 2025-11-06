@@ -28,14 +28,15 @@ export default function TabLayout() {
           headerTitleAlign: 'center',
           headerShown: false,
           tabBarStyle: {
-            height: 65,
+            height: 90,
             paddingTop: 10,
-            backgroundColor: '#f8f8f8'
+            // paddingVertical: 50,
+            backgroundColor: '#f8f8f8',
           },
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: "bold",
-            marginBottom: 10,
+            marginBottom: 30,
           }
         }}
       >

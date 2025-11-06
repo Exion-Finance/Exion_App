@@ -274,7 +274,7 @@ export default function FundingAmount() {
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.button, { backgroundColor: initiating ? "#36EFBD" : "#00C48F", marginBottom: 16 },]}
+                                style={[styles.button, { backgroundColor: initiating ? "#36EFBD" : "#00C48F", marginBottom: 32 },]}
                                 onPress={processOnRamp}
                                 disabled={initiating}
                             >
@@ -316,7 +316,7 @@ export default function FundingAmount() {
                                 </View>
 
                                 <TouchableOpacity
-                                    style={[styles.button, { backgroundColor: "#f8f8f8", marginBottom: -14 },]}
+                                    style={[styles.button, { backgroundColor: "#f8f8f8" },]}
                                     onPress={handleDone}
                                     disabled={makepayment}
                                 >
@@ -327,7 +327,7 @@ export default function FundingAmount() {
                             </View>
                             :
                             transactionNotFound ?
-                                <View style={{ width: '100%', alignItems: 'center' }}>
+                                <View style={{ width: '100%', alignItems: 'center'}}>
                                     <Image source={pending} style={{ width: 140, height: 140, marginTop: 8 }} />
                                     <PrimaryFontBold style={{ width: '100%', textAlign: 'center', fontSize: 22, color: '#333', marginTop: 0 }}>Pending transaction</PrimaryFontBold>
                                     <PrimaryFontText style={{ width: '90%', textAlign: 'center', fontSize: 16, color: 'gray', marginTop: 8 }}>Your transaction is taking longer than expected to complete. We'll notify you once it's done</PrimaryFontText>
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
         paddingVertical: 18,
         width: '60%',
         marginTop: 5,
-        marginBottom: 10,
+        marginBottom: 32,
     },
     text: {
         display: 'flex',
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 24
+        paddingBottom: 50
     },
     gridContainer: {
         flexDirection: "row",
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         // justifyContent: 'space-between',
         marginTop: 4,
-        marginBottom: 24
+        marginBottom: 32
     },
     confirm: {
         width: 50,

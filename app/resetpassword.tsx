@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -89,6 +90,7 @@ const ResetPassword = () => {
 
     return (
         <View style={styles.container}>
+            <StatusBar style='dark'/>
             <PrimaryFontText style={styles.instructions}>Please enter the new password 🫣</PrimaryFontText>
 
             <View style={[styles.passwordContainer, { borderColor: isPasswordFocused ? '#B5BFB5' : '#C3C3C3', borderWidth: isPasswordFocused ? 2 : 1 }]}>
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%',
-        marginTop: 25
+        marginTop: 16
     },
     passwordContainer: {
         flexDirection: 'row',

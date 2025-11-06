@@ -555,9 +555,8 @@ const CustomKeyboard = () => {
     // Remove the last character from the input value
     setInputValue(prev => prev.slice(0, -1));
     setError(false)
+    // bottomSheetRef2.current?.expand();
   };
-  // console.log("Active Token", activeToken)
-  // console.log("Tokens-->", tokens)
 
   const bottomSheetRef1 = useRef<BottomSheet>(null);
   const bottomSheetRef2 = useRef<BottomSheet>(null);
@@ -764,7 +763,7 @@ const CustomKeyboard = () => {
           backgroundStyle={{ backgroundColor: '#f8f8f8' }}
         >
           <BottomSheetView
-            style={{ paddingBottom: 18 }}
+            style={{ paddingBottom: 50 }}
             onLayout={handleContentLayout}
           >
             <View style={[reusableStyle.paddingContainer, styles.tokenListHeader]}>
@@ -794,7 +793,7 @@ const CustomKeyboard = () => {
           animatedIndex={animatedIndex2}
         >
           <BottomSheetView
-            style={{ paddingBottom: 18, alignItems: 'center' }}
+            style={{ paddingBottom: 50, alignItems: 'center' }}
             onLayout={handleContentLayout2}
           >
             {transactionNotFound ?
@@ -979,7 +978,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     width: '60%',
     marginTop: 5,
-    marginBottom: 10,
+    marginBottom: 20,
     // opacity: 0
   },
   text: {
