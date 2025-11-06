@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal, StatusBar as RNStatusBar, Platform, Pressable, Alert, ToastAndroid, Image, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, StatusBar as RNStatusBar, Platform, Pressable, Alert, ToastAndroid, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 // import { BlurView } from 'expo-blur';
@@ -685,7 +685,7 @@ const CustomKeyboard = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <StatusBar style={'light'} />
         <View style={styles.balanceContainer}>
           <Pressable style={styles.closeContainer} onPress={() => route.back()}>
@@ -859,7 +859,7 @@ const CustomKeyboard = () => {
               </View>}
           </BottomSheetView>
         </BottomSheet>
-      </SafeAreaView>
+      </View>
 
       {showPinAuth && (
         <Modal animationType="none">

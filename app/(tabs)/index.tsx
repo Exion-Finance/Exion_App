@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, View, ImageBackground, Image, Platform, StatusBar as RNStatusBar, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import reusableStyle from '@/constants/ReusableStyles'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -286,7 +286,7 @@ export default function TabOneScreen() {
         const pageSize: number = 500;
         const tx = await fetchMobileTransactions(pageSize)
         // const tx = txanother1
-        console.log("Mobile transactions--->")
+        // console.log("Mobile transactions--->")
         if (tx.data) {
           console.log("Mobile transactions received")
           const fullSections = makeSections(tx.data)
@@ -440,7 +440,7 @@ export default function TabOneScreen() {
 
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ImageBackground style={styles.background} source={dashboardBackground}>
         <StatusBar style={'light'} />
         <View style={styles.dashBackground}>
@@ -599,7 +599,7 @@ export default function TabOneScreen() {
           {/* <TokenList routeProp='/fundingmethod'/> */}
         </BottomSheetView>
       </BottomSheet>
-    </SafeAreaView>
+    </View>
 
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
@@ -69,7 +69,7 @@ export default function ResetPwdProfile() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style={'dark'} />
             <NavBar title='Reset password' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
@@ -97,7 +97,7 @@ export default function ResetPwdProfile() {
                 </TouchableOpacity>
             </View>
 
-        </SafeAreaView>
+        </View>
     );
 }
 

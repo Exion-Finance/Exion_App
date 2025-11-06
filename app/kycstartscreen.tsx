@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { PrimaryFontBold } from '@/components/PrimaryFontBold';
 import { PrimaryFontMedium } from '@/components/PrimaryFontMedium';
 import { PrimaryFontText } from '@/components/PrimaryFontText';
@@ -12,7 +12,7 @@ export default function KYCStartScreen() {
     const route = useRouter();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style={'dark'} />
             <View style={{ flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                 <View style={[styles.avatarWrap, styles.alignCenter]}>
@@ -29,7 +29,7 @@ export default function KYCStartScreen() {
             <TouchableOpacity style={styles.button} onPress={() => route.push('/kycflowscreen')}>
                 <PrimaryFontBold style={styles.buttonText}>Get Started</PrimaryFontBold>
             </TouchableOpacity>
-        </SafeAreaView>
+        </View>
     );
 }
 

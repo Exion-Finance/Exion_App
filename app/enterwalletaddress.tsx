@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal, SafeAreaView } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
 import FormErrorText from "@/components/FormErrorText";
@@ -372,7 +372,7 @@ export default function EnterWalletAddress() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style={'dark'} />
             <NavBar title='Wallet Address' onBackPress={() => route.back()} />
 
@@ -553,7 +553,7 @@ export default function EnterWalletAddress() {
                     </View>
                 </Modal>
             </View>
-        </SafeAreaView>
+        </View>
     );
 
 }

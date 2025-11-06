@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, Platform, ToastAndroid, StatusBar, ImageBackground, Image, Linking, ScrollView, RefreshControl, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, Platform, ToastAndroid, StatusBar, ImageBackground, Image, Linking, ScrollView, RefreshControl } from "react-native";
 import { StatusBar as StatBar } from 'expo-status-bar';
 import { CameraView, Camera } from "expo-camera";
 import QRCode from "react-native-qrcode-svg";
@@ -142,7 +142,7 @@ const CryptoScreen: React.FC = () => {
     return (
         <GestureHandlerRootView>
             <StatBar style={'dark'} />
-            <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
                 {/* Top Navigation */}
                 <ImageBackground style={styles.topNav} source={settingsBackground}>
                     <TouchableOpacity style={styles.closeIcon} onPress={() => route.back()}>
@@ -286,7 +286,7 @@ const CryptoScreen: React.FC = () => {
 
                     )}
 
-            </SafeAreaView>
+            </View>
         </GestureHandlerRootView>
     );
 };

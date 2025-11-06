@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { Provider } from 'react-redux';
@@ -8,7 +9,7 @@ import { AuthProvider } from './context/AuthContext';
 import { store, persistor } from './state/store';
 import { useTokenValidation } from './hooks/useTokenValidation';
 import { useRouter, Stack } from 'expo-router';
-import { useAuth} from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 // Prevent splash auto hiding
 SplashScreen.preventAutoHideAsync();
@@ -17,9 +18,11 @@ export default function AppLayout() {
   return (
     <Provider store={store}>
       <PersistGate loading={<ActivityIndicator size="small" />} persistor={persistor}>
-          <AuthProvider>
+        <AuthProvider>
+          <SafeAreaView style={{ flex: 1 }} edges={["bottom", "left", "right"]}>
             <AppInitializer />
-          </AuthProvider>
+          </SafeAreaView>
+        </AuthProvider>
       </PersistGate>
     </Provider>
   );
@@ -28,7 +31,7 @@ export default function AppLayout() {
 function AppInitializer() {
   const router = useRouter();
   const { setAuthState } = useAuth()
-  
+
   const [fontsLoaded, fontError] = useFonts({
     SpaceGrotesk: require('../assets/fonts/SpaceGrotesk-Bold.ttf'),
     DMSansMedium: require('../assets/fonts/DMSans-Medium.ttf'),
@@ -42,7 +45,7 @@ function AppInitializer() {
     (async () => {
       // console.log("Token valid inside useff ---->", tokenValid);
       const fontsReady = fontsLoaded || fontError;
-  
+
       if (fontsReady && tokenValid !== null) {
         if (tokenValid === false) {
           // No token or token is invalid
@@ -52,7 +55,7 @@ function AppInitializer() {
           // router.replace('/landing');
           return;
         }
-  
+
         // Token is valid
         setReady(true);
         await SplashScreen.hideAsync();
@@ -60,7 +63,7 @@ function AppInitializer() {
       }
     })();
   }, [fontsLoaded, fontError, tokenValid]);
-  
+
   if (!ready) {
     return null;
   }
@@ -98,7 +101,7 @@ function AppInitializer() {
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
       <Stack.Screen name="kycstartscreen" options={{ headerTitle: 'Get verified', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
       <Stack.Screen name="kycflowscreen" options={{ headerTitle: 'KYC Verification', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
-      <Stack.Screen name="invite" options={{ headerTitle: 'Refer & Earn', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18} }} />
+      <Stack.Screen name="invite" options={{ headerTitle: 'Refer & Earn', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18 } }} />
       <Stack.Screen name="resetpassword" options={{ headerTitle: 'Reset Password', headerTitleStyle: { fontFamily: 'DMSansMedium', fontSize: 18, } }} />
     </Stack>
   );
