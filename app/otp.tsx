@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { PrimaryFontBold } from "@/components/PrimaryFontBold";
 import { PrimaryFontText } from "@/components/PrimaryFontText";
 import { useRouter, useLocalSearchParams, Href } from 'expo-router';
@@ -353,7 +353,7 @@ export default function OTP({ }) {
 
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style={'dark'} />
             <NavBar title='OTP' onBackPress={() => route.back()} />
             <FormDescription title={parsedUser && parsedUser.title || " "} description={parsedUser && parsedUser.description || " "} />
@@ -396,7 +396,7 @@ export default function OTP({ }) {
                     </PrimaryFontBold>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

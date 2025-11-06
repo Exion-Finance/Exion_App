@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Modal, SafeAreaView } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import NavBar from '@/components/NavBar';
@@ -175,7 +175,7 @@ export default function OptionalMessage() {
     // const digit: number = 10000.54;
     return (
         <GestureHandlerRootView>
-            <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
                 <StatusBar style={'dark'} />
                 <NavBar title={`Sending ${formatNumber(amount as string)} Ksh`} onBackPress={() => route.back()} />
 
@@ -285,7 +285,7 @@ export default function OptionalMessage() {
                     </BottomSheetView>
                 </BottomSheet>
 
-            </SafeAreaView>
+            </View>
 
 
             {showPinAuth && (

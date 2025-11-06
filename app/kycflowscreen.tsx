@@ -2,7 +2,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
     View,
-    SafeAreaView,
     StyleSheet,
     ScrollView,
     TouchableOpacity,
@@ -323,7 +322,7 @@ export default function KYCFlowScreen() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <StatusBar style={'dark'} />
-            <SafeAreaView style={styles.screen}>
+            <View style={styles.screen}>
                 {/* Header: Step X of Y, percent */}
                 <View style={styles.header}>
                     <PrimaryFontText style={styles.stepLabel}>Step {step} of {totalSteps}</PrimaryFontText>
@@ -400,7 +399,7 @@ export default function KYCFlowScreen() {
 
                     </BottomSheetView>
                 </BottomSheet>
-            </SafeAreaView>
+            </View>
         </GestureHandlerRootView>
     );
 }

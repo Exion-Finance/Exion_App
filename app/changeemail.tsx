@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import validator from "validator";
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
@@ -74,7 +74,7 @@ export default function ChangeEmail() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container} >
             <NavBar title='New Email' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
                 <View>
@@ -110,7 +110,7 @@ export default function ChangeEmail() {
                 </TouchableOpacity>
             </View>
 
-        </SafeAreaView>
+        </View>
     );
 }
 

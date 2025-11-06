@@ -5,8 +5,7 @@ import {
     Image,
     TouchableOpacity,
     FlatList,
-    Dimensions,
-    SafeAreaView
+    Dimensions
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -57,7 +56,7 @@ export default function LandingPage() {
     }).current;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style={'light'} />
             {currentIndex < slides.length - 1 && (
                 <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/login')}>
@@ -114,7 +113,7 @@ export default function LandingPage() {
                     </PrimaryFontBold>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </View>
     );
 }
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import HomeIcon from '@/assets/icons/HomeIcon';
@@ -22,7 +21,6 @@ export default function TabLayout() {
 
   return (
     <GestureHandlerRootView>
-      <SafeAreaView style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#00C48F",
@@ -76,7 +74,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }

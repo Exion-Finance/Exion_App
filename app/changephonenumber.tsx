@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput, Modal, FlatList, SafeAreaView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, Modal, FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import reusableStyles from '@/constants/ReusableStyles';
 import NavBar from '@/components/NavBar';
@@ -214,7 +214,7 @@ export default function changePhoneNumber() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style='dark'/>
             <NavBar title='New contact' onBackPress={() => route.back()} />
             <View style={[reusableStyles.paddingContainer, styles.flexContainer]}>
@@ -288,7 +288,7 @@ export default function changePhoneNumber() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 }
 
