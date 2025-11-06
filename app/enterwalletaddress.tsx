@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%',
-        marginBottom: 20
+        marginBottom: 50
     },
     text: {
         color: '#fff',
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 40
+        // paddingBottom: 40
     },
     pasteBanner: {
         flexDirection: 'row',

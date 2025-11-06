@@ -97,7 +97,7 @@ export default function LandingPage() {
             </View>
 
 
-            <View style={{ width: '90%', marginBottom: 28 }}>
+            <View style={{ width: '90%', marginBottom: 50 }}>
                 <TouchableOpacity
                     style={[
                         styles.button,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '80%',
-        height: 220,
+        height: 200,
         resizeMode: 'contain',
         marginBottom: 20
     },

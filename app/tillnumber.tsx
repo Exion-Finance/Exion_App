@@ -75,12 +75,12 @@ const styles = StyleSheet.create({
     },
     text: {
         color: '#fff',
-        fontSize: 17,
+        fontSize: 19,
         fontFamily: 'DMSansMedium'
     },
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 24
+        paddingBottom: 50
     }
 });

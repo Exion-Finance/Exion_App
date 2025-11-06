@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: 'white'
+    backgroundColor: '#f8f8f8'
   },
   couponContainer: {
     justifyContent: 'center',

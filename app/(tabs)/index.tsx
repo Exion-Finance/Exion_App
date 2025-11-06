@@ -609,7 +609,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    // backgroundColor: "#E0FFDD",
   },
   title: {
     fontSize: 20,

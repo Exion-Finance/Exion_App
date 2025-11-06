@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 24,
+        paddingBottom: 50,
     },
     chooseText: {
         color: 'gray',

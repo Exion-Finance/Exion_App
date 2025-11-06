@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     takePicBtn: { marginTop: 12, backgroundColor: '#00C48F', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
     confirmCard: { marginTop: 16, padding: 15, backgroundColor: '#FAFAFA', borderRadius: 8, borderWidth: 1, borderColor: '#EEE' },
     confirmTitle: { marginBottom: 6, fontSize: 16 },
-    bottomRow: { flexDirection: 'row', padding: 16, borderTopWidth: 1, borderColor: '#F0F0F0', backgroundColor: '#fff' },
+    bottomRow: { flexDirection: 'row', padding: 16, paddingBottom: 50, borderTopWidth: 1, borderColor: '#F0F0F0', backgroundColor: '#fff' },
     bottomLeft: { flex: 1, paddingVertical: 14, alignItems: 'center' },
     bottomRight: { flex: 1, paddingVertical: 14, alignItems: 'center', backgroundColor: '#00C48F', borderRadius: 8 },
     optionRow: {
