@@ -83,6 +83,6 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 50
+        paddingBottom: 30
     }
 });

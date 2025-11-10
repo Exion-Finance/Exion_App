@@ -97,7 +97,7 @@ export default function LandingPage() {
             </View>
 
 
-            <View style={{ width: '90%', marginBottom: 50 }}>
+            <View style={{ width: '90%', marginBottom: 30 }}>
                 <TouchableOpacity
                     style={[
                         styles.button,

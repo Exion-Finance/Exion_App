@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 18,
         width: '100%',
-        marginBottom: 50
+        marginBottom: 30
     },
     text: {
         color: '#fff',

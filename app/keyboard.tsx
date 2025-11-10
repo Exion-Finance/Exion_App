@@ -793,7 +793,7 @@ const CustomKeyboard = () => {
           animatedIndex={animatedIndex2}
         >
           <BottomSheetView
-            style={{ paddingBottom: 50, alignItems: 'center' }}
+            style={{ paddingBottom: 20, alignItems: 'center' }}
             onLayout={handleContentLayout2}
           >
             {transactionNotFound ?

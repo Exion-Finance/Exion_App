@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 40
+        paddingBottom: 30
     },
     disclaimerContainer: {
         flexDirection: 'row',
