@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useSafeAreaInsets, SafeAreaProvider  } from 'react-native-safe-area-context';
+import { SafeAreaProvider  } from 'react-native-safe-area-context';
 import HomeIcon from '@/assets/icons/HomeIcon';
 import HomeIconActive from '@/assets/icons/HomIconActive';
 import ProfileActive from '@/assets/icons/ProfileIconActive';
@@ -10,8 +10,6 @@ import TransactionsIcon from '@/assets/icons/TransactionsIcon';
 import TransactionsIconActive from '@/assets/icons/TransactionsIconActive';
 
 export default function TabLayout() {
-  const insets = useSafeAreaInsets();
-
   return (
     <SafeAreaProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -21,8 +19,8 @@ export default function TabLayout() {
           tabBarInactiveTintColor: "#C9CACB",
           headerShown: false,
           tabBarStyle: {
-            height: 65 + insets.bottom,
-            paddingBottom: insets.bottom || 10,
+            height: 65,
+            paddingBottom: 10,
             paddingTop: 10,
             backgroundColor: '#f8f8f8',
           },
