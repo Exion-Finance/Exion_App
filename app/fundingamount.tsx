@@ -274,7 +274,7 @@ export default function FundingAmount() {
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.button, { backgroundColor: initiating ? "#36EFBD" : "#00C48F", marginBottom: 32 },]}
+                                style={[styles.button, { backgroundColor: initiating ? "#36EFBD" : "#00C48F", marginBottom: 12 },]}
                                 onPress={processOnRamp}
                                 disabled={initiating}
                             >
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
         paddingVertical: 18,
         width: '60%',
         marginTop: 5,
-        marginBottom: 32,
+        marginBottom: 12,
     },
     text: {
         display: 'flex',
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     flexContainer: {
         flex: 1,
         justifyContent: 'space-between',
-        paddingBottom: 50
+        paddingBottom: 30
     },
     gridContainer: {
         flexDirection: "row",
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         // justifyContent: 'space-between',
         marginTop: 4,
-        marginBottom: 32
+        marginBottom: 12
     },
     confirm: {
         width: 50,

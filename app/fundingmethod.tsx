@@ -78,7 +78,7 @@ export default function FundingMethod() {
                 <StatusBar style={'dark'} />
                 <NavBar title={'Choose payment method'} onBackPress={() => route.back()} />
 
-                <View style={[reusableStyles.paddingContainer, { flex: 1, justifyContent: 'space-between', paddingBottom: 50 }]}>
+                <View style={[reusableStyles.paddingContainer, { flex: 1, justifyContent: 'space-between', paddingBottom: 30 }]}>
                     <View>
                         <View style={[styles.flexRow, reusableStyles.paddingContainer, { marginTop: 15, marginBottom: 12 }]}>
                             <View style={styles.initialContainer}>
@@ -113,7 +113,7 @@ export default function FundingMethod() {
                     animatedIndex={animatedIndex}
                 >
                     <BottomSheetView
-                        style={{ paddingBottom: 26, alignItems: 'center', width: '100%' }}
+                        style={{ paddingBottom: 6, alignItems: 'center', width: '100%' }}
                         onLayout={handleContentLayout}
                     >
                         <PhoneNumberSheet onContinue={(num) => handlePress(num)} disabled = {clicked}/>

@@ -1,43 +1,36 @@
 import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSafeAreaInsets, SafeAreaProvider  } from 'react-native-safe-area-context';
 import HomeIcon from '@/assets/icons/HomeIcon';
 import HomeIconActive from '@/assets/icons/HomIconActive';
 import ProfileActive from '@/assets/icons/ProfileIconActive';
 import Profile from '@/assets/icons/ProfileIcon';
-//import More from '@/assets/icons/More';
 import TransactionsIcon from '@/assets/icons/TransactionsIcon';
 import TransactionsIconActive from '@/assets/icons/TransactionsIconActive';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
 
   return (
-    <GestureHandlerRootView>
+    <SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#00C48F",
           tabBarInactiveTintColor: "#C9CACB",
-          headerTitleAlign: 'center',
           headerShown: false,
           tabBarStyle: {
-            height: 90,
+            height: 65 + insets.bottom,
+            paddingBottom: insets.bottom || 10,
             paddingTop: 10,
-            // paddingVertical: 50,
             backgroundColor: '#f8f8f8',
           },
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: "bold",
-            marginBottom: 30,
-          }
+            marginBottom: 5,
+          },
         }}
       >
         <Tabs.Screen
@@ -45,36 +38,29 @@ export default function TabLayout() {
           options={{
             title: 'Home',
             tabBarIcon: ({ focused }) =>
-              focused
-                ? <HomeIconActive width={30} height={30} />
-                : <HomeIcon width={30} height={30} />,
+              focused ? <HomeIconActive width={30} height={30} /> : <HomeIcon width={30} height={30} />,
           }}
         />
-
         <Tabs.Screen
           name="transactions"
           options={{
             title: 'Transactions',
             tabBarIcon: ({ focused }) =>
               focused
-                ? <TransactionsIconActive width={26} height={22} marginBottom={-5} />
-                : <TransactionsIcon width={26} height={22} marginBottom={-5} />,
-            headerShown: false,
+                ? <TransactionsIconActive width={26} height={22} />
+                : <TransactionsIcon width={26} height={22} />,
           }}
         />
-
         <Tabs.Screen
           name="profile"
           options={{
             title: 'Profile',
             tabBarIcon: ({ focused }) =>
-              focused
-                ? <ProfileActive width={30} height={30} />
-                : <Profile width={30} height={30} />,
-            headerShown: false
+              focused ? <ProfileActive width={30} height={30} /> : <Profile width={30} height={30} />,
           }}
         />
       </Tabs>
     </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
